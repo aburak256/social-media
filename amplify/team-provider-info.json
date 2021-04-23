@@ -1,0 +1,30 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-socialmedia-dev-131342-authRole",
+      "UnauthRoleArn": "arn:aws:iam::692745129802:role/amplify-socialmedia-dev-131342-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::692745129802:role/amplify-socialmedia-dev-131342-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+      "UnauthRoleName": "amplify-socialmedia-dev-131342-unauthRole",
+      "StackName": "amplify-socialmedia-dev-131342",
+      "StackId": "arn:aws:cloudformation:us-east-2:692745129802:stack/amplify-socialmedia-dev-131342/6f2be400-99e5-11eb-8635-06cf8d83d566",
+      "AmplifyAppId": "d2xe8y05ho8c70"
+    },
+    "categories": {
+      "function": {
+        "socialmedia410aa66aDefineAuthChallenge": {
+          "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+          "s3Key": "amplify-builds/socialmedia410aa66aDefineAuthChallenge-52304f61684f49524b43-build.zip"
+        },
+        "socialmedia410aa66aCreateAuthChallenge": {
+          "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+          "s3Key": "amplify-builds/socialmedia410aa66aCreateAuthChallenge-527067346d7663433450-build.zip"
+        }
+      },
+      "auth": {
+        "socialmedia9c76fc97": {}
+      }
+    }
+  }
+}
