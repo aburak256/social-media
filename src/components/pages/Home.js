@@ -5,6 +5,7 @@ import '../../App.css'
 function Home() {
     return (
         <>
+        <title>Home</title>
             <HeroSection/>
         </>
     )
