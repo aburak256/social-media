@@ -4,7 +4,7 @@ import '../../App.css';
 function Topics() {
     return (
         <div>
-            <div className='topics'>
+            <title>Topics</title>
                 <h2>This is the topics page</h2>
             </div>
         </div>

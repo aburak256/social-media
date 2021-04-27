@@ -16,6 +16,7 @@ function Signup() {
     
     return (
         <div className='sign-up'>
+          <title>Sign-Up</title>
             <h2>This is the signup Page for: {user}</h2>
         </div>
     )
