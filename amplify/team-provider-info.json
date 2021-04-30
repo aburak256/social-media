@@ -20,10 +20,25 @@
         "socialmedia410aa66aCreateAuthChallenge": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
           "s3Key": "amplify-builds/socialmedia410aa66aCreateAuthChallenge-527067346d7663433450-build.zip"
+        },
+        "topicsLambda": {
+          "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+          "s3Key": "amplify-builds/topicsLambda-374f364a457833453374-build.zip"
         }
       },
       "auth": {
         "socialmedia9c76fc97": {}
+      },
+      "storage": {
+        "SingleTableDesign": {
+          "tableName": "SingleTableDesign",
+          "region": "us-east-2",
+          "arn": "arn:aws:dynamodb:us-east-2:692745129802:table/SingleTableDesign",
+          "partitionKeyName": "PK",
+          "partitionKeyType": "S",
+          "sortKeyName": "sortKey",
+          "sortKeyType": "S"
+        }
       }
     }
   }

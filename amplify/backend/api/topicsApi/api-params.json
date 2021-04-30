@@ -1,0 +1,45 @@
+{
+    "paths": [
+        {
+            "name": "/topics",
+            "lambdaFunction": "topicsLambda",
+            "privacy": {
+                "protected": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
+            },
+            "policyResourceName": "/topics"
+        }
+    ],
+    "resourceName": "topicsApi",
+    "apiName": "topicsApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "topicsLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 1,
+        "unauth": 1,
+        "authRoleName": "amplify-socialmedia-dev-131342-authRole",
+        "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "topicsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
