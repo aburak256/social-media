@@ -23,7 +23,7 @@
         },
         "topicsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/topicsLambda-374f364a457833453374-build.zip"
+          "s3Key": "amplify-builds/topicsLambda-4f4577616839774d4c6d-build.zip"
         }
       },
       "auth": {
