@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
+import {Link} from 'react-router-dom'
 import { ViewIcon } from '@chakra-ui/icons'
 import { Image } from "@chakra-ui/react"
 import {API} from "aws-amplify";
@@ -27,7 +28,9 @@ export default class PostList extends React.Component {
             <Box p="6">
               <Box alignItems="baseline">
                 <Badge borderRadius="full" px="2" colorScheme="teal">
-                {topic.topic}
+                <Link to={'/topics/' + topic.topic }>
+                  {topic.topic}
+                </Link>
                 </Badge>
               </Box>     
               <Text
