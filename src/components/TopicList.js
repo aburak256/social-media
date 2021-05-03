@@ -3,25 +3,37 @@ import axios from 'axios';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import {Link} from 'react-router-dom'
 import { ViewIcon } from '@chakra-ui/icons'
-import { Image } from "@chakra-ui/react"
+import { Image, Spinner } from "@chakra-ui/react"
 import {API} from "aws-amplify";
 
 
 export default class PostList extends React.Component {
   state = {
-    topics: []
+    topics: [],
+    loading: true
   }
 
   async componentDidMount() {
     const data = await API.get(`topicsApi`, '/topics')
     const topics = data
     console.log(topics)
+    this.setState({ loading: false})
     this.setState({ topics })
     }
 
   render() {
     return (
-        <VStack w="80%">     
+        <VStack w="80%">
+          {this.state.loading ? 
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          :  
+          <>     
           { this.state.topics.map(topic => 
           <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg">  
             <Image src={topic.imageURL} alt={topic.topic} />       
@@ -51,7 +63,8 @@ export default class PostList extends React.Component {
               </Box>             
             </Box>
           </Box>             
-          )}
+          )} </>
+        }
         </VStack>
     )
   }
