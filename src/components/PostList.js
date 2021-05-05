@@ -46,9 +46,13 @@ export default class PostList extends React.Component {
                   lineHeight="tight"
                   noOfLines={[1, 2, 3]}
                 >
-                  {post.text}
+                  <Link to={'/posts/' + post.postId }>
+                    {post.text}
+                  </Link>
                 </Text>
-                
+                <Text>
+                  Comments : {post.numberOfComments}
+                </Text>
                 <Box d="flex" mt="2" alignItems="center">
                   {/* Number of Likes, Like button and same for dislikes will come here. Also look new icons for like and dislike */}                
                   <StarIcon  color="teal.500"/>
