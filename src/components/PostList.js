@@ -9,13 +9,15 @@ import {Link} from 'react-router-dom'
 export default class PostList extends React.Component {
   state = {
     posts: [],
-    loading:true
+    loading:true,
+    sizeOfArray: '',
+
   }
   
   async componentDidMount() {
     const path = '/topics/' + (this.props.topic).toUpperCase()
     const data = await API.get(`topicsApi`, path)
-    console.log(data)
+    this.setState({ title: this.props.topic , sizeOfArray: data.length})
     this.setState({ loading: false })
     this.setState({ posts: data })
   }
@@ -32,7 +34,7 @@ export default class PostList extends React.Component {
               size="xl"
             />
             :  
-            <>{this.state.posts.map(post => 
+            <>{this.state.sizeOfArray ? <> {this.state.posts.map(post => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
               <Box p="6">
                 <Box alignItems="baseline">
@@ -66,7 +68,12 @@ export default class PostList extends React.Component {
                 </Box>             
               </Box>
             </Box>             
-            )}</>
+            )} </>: 
+            <Box>
+              No posts in this topic 
+            </Box>
+            }
+            </>
           }
         </VStack>
     )
