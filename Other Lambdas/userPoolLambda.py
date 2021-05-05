@@ -29,6 +29,7 @@ def lambda_handler(event, context):
                 'phone': phone,
             }
         )
+        print(response)
         return event
     else:
         print("Failed request")
