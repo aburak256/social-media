@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {API} from "aws-amplify";
-import { Spinner, Image } from "@chakra-ui/react"
-import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
+import { Spinner, Image,  Stack} from "@chakra-ui/react"
+import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import { VStack, Box, Badge, HStack, Text, Center} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 
 export class Post extends Component {
@@ -14,12 +15,12 @@ export class Post extends Component {
     async componentDidMount() {
         const path = '/posts/' + (this.props.post).toString()
         const data = await API.get(`topicsApi`, path)
-        this.setState({  loading:false, post: data["post"], comments: data["comments"] })
+        this.setState({ loading: false, post: data["post"], comments: data["comments"] })
     }
     
     render() {
         return (
-            <VStack w="80%">
+            <VStack w="90%">
             {this.state.loading ? 
                 <Box w='100%' padding="6" boxShadow="lg" bg="white">
                     <SkeletonCircle size="100" />
@@ -30,7 +31,7 @@ export class Post extends Component {
                     {this.state.post.map(p =>
                     <Box w="75%" boxShadow='lg' borderWidth="1px" borderRadius="lg" overflow="hidden">
                         {p.imageURL ? 
-                            <Image src={p.imageURL} alt={p.text} />
+                            <Image w='100%' src={p.imageURL} alt={p.text} />
                             :
                             <Box></Box>
                         }
@@ -80,8 +81,62 @@ export class Post extends Component {
                             </Box>
                         </Box>
                     </Box>)}
-
-                    {this.state.comments.map(comment => <Text>{comment.text} </Text>)}
+                    <VStack w='100%' p='6' spacing='17px'>
+                        {this.state.comments.map(comment =>
+                            <Box w='70%' boxShadow='md' bg='teal.50' padding='4' borderRadius='md'>
+                                <HStack padding='2'>
+                                    <Text
+                                        color="gray.400"
+                                        fontWeight="semibold"
+                                        letterSpacing="wide"
+                                        fontSize="xs"
+                                        textTransform="uppercase"
+                                        >
+                                        {comment.username}
+                                    </Text>
+                                    <Text
+                                        color="gray.400"
+                                        flex="1"
+                                        textAlign='right'
+                                        fontWeight="semibold"
+                                        letterSpacing="wide"
+                                        fontSize="xs"
+                                        textTransform="uppercase"
+                                        >
+                                        {comment.dateTime}
+                                    </Text>
+                                </HStack>
+                                <Box marginBottom='1'>
+                                    <Text
+                                        color="gray.600"
+                                        letterSpacing="wide"
+                                        fontSize="sm"
+                                    >
+                                        {comment.text}
+                                    </Text>
+                                    <Box d="flex" mt="2" alignItems="center">
+                                        <ChevronUpIcon
+                                            key={comment.numberOfLikes}
+                                            color= "teal.300" 
+                                            w={8} h={8}
+                                        />
+                                        <Box as="span" ml="2" color="gray.600" fontSize="sm">
+                                            {comment.numberOfLikes}
+                                        </Box>
+                                        <ChevronDownIcon
+                                            key={comment.numberOfDislikes}
+                                            ml='5'
+                                            color= "red.400" 
+                                            w={8} h={8}
+                                        />
+                                        <Box as="span" ml="2" color="gray.600" fontSize="sm">
+                                            {comment.numberOfDislikes}
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+                            )}
+                    </VStack>
                 </> }
             </VStack>
         )
