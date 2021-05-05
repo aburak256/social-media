@@ -11,7 +11,6 @@ function PostDetail() {
             <title>Post</title>
             <Center> 
                 <VStack spacing="24px" width="70%">            
-                    <h2>This is the post detail page</h2>
                     <br/>
                     <Post post={post}/>
                 </VStack>

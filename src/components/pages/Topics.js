@@ -10,7 +10,6 @@ function Topics() {
             <title>Topics</title>
             <Center> 
                 <VStack spacing="24px" width="70%">            
-                    <h2>This is the topics page</h2>
                     <br/>
                     <TopicList/>
                 </VStack>
