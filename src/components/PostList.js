@@ -1,6 +1,6 @@
 import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
-import { StarIcon } from '@chakra-ui/icons'
+import { StarIcon, EmailIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
 import { Spinner, Image,  Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
@@ -33,35 +33,46 @@ export default class PostList extends React.Component {
             :  
             <>{this.state.sizeOfArray ? <> {this.state.posts.map(post => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
-              <Box p="6">
+              <Box p="4" paddingLeft="4">
                 <Box alignItems="baseline">
                   <Badge borderRadius="full" px="2" colorScheme="teal">
                   {post.username}
                   </Badge>
-                </Box>     
-                <Text
-                  mt="2"
-                  fontWeight="semibold"
-                  lineHeight="tight"
-                  noOfLines={[1, 2, 3]}
-                >
-                  <Link to={'/posts/' + post.postId }>
-                    {post.text}
-                  </Link>
-                </Text>
-                <Text>
-                  Comments : {post.numberOfComments}
-                </Text>
-                <Box d="flex" mt="2" alignItems="center">
+                </Box>
+                <HStack>     
+                  <Text
+                    w='70%'
+                    mt="2"
+                    fontWeight="semibold"
+                    lineHeight="tight"
+                    noOfLines={[1, 2, 3]}
+                  >
+                    <Link to={'/posts/' + post.postId }>
+                      {post.text}
+                    </Link>
+                  </Text>
+                  <Box
+                    w='30%'
+                  >
+                    <Image w='100%' borderRadius='xl'  src={post.imageURL}/>
+                  </Box>
+                </HStack>
+                <Box d="flex" mt="4" alignItems="center">
                   {/* Number of Likes, Like button and same for dislikes will come here. Also look new icons for like and dislike */}                
                   <StarIcon  color="teal.500"/>
-                  <Box as="span" ml="2" color="gray.600" fontSize="md">
+                  <Box as="span" ml="2" color="gray.600" fontSize="sm">
                     {post.numberOfLikes}
                   </Box>
                   <StarIcon  ml="6" color="gray.300"/>
                   <Box as="span" ml="2" color="gray.600" fontSize="sm">
                     {post.numberOfDislikes}
                   </Box>
+                  <Text
+                    fontSize='sm'
+                    ml='4'
+                  >
+                    <EmailIcon/> : {post.numberOfComments}
+                  </Text>
                 </Box>             
               </Box>
             </Box>             
