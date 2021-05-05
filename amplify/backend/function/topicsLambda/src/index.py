@@ -9,7 +9,18 @@ table = dynamodb.Table('SingleTableDesign')
 def handler(event, context):
     print('received event:')
     print(event)
-    path = event['resource']
+    if 'resource' in event:
+        path = event['resource']
+    else:
+        return {
+            'statusCode': 404,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': json.dumps("Couldn't find the request")
+        }
 
     if event['resource'] == "/topics":
         resp = table.scan(
