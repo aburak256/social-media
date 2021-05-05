@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import {Link} from 'react-router-dom'
 import { ViewIcon } from '@chakra-ui/icons'
