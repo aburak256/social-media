@@ -2,7 +2,7 @@ import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import {Link} from 'react-router-dom'
 import { ViewIcon } from '@chakra-ui/icons'
-import { Image, Spinner } from "@chakra-ui/react"
+import { Image, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {API} from "aws-amplify";
 
 
@@ -24,13 +24,10 @@ export default class PostList extends React.Component {
     return (
         <VStack w="80%">
           {this.state.loading ? 
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="blue.500"
-              size="xl"
-            />
+            <Box w='100%' padding="6" boxShadow="lg" bg="white">
+              <SkeletonCircle size="100" />
+              <SkeletonText mt="4" noOfLines={6} spacing="4" />
+            </Box>
           :  
           <>     
           { this.state.topics.map(topic => 
