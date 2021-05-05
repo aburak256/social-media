@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { StarIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
