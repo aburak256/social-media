@@ -21,13 +21,10 @@ export class Post extends Component {
         return (
             <VStack w="80%">
             {this.state.loading ? 
-                <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="blue.500"
-                size="xl"
-                />
+                <Box w='100%' padding="6" boxShadow="lg" bg="white">
+                    <SkeletonCircle size="100" />
+                    <SkeletonText mt="4" noOfLines={6} spacing="4" />
+                </Box>
                 :  
                 <>     
                     {this.state.post.map(p =>
