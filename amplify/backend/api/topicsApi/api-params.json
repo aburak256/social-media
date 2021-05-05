@@ -17,6 +17,24 @@
                 ]
             },
             "policyResourceName": "/topics"
+        },
+        {
+            "name": "/posts",
+            "lambdaFunction": "postsLambda",
+            "privacy": {
+                "protected": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
+            },
+            "policyResourceName": "/posts"
         }
     ],
     "resourceName": "topicsApi",
@@ -24,11 +42,14 @@
     "functionArns": [
         {
             "lambdaFunction": "topicsLambda"
+        },
+        {
+            "lambdaFunction": "postsLambda"
         }
     ],
     "privacy": {
-        "auth": 1,
-        "unauth": 1,
+        "auth": 2,
+        "unauth": 2,
         "authRoleName": "amplify-socialmedia-dev-131342-authRole",
         "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
     },
@@ -40,6 +61,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "postsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
-    ]
+    ],
+    "uuid": "fa99e021"
 }

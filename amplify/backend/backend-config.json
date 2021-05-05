@@ -14,6 +14,11 @@
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "postsLambda": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "auth": {
@@ -32,6 +37,14 @@
         {
           "category": "function",
           "resourceName": "topicsLambda",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "postsLambda",
           "attributes": [
             "Name",
             "Arn"
