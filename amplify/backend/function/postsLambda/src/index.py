@@ -3,6 +3,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
 
+
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
 table = dynamodb.Table('SingleTableDesign')
 
@@ -25,8 +26,10 @@ def handler(event, context):
     if "/posts" in event['resource']:
         params = event['pathParameters']
         postId = params['proxy']
-
-
+        user = None
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        print(user)
         try:
             response = table.get_item(Key={'PK': "POST#" + postId, 'sortKey': "METADATA"})
         except ClientError as e:
@@ -34,6 +37,17 @@ def handler(event, context):
         else:
             post = []
             post.append(response['Item'])
+            if user != None:
+                try:
+                    likeResponse = table.query(
+                        KeyConditionExpression=Key('PK').eq("POST#" + postId + "#REACTION#" + user)
+                    )
+                except ClientError as e:
+                    print(e.likeResponse['Error']['Message'])
+                else:
+                    if len(likeResponse['Items']) != 0:
+                        Reaction = likeResponse['Items'][0]['text']      
+                        post[0]['Reaction'] = Reaction
             comments = []
             try :
                 commentsResponse = table.query(
