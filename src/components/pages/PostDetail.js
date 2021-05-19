@@ -1,18 +1,31 @@
-import React from 'react'
+import React, {useState, useEffect}  from 'react'
 import { useParams } from 'react-router'
 import '../../App.css';
 import {Center, Box, VStack} from "@chakra-ui/react"
+import {Auth} from 'aws-amplify'
 import Post from '../Post';
 
 function PostDetail() {
     const {post} = useParams()
+    const [user, setUser] = useState("");
+    
+    Auth.currentAuthenticatedUser().then(
+      function(result){
+        setUser(result['username'])
+      }
+    )
+
+    // const [creds, setCreds] = useState("");
+    // Auth.currentCredentials().then(
+    //     creds => setCreds(creds)
+    // )
     return (
         <div>
             <title>Post</title>
             <Center> 
                 <VStack spacing="24px" width="70%">            
                     <br/>
-                    <Post post={post}/>
+                    <Post post={post} user={user} />
                 </VStack>
             </Center>
         </div>
