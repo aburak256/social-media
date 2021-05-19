@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {API} from "aws-amplify";
+import {Auth} from 'aws-amplify'
 import { Spinner, Image,  Stack} from "@chakra-ui/react"
 import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import { VStack, Box, Badge, HStack, Text, Center} from '@chakra-ui/layout';
@@ -9,14 +10,18 @@ export class Post extends Component {
     state = {
         comments: [],
         post: [],
-        loading:true
+        loading:true,
+        interact:false,
     }
-      
+    
     async componentDidMount() {
         const path = '/posts/' + (this.props.post).toString()
         const data = await API.get(`topicsApi`, path)
         this.setState({ loading: false, post: data["post"], comments: data["comments"] })
+        console.log(this.state.post)
     }
+
+
     
     render() {
         return (
@@ -61,18 +66,20 @@ export class Post extends Component {
                                 {p.text}
                             </Text>
                             <Box d="flex" mt="2" alignItems="center">
+                                <button id={p.postId} onClick={this.postLike}>
                                 <ChevronUpIcon
                                     key={p.numberOfLikes}
-                                    color= "teal.300" 
+                                    color = {p.Reaction == "Like" ? "teal.300" : "gray.300"}
                                     w={8} h={8}
                                 />
+                                </button>
                                 <Box as="span" ml="2" color="gray.600" fontSize="sm">
                                     {p.numberOfLikes}
                                 </Box>
                                 <ChevronDownIcon
                                     key={p.numberOfDislikes}
                                     ml='5'
-                                    color= "red.400" 
+                                    color = {p.Reaction == "Dislike" ? "red.300" : "red.100"} 
                                     w={8} h={8}
                                 />
                                 <Box as="span" ml="2" color="gray.600" fontSize="sm">
@@ -117,7 +124,7 @@ export class Post extends Component {
                                     <Box d="flex" mt="2" alignItems="center">
                                         <ChevronUpIcon
                                             key={comment.numberOfLikes}
-                                            color= "teal.300" 
+                                            color= "teal.100" 
                                             w={8} h={8}
                                         />
                                         <Box as="span" ml="2" color="gray.600" fontSize="sm">
@@ -126,7 +133,7 @@ export class Post extends Component {
                                         <ChevronDownIcon
                                             key={comment.numberOfDislikes}
                                             ml='5'
-                                            color= "red.400" 
+                                            color= "red.100" 
                                             w={8} h={8}
                                         />
                                         <Box as="span" ml="2" color="gray.600" fontSize="sm">
