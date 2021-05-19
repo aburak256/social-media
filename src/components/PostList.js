@@ -1,6 +1,6 @@
 import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
-import { StarIcon, EmailIcon } from '@chakra-ui/icons'
+import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
 import { Spinner, Image,  Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
@@ -59,19 +59,21 @@ export default class PostList extends React.Component {
                 </HStack>
                 <Box d="flex" mt="4" alignItems="center">
                   {/* Number of Likes, Like button and same for dislikes will come here. Also look new icons for like and dislike */}                
-                  <StarIcon  color="teal.500"/>
-                  <Box as="span" ml="2" color="gray.600" fontSize="sm">
+                  <ChevronUpIcon w={8} h={8} color="teal.500"/>
+                  <Box as="span"  color="gray.600" fontSize="sm">
                     {post.numberOfLikes}
                   </Box>
-                  <StarIcon  ml="6" color="gray.300"/>
-                  <Box as="span" ml="2" color="gray.600" fontSize="sm">
+                  <ChevronDownIcon w={8} h={8} ml="4" color="gray.300"/>
+                  <Box as="span" color="gray.600" fontSize="sm">
                     {post.numberOfDislikes}
                   </Box>
                   <Text
                     fontSize='sm'
-                    ml='4'
+                    ml='7'
                   >
-                    <EmailIcon/> : {post.numberOfComments}
+                    <ChatIcon
+                      color='teal.500'
+                    /> : {post.numberOfComments}
                   </Text>
                 </Box>             
               </Box>
