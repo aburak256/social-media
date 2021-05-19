@@ -2,6 +2,7 @@ import json
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
+from datetime import datetime
 
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
@@ -10,6 +11,8 @@ table = dynamodb.Table('SingleTableDesign')
 def handler(event, context):
     print('received event:')
     print(event)
+    if event['httpMethod'] == 'POST':
+        return postHandler(event, context)
     if 'resource' in event:
         path = event['resource']
     else:
@@ -88,3 +91,78 @@ def handler(event, context):
         },
         'body': json.dumps("Couldn't find the request")
     }
+
+def postHandler(event, context):
+    Fail = {
+        'statusCode': 404,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps("Couldn't find the request")
+    }
+
+    #Like handler
+    if 'reaction' in event['body']:
+        body = json.loads(event['body'])
+        if body["reaction"] == "Like":
+            params = event['pathParameters']
+            postId = params['proxy']
+            if 'identity' in event['requestContext']:
+                user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+            else:
+                return Fail 
+            try:
+                response = table.get_item(Key={'PK': "POST#" + postId, 'sortKey': "METADATA"})
+            except ClientError as e:
+                print(e.response['Error']['Message'])
+            else:
+                post = response['Item']
+                #Check if user liked before
+                try:
+                    reactionResponse = table.query(KeyConditionExpression=Key('PK').eq("POST#" + postId + "#REACTION#" + user))
+                except ClientError as e:
+                    print(e.reactionResponse['Error']['Message'])
+                else:
+                    #User didn't interacted with post before
+                    if len(reactionResponse['Items']) == 0:
+                    #Change like count in Post metadata
+                        post['numberOfLikes'] = str(int(post['numberOfLikes']) + 1)
+                        table.put_item(Item=post)
+
+                        #Add new reaction to the post
+                        table.put_item(
+                            Item={
+                                    'PK': "POST#" + postId + "#REACTION#" + user,
+                                    'sortKey': datetime.now().isoformat(),
+                                    'text': 'Like',
+                                    'userId': user,
+                                    'reactionType': 'Reaction',
+                                }
+                            )
+                    else:
+                        #Change the interaction made before
+                        post['numberOfLikes'] = str(int(post['numberOfLikes']) - 1)
+                        table.put_item(Item=post)
+                        previousSortKey = reactionResponse['Items'][0]['sortKey']
+                        table.delete_item(
+                            Key={
+                                'PK': "POST#" + postId + "#REACTION" + user,
+                                'sortKey': previousSortKey,
+                            }
+                        )
+                    res = {'post': post}
+                    response = {
+                        'statusCode': 200,
+                        'body': json.dumps(res),
+                        'headers': {
+                            'Access-Control-Allow-Headers': '*',
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                        },
+                    }
+
+                    return response
+                
+            
