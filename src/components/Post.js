@@ -22,6 +22,19 @@ export class Post extends Component {
     }
 
 
+    async postLike(postId){
+        console.log("Like Clicked")
+        const path = '/posts/' + postId
+        const myInit = {
+            body: {
+                reaction: 'Like'
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        console.log(data)
+        // this.setState({post: data["post"]})
+        // console.log(this.state.post)
+    }
     
     render() {
         return (
@@ -66,12 +79,12 @@ export class Post extends Component {
                                 {p.text}
                             </Text>
                             <Box d="flex" mt="2" alignItems="center">
-                                <button id={p.postId} onClick={this.postLike}>
-                                <ChevronUpIcon
-                                    key={p.numberOfLikes}
-                                    color = {p.Reaction == "Like" ? "teal.300" : "gray.300"}
-                                    w={8} h={8}
-                                />
+                                <button id={p.postId} onClick={() => this.postLike(p.postId)}>
+                                    <ChevronUpIcon
+                                        key={p.numberOfLikes}
+                                        color = {p.Reaction == "Like" ? "teal.300" : "gray.300"}
+                                        w={8} h={8}
+                                    />
                                 </button>
                                 <Box as="span" ml="2" color="gray.600" fontSize="sm">
                                     {p.numberOfLikes}
