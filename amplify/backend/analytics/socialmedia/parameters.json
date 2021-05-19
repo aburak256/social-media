@@ -1,0 +1,21 @@
+{
+    "appName": "socialmedia",
+    "roleName": "pinpointLambdaRole9d23406e",
+    "cloudformationPolicyName": "cloudformationPolicy9d23406e",
+    "cloudWatchPolicyName": "cloudWatchPolicy9d23406e",
+    "pinpointPolicyName": "pinpointPolicy9d23406e",
+    "authPolicyName": "pinpoint_amplify_9d23406e",
+    "unauthPolicyName": "pinpoint_amplify_9d23406e",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}
