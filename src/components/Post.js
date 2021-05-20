@@ -22,7 +22,6 @@ export class Post extends Component {
 
 
     async postLike(postId){
-        console.log("Like Clicked")
         const path = '/posts/' + postId
         const myInit = {
             body: {
@@ -35,7 +34,6 @@ export class Post extends Component {
 
 
     async postDislike(postId){
-        console.log("Like Clicked")
         const path = '/posts/' + postId
         const myInit = {
             body: {
