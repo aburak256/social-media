@@ -18,7 +18,6 @@ export class Post extends Component {
         const path = '/posts/' + (this.props.post).toString()
         const data = await API.get(`topicsApi`, path)
         this.setState({ loading: false, post: data["post"], comments: data["comments"] })
-        console.log(this.state.post)
     }
 
 
@@ -31,9 +30,7 @@ export class Post extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
-        console.log(data)
-        // this.setState({post: data["post"]})
-        // console.log(this.state.post)
+        this.setState({post: data["post"]})
     }
     
     render() {

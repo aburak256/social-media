@@ -118,7 +118,8 @@ def postHandler(event, context):
             except ClientError as e:
                 print(e.response['Error']['Message'])
             else:
-                post = response['Item']
+                post = []
+                post.append(response['Item'])
                 #Check if user liked before
                 try:
                     reactionResponse = table.query(KeyConditionExpression=Key('PK').eq("POST#" + postId + "#REACTION#" + user))
@@ -128,8 +129,9 @@ def postHandler(event, context):
                     #User didn't interacted with post before
                     if len(reactionResponse['Items']) == 0:
                     #Change like count in Post metadata
-                        post['numberOfLikes'] = str(int(post['numberOfLikes']) + 1)
-                        table.put_item(Item=post)
+                        post[0]['numberOfLikes'] = str(int(post[0]['numberOfLikes']) + 1)
+                        table.put_item(Item=post[0])
+                        post[0]['Reaction'] = "Like"
 
                         #Add new reaction to the post
                         table.put_item(
@@ -143,15 +145,35 @@ def postHandler(event, context):
                             )
                     else:
                         #Change the interaction made before
-                        post['numberOfLikes'] = str(int(post['numberOfLikes']) - 1)
-                        table.put_item(Item=post)
+                        #Unlike
+                        if reactionResponse['Items'][0]['text'] == "Like":                         
+                            post[0]['numberOfLikes'] = str(int(post[0]['numberOfLikes']) - 1)
+                            table.put_item(Item=post[0])
+                        #Like the previusly disliked one
+                        elif reactionResponse['Items'][0]['text'] == "Dislike":                       
+                            post[0]['numberOfLikes'] = str(int(post[0]['numberOfLikes']) + 1)
+                            post[0]['numberOfDislikes'] = str(int(post[0]['numberOfDislikes']) - 1)
+                            table.put_item(Item=post[0])
+                            #Add new reaction to the post
+                            table.put_item(
+                                Item={
+                                        'PK': "POST#" + postId + "#REACTION#" + user,
+                                        'sortKey': datetime.now().isoformat(),
+                                        'text': 'Like',
+                                        'userId': user,
+                                        'reactionType': 'Reaction',
+                                    }
+                                )
+
+                        
                         previousSortKey = reactionResponse['Items'][0]['sortKey']
                         table.delete_item(
                             Key={
-                                'PK': "POST#" + postId + "#REACTION" + user,
+                                'PK': "POST#" + postId + "#REACTION#" + user,
                                 'sortKey': previousSortKey,
                             }
                         )
+
                     res = {'post': post}
                     response = {
                         'statusCode': 200,
