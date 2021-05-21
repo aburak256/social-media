@@ -18,6 +18,7 @@ export class Post extends Component {
         const path = '/posts/' + (this.props.post).toString()
         const data = await API.get(`topicsApi`, path)
         this.setState({ loading: false, post: data["post"], comments: data["comments"] })
+        console.log(this.state.comments)
     }
 
 
@@ -42,6 +43,36 @@ export class Post extends Component {
         }
         const data = await API.post(`topicsApi`, path, myInit)
         this.setState({post: data["post"]})
+    }
+
+    async commentLike(commentId, index){
+        const path = '/comments/' + commentId
+        const postId = (this.state.post[0]['postId'])
+        let comments = this.state.comments
+        const myInit = {
+            body: {
+                reaction: 'Like',
+                post: postId
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        comments[index] = data['comment']
+        this.setState({ comments: comments})
+    }
+
+    async commentDislike(commentId, index){
+        const path = '/comments/' + commentId
+        const postId = (this.state.post[0]['postId'])
+        let comments = this.state.comments
+        const myInit = {
+            body: {
+                reaction: 'Dislike',
+                post: postId
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        comments[index] = data['comment']
+        this.setState({ comments: comments})
     }
     
     render() {
@@ -112,7 +143,7 @@ export class Post extends Component {
                         </Box>
                     </Box>)}
                     <VStack w='100%' p='6' spacing='17px'>
-                        {this.state.comments.map(comment =>
+                        {this.state.comments.map((comment, index) =>
                             <Box w='70%' boxShadow='md' bg='teal.50' padding='4' borderRadius='md'>
                                 <HStack padding='2'>
                                     <Text
@@ -145,20 +176,24 @@ export class Post extends Component {
                                         {comment.text}
                                     </Text>
                                     <Box d="flex" mt="2" alignItems="center">
-                                        <ChevronUpIcon
-                                            key={comment.numberOfLikes}
-                                            color= "teal.100" 
-                                            w={8} h={8}
-                                        />
+                                        <button id={comment.commentId} onClick={() => this.commentLike(comment.commentId, index)}>
+                                            <ChevronUpIcon
+                                                key={comment.numberOfLikes}
+                                                color= {comment.Reaction == "Like" ? "teal.300" : "teal.100"} 
+                                                w={8} h={8}
+                                            />
+                                        </button>
                                         <Box as="span" ml="2" color="gray.600" fontSize="sm">
                                             {comment.numberOfLikes}
                                         </Box>
+                                        <button id={comment.commentId} onClick={() => this.commentDislike(comment.commentId, index)}>
                                         <ChevronDownIcon
                                             key={comment.numberOfDislikes}
                                             ml='5'
-                                            color= "red.100" 
+                                            color= {comment.Reaction == "Dislike" ? "red.300" : "red.100"} 
                                             w={8} h={8}
                                         />
+                                        </button>
                                         <Box as="span" ml="2" color="gray.600" fontSize="sm">
                                             {comment.numberOfDislikes}
                                         </Box>
