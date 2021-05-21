@@ -71,7 +71,7 @@ export default class PostList extends React.Component {
                     mt="2"
                     fontWeight="semibold"
                     lineHeight="tight"
-                    noOfLines={[1, 2, 3]}
+                    noOfLines={[1, 2, 3, 4]}
                   >
                     <Link to={'/posts/' + post.postId }>
                       {post.text}
