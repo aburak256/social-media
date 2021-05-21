@@ -1,75 +1,101 @@
 {
-  "paths": [
-    {
-      "name": "/topics",
-      "lambdaFunction": "topicsLambda",
-      "privacy": {
-        "protected": true,
-        "auth": [
-          "/POST",
-          "/GET",
-          "/PUT",
-          "/PATCH",
-          "/DELETE"
-        ],
-        "unauth": [
-          "/GET"
-        ]
-      },
-      "policyResourceName": "/topics"
+    "paths": [
+        {
+            "name": "/topics",
+            "lambdaFunction": "topicsLambda",
+            "privacy": {
+                "protected": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
+            },
+            "policyResourceName": "/topics"
+        },
+        {
+            "name": "/posts",
+            "lambdaFunction": "postsLambda",
+            "privacy": {
+                "protected": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
+            },
+            "policyResourceName": "/posts"
+        },
+        {
+            "name": "/comments",
+            "lambdaFunction": "commentsLambda",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            },
+            "policyResourceName": "/comments"
+        }
+    ],
+    "resourceName": "topicsApi",
+    "apiName": "topicsApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "topicsLambda"
+        },
+        {
+            "lambdaFunction": "postsLambda"
+        },
+        {
+            "lambdaFunction": "commentsLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 3,
+        "unauth": 2,
+        "authRoleName": "amplify-socialmedia-dev-131342-authRole",
+        "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
     },
-    {
-      "name": "/posts",
-      "lambdaFunction": "postsLambda",
-      "privacy": {
-        "protected": true,
-        "auth": [
-          "/POST",
-          "/GET",
-          "/PUT",
-          "/PATCH",
-          "/DELETE"
-        ],
-        "unauth": [
-          "/GET"
-        ]
-      },
-      "policyResourceName": "/posts"
-    }
-  ],
-  "resourceName": "topicsApi",
-  "apiName": "topicsApi",
-  "functionArns": [
-    {
-      "lambdaFunction": "topicsLambda"
-    },
-    {
-      "lambdaFunction": "postsLambda"
-    }
-  ],
-  "privacy": {
-    "auth": 2,
-    "unauth": 2,
-    "authRoleName": "amplify-socialmedia-dev-131342-authRole",
-    "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
-  },
-  "dependsOn": [
-    {
-      "category": "function",
-      "resourceName": "topicsLambda",
-      "attributes": [
-        "Name",
-        "Arn"
-      ]
-    },
-    {
-      "category": "function",
-      "resourceName": "postsLambda",
-      "attributes": [
-        "Name",
-        "Arn"
-      ]
-    }
-  ],
-  "uuid": "fa99e021"
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "topicsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "postsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "commentsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "0b787d92"
 }
