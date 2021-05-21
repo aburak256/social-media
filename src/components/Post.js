@@ -5,6 +5,7 @@ import { Spinner, Image,  Stack} from "@chakra-ui/react"
 import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import { VStack, Box, Badge, HStack, Text, Center} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import {Popularity} from './Popularity';
 
 export class Post extends Component {
     state = {
@@ -18,7 +19,6 @@ export class Post extends Component {
         const path = '/posts/' + (this.props.post).toString()
         const data = await API.get(`topicsApi`, path)
         this.setState({ loading: false, post: data["post"], comments: data["comments"] })
-        console.log(this.state.comments)
     }
 
 
@@ -139,6 +139,9 @@ export class Post extends Component {
                                 <Box as="span" ml="2" color="gray.600" fontSize="sm">
                                     {p.numberOfDislikes}
                                 </Box>
+
+                                <Popularity likes={parseInt(p.numberOfLikes)} dislikes={parseInt(p.numberOfDislikes)}/>
+                                
                             </Box>
                         </Box>
                     </Box>)}
