@@ -59,13 +59,24 @@ def handler(event, context):
             except ClientError as e:
                 print(e.commentsResponse['Error']['Message'])
             else:
-                for commentId in commentsResponse['Items']:
+                for comment in commentsResponse['Items']:
                     try :
-                        comment = table.get_item(Key={'PK': "COMMENT#" + commentId['commentId'], 'sortKey': "METADATA"})
+                        comment = table.get_item(Key={'PK': "COMMENT#" + comment['commentId'], 'sortKey': "METADATA"})
                     except ClientError as e:
                         print(e.comment['Error']['Message'])
                     else:
                         comments.append(comment['Item'])
+                        if user != None:
+                            try:
+                                commentsLikeResponse = table.query(
+                                    KeyConditionExpression=Key('PK').eq("COMMENT#" + comment['Item']['commentId'] + "#REACTION#" + user)
+                                )
+                            except ClientError as e:
+                                print(e.commentsLikeResponse['Error']['Message'])
+                            else:
+                                if len(commentsLikeResponse['Items']) != 0:
+                                    Reaction = commentsLikeResponse['Items'][0]['text']      
+                                    comments[-1]['Reaction'] = Reaction
         
         print(post, comments)
         res = {'post': post, 'comments':comments}
