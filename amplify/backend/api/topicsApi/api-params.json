@@ -50,6 +50,21 @@
                 ]
             },
             "policyResourceName": "/comments"
+        },
+        {
+            "name": "/topicTest",
+            "lambdaFunction": "topicTestsLambda",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            },
+            "policyResourceName": "/topicTest"
         }
     ],
     "resourceName": "topicsApi",
@@ -63,10 +78,13 @@
         },
         {
             "lambdaFunction": "commentsLambda"
+        },
+        {
+            "lambdaFunction": "topicTestsLambda"
         }
     ],
     "privacy": {
-        "auth": 3,
+        "auth": 4,
         "unauth": 2,
         "authRoleName": "amplify-socialmedia-dev-131342-authRole",
         "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
@@ -95,7 +113,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "topicTestsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
     ],
-    "uuid": "0b787d92"
+    "uuid": "113a2735"
 }
