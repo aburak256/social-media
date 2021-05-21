@@ -4,6 +4,7 @@ import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
 import { Spinner, Image,  Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
+import { Popularity } from './Popularity';
 
 
 export default class PostList extends React.Component {
@@ -100,6 +101,7 @@ export default class PostList extends React.Component {
                   <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
                     {post.numberOfDislikes}
                   </Box>
+                  <Popularity likes={post.numberOfLikes} dislikes={post.numberOfDislikes}/>
                   <Text
                     fontSize='sm'
                     ml='7'
