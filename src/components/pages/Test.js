@@ -14,7 +14,7 @@ export default class Test extends React.Component{
                 <Center> 
                     <VStack spacing="24px" width="70%">
                         <Timer ref='timer'/>
-                        <Button onClick={this.triggerTimer.bind(this)}>Click</Button>
+                        <Button colorScheme="teal" size="lg" onClick={this.triggerTimer.bind(this)}>Start Test</Button>
                         <Box>
                             Questions will come this place
                         </Box>
