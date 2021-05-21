@@ -22,6 +22,32 @@ export default class PostList extends React.Component {
     this.setState({ posts: data })
   }
 
+  async postLike(postId, index){
+    const path = '/posts/' + postId
+    const myInit = {
+        body: {
+            reaction: 'Like'
+        }
+    }
+    const data = await API.post(`topicsApi`, path, myInit)
+    let posts = this.state.posts
+    posts[index] = data["post"][0]
+    this.setState({posts: posts})
+  }
+
+  async postDislike(postId, index){
+    const path = '/posts/' + postId
+    const myInit = {
+        body: {
+            reaction: 'Dislike'
+        }
+    }
+    const data = await API.post(`topicsApi`, path, myInit)
+    let posts = this.state.posts
+    posts[index] = data["post"][0]
+    this.setState({posts: posts})
+}
+
   render() {
     return (
         <VStack w="100%">
@@ -31,7 +57,7 @@ export default class PostList extends React.Component {
               <SkeletonText mt="4" noOfLines={6} spacing="4" />
             </Box>
             :  
-            <>{this.state.sizeOfArray ? <> {this.state.posts.map(post => 
+            <>{this.state.sizeOfArray ? <> {this.state.posts.map((post, index) => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
               <Box p="4" paddingLeft="4">
                 <Box alignItems="baseline">
@@ -58,13 +84,20 @@ export default class PostList extends React.Component {
                   </Box>
                 </HStack>
                 <Box d="flex" mt="4" alignItems="center">
-                  {/* Number of Likes, Like button and same for dislikes will come here. Also look new icons for like and dislike */}                
-                  <ChevronUpIcon w={8} h={8} color="teal.500"/>
-                  <Box as="span"  color="gray.600" fontSize="sm">
+                  <button id={post.postId} onClick={() => this.postLike(post.postId, index)}>                
+                    <ChevronUpIcon w={8} h={8} color={post.Reaction == "Like" ? "teal.300" : "teal.100"}/>
+                  </button>
+                  <Box
+                    as="span"
+                    color={post.Reaction == "Like" ? "teal.300" : "gray.300"}
+                    fontSize="sm"
+                    >
                     {post.numberOfLikes}
                   </Box>
-                  <ChevronDownIcon w={8} h={8} ml="4" color="gray.300"/>
-                  <Box as="span" color="gray.600" fontSize="sm">
+                  <button id={post.postId} onClick={() => this.postDislike(post.postId, index)}>
+                    <ChevronDownIcon w={8} h={8} ml="4" color={post.Reaction == "Dislike" ? "red.300" : "red.100"}/>
+                  </button>
+                  <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
                     {post.numberOfDislikes}
                   </Box>
                   <Text

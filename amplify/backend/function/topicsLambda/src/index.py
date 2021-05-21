@@ -1,6 +1,7 @@
 import json
 import boto3
 from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError 
 
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
@@ -48,13 +49,29 @@ def handler(event, context):
             KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST")
         )
 
+        user = None
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+
         print(resp['Items'])
         posts = []
         for item in resp['Items']:
             response = table.query(
                 KeyConditionExpression=Key('PK').eq("POST#" + item['postId'])
         )
-            posts.append(response['Items'][0])
+            post = response['Items'][0]
+            if user != None:      
+                try:
+                    likeResponse = table.query(
+                        KeyConditionExpression=Key('PK').eq("POST#" + post['postId'] + "#REACTION#" + user)
+                    )
+                except ClientError as e:
+                    print(e.likeResponse['Error']['Message'])
+                else:
+                    if len(likeResponse['Items']) != 0:
+                        Reaction = likeResponse['Items'][0]['text']      
+                        post['Reaction'] = Reaction
+            posts.append(post)
         
         print(posts)
         response = {
