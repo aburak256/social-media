@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import {HStack, Text} from '@chakra-ui/layout';
 
 export default class Timer extends Component {
     constructor() {
@@ -55,7 +55,14 @@ export default class Timer extends Component {
       render() {
         return(
           <div>
-            m: {this.state.time.m} s: {this.state.time.s}
+            <HStack pl='4'>
+              <Text color='teal.400'>
+                Minute: {this.state.time.m}
+              </Text>
+              <Text color='cyan.400'>
+                Second: {this.state.time.s}
+              </Text>
+            </HStack>
           </div>
         );
       }
