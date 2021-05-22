@@ -5,9 +5,19 @@ import Timer from '../Timer'
 import { Button, ButtonGroup } from "@chakra-ui/react"
 
 export default class Test extends React.Component{
-    triggerTimer() {
+    state = {
+        started: false,
+        question: ''
+    }
+
+    async startTest() {
+        const topic = this.props.match.params.topic
+        const path = '/topicTest/' + topic.toString()
+        const data = await API.get(`topicsApi`, path)
+        this.setState({ started: true, question:data['question']})
         this.refs.timer.startTimer();
     }
+
     render(){
         return (
             <div>
@@ -16,8 +26,6 @@ export default class Test extends React.Component{
                         <HStack width="100%" mt="4">
                             <Box width="80%"/>
                             <Box width="15%" align='center' py="3" borderRadius="lg" boxShadow="lg" bg='gray.200'>
-                                <Timer ref='timer'/>          
-                        <Timer ref='timer'/>
                                 <Timer ref='timer'/>          
                             </Box>  
                         </HStack>         
