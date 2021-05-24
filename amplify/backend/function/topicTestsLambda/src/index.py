@@ -41,6 +41,7 @@ def handler(event, context):
             response = table.get_item(Key={'PK': "TOPIC#" + topic, 'sortKey': "METADATA"})
         except ClientError as e:
             print(e.response['Error']['Message'])
+            return Fail
         else:
             topicResult = response['Item']
             numberOfQuestions = topicResult['numberOfQuestions']
@@ -78,7 +79,8 @@ def handler(event, context):
                     #Collect options for this question
                     return collectAnswers(question)
                     
-                #User solved this before, check time and finish status. Also check permissions, if he/she has write permissions, refuse
+                    
+                #User solved this before, check time and finish status. Also check permissions, if he/she has write permissions, refuse to create new test
                 else :               
                     prev = checkResponse['Items'][-1]
                     dateTimePrev = datetime.datetime.strptime(prev['dateTime'], '%Y-%m-%d %H:%M:%S.%f')
@@ -408,8 +410,6 @@ def evaluate(user, topic):
                     },
                 }
 
-def questionPick(user, topic):
-    pass
 
 def postHandler(event, context):
     pass
