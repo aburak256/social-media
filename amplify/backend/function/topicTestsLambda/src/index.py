@@ -150,6 +150,50 @@ def handler(event, context):
                                                 }
                                             )
                                 #Collect options for this question
+def questionPick(user, topic, numberOfQuestions):
+    #Collect users prev questions at this session and give random question in topic
+    try:
+        selectionsResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+        )
+    except ClientError as e:
+        print(e.selectionsResponse['Error']['Message'])
+    else:
+        selections = selectionsResponse['Items']
+        questionIds = []
+        for selection in selections:
+            questionIds.append(selection['questionId'])
+        #Pick a random question in topic until its not in questions object
+        while True:
+            randomNumber = str(random.random.randint(0, int(numberOfQuestions)))
+            try:
+                #Collect the question at randomNumber and check
+                randomResponse = table.query(
+                    KeyConditionExpression=Key('PK').eq('TOPIC#' + topic + '#QUESTION') & Key('sortKey').eq(randomNumber)
+                )
+            except ClientError as e:
+                print(e.randomResponse['Error']['Message'])
+            else:
+                #Check if there is a question at this index
+                if len(randomResponse['Items']) == 1:
+                    #Found the question. Check if its solved before
+                    if randomResponse['Items'][0]['questionId'] in questionIds:
+                        #Solved before. Try again
+                        pass
+                    else:
+                        #Didnt't solved before. Collect question itself from db and return.
+                        try:
+                            questionResponse =table.get_item(Key={'PK': "QUESTION#" + randomResponse['Items'][0]['questionId'], 'sortKey': "METADATA"})
+                        except ClientError as e:
+                            print(e.questionResponse['Error']['Message'])
+                            pass
+                        else:
+                            return questionResponse['Item']
+                else:
+                    #Couldn't find the question. Retry
+                    pass
+
+
                                 answers = []
                                 for i in range(int(question['numberOfAnswers'])):
                                     try:
