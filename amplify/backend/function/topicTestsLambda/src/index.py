@@ -123,17 +123,18 @@ def handler(event, context):
                                             table.delete_item(Item=answer)                
                                                 table.delete_item(Item=answer)                
 
-                                question = questionPick(user, topic)
-                                table.put_item(
-                                            Item={
-                                                    'PK': "USER#" + user + "#ANSWERS#" + topic,
-                                                    'sortKey': '1',
-                                                    'text': '',
-                                                    'True': 'False',
-                                                    'questionId' :question['PK'],
-                                                }
-                                            )
-                                #Collect options for this question
+                                    question = questionPick(user, topic, numberOfQuestions)
+                                    table.put_item(
+                                                Item={
+                                                        'PK': "USER#" + user + "#ANSWERS#" + topic,
+                                                        'sortKey': '1',
+                                                        'text': '',
+                                                        'True': 'False',
+                                                        'questionId' :question['PK'],
+                                                    }
+                                                )
+                                    #Collect options for this question
+                                    return collectAnswers(question)
 def questionPick(user, topic, numberOfQuestions):
     #Collect users prev questions at this session and give random question in topic
     try:
