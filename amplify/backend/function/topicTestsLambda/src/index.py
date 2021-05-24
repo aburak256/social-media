@@ -337,7 +337,7 @@ def collectAnswers(question):
             print(e.answerResponse['Error']['Message'])
             return Fail
         else:
-            answers.append(response['Items'][0])
+            answers.append(answerResponse['Items'][0])
     res = {'question': question['text'], 'answers':answers}
     response = {
             'statusCode': 200,
