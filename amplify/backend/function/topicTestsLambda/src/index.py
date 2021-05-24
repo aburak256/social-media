@@ -133,9 +133,62 @@ def handler(event, context):
                                                 )
                                     #Collect options for this question
                                     return collectAnswers(question)
-                                            table.delete_item(Item=answer)                
-                                                table.delete_item(Item=answer)                
+                            else:
+                                #Didn't find any permission item
+                                #So there is a failiure from prev test results
+                                #Check the prev tests results
+                                #If success return fail else give another test
+                                if int(prev['success']) >= int(topic['successRequired']):
+                                    #Give user a permission
+                                    table.put_item(
+                                                Item={
+                                                        'PK': 'USER#' + user + '#PERMISSION',
+                                                        'sortKey': topic,
+                                                        'text': 'Success',
+                                                    }
+                                                )
+                                    response = {
+                                        'statusCode': 200,
+                                        'body': {
+                                            'message': 'You have a permission'
+                                        },
+                                        'headers': {
+                                            'Access-Control-Allow-Headers': '*',
+                                            'Access-Control-Allow-Origin': '*',
+                                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                                        },
+                                        'body': json.dumps('Hello from your new Amplify Python lambda!')
+                                    }
+                                    return response
 
+                                else:
+                                    #Give another test
+                                    #Create a user answers and add first question to this item. Return the first question
+                                    table.put_item(
+                                                Item={
+                                                        'PK': "USER#" + user + "#ANSWERS#" + topic,
+                                                        'sortKey': 'METADATA',
+                                                        'dateTime': datetime.now().isoformat(),
+                                                        'finished': 'False',
+                                                        'successRate': '0',
+                                                        'topicId': topic,
+                                                    }
+                                                )
+                                    #Delete previus user selections
+                                    try:
+                                        prevAnswers = table.query(
+                                            KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+                                        )
+                                    except ClientError as e:
+                                        print(e.prevAnswers['Error']['Message'])
+                                        return Fail
+                                    else:
+                                        for answer in prevAnswers['Items']:
+                                            if answer['sortKey'] == 'METADATA':
+                                                continue
+                                            else:
+                                                table.delete_item(Item=answer)
+                                    #Pick a question           
                                     question = questionPick(user, topic, numberOfQuestions)
                                     table.put_item(
                                                 Item={
