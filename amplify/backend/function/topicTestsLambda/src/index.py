@@ -201,6 +201,76 @@ def handler(event, context):
                                                 )
                                     #Collect options for this question
                                     return collectAnswers(question)
+
+                    elif result.total_seconds() >= 60 * int(topic['requiredTimeTest']):
+                        #Last test's session expired, check for success if there is a failure then return fail
+                        if int(prev['success']) >= int(topic['successRequired']):
+                            #Give user a permission
+                            table.put_item(
+                                        Item={
+                                                'PK': 'USER#' + user + '#PERMISSION',
+                                                'sortKey': topic,
+                                                'text': 'Success',
+                                            }
+                                        )
+                            response = {
+                                'statusCode': 200,
+                                'body': {
+                                    'message': 'You have a permission'
+                                },
+                                'headers': {
+                                    'Access-Control-Allow-Headers': '*',
+                                    'Access-Control-Allow-Origin': '*',
+                                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                                },
+                                'body': json.dumps('Hello from your new Amplify Python lambda!')
+                            }
+                            return response
+                        else:
+                            return Fail
+                    else:
+                        #Continue the last test's session
+                        #Find the latest answer object that writed to db. Check if its selected then send it to user
+                        try:
+                            #Default order is ascending. Last element is metadata item. Take previous item to continue
+                            latestAnswer = table.query(
+                                KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+                            )
+                        except ClientError as e:
+                            print(e.answerResponse['Error']['Message'])
+                        else:
+                            lastObject = latestAnswer['Items'][-2]
+                            if len(lastObject['text']) > 1:
+                                #User answered this item. Check the number of questions required for this topic.
+                                #If its greater or equal required number of questions return results
+                                #If its smaller than required questions give another question
+                                if int(lastObject['sortKey']) >= int(topicResult['numberOfTestQuestions']):
+                                    #check result
+                                    return evaluate(user, topic)
+                                else:
+                                    #Give last question
+                                    question = questionPick(user, topic, numberOfQuestions)
+                                    table.put_item(
+                                                Item={
+                                                        'PK': "USER#" + user + "#ANSWERS#" + topic,
+                                                        'sortKey': str(int(lastObject['sortKey']) + 1),
+                                                        'text': '',
+                                                        'True': 'False',
+                                                        'questionId' :question['PK'],
+                                                    }
+                                                )
+                                    return collectAnswers(question)    
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps("We didn't understand your request")
+    }
+
+
 def questionPick(user, topic, numberOfQuestions):
     #Collect users prev questions at this session and give random question in topic
     try:
