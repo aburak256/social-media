@@ -318,6 +318,15 @@ def questionPick(user, topic, numberOfQuestions):
 
 
 def collectAnswers(question):
+    Fail = {
+            'statusCode': 404,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': json.dumps("Couldn't find the request")
+        }
     answers = []
     for i in range(int(question['numberOfAnswers'])):
         try:
