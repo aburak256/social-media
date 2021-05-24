@@ -65,7 +65,7 @@ def handler(event, context):
                                         'topicId': topic,
                                     }
                                 )
-                    question = questionPick(user, topic)
+                    question = questionPick(user, topic, numberOfQuestions)
                     table.put_item(
                                 Item={
                                         'PK': "USER#" + user + "#ANSWERS#" + topic,
@@ -76,28 +76,7 @@ def handler(event, context):
                                     }
                                 )
                     #Collect options for this question
-                    answers = []
-                    for i in range(int(question['numberOfAnswers'])):
-                        try:
-                            answerResponse = table.query(
-                                KeyConditionExpression=Key('PK').eq(question['PK'] + "#ANSWER") & Key('sortKey').eq(str(i))
-                            )
-                        except ClientError as e:
-                            print(e.answerResponse['Error']['Message'])
-                            return Fail
-                        else:
-                            answers.append(response['Items'][0])
-                    res = {'question': question['text'], 'answers':answers}
-                    response = {
-                            'statusCode': 200,
-                            'body': json.dumps(res),
-                            'headers': {
-                                'Access-Control-Allow-Headers': '*',
-                                'Access-Control-Allow-Origin': '*',
-                                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                            },
-                        }
-                    return response
+                    return collectAnswers(question)
                     
                 #User solved this before, check time and finish status. Also check permissions, if he/she has write permissions, refuse
                 else :               
