@@ -218,25 +218,74 @@ def collectAnswers(question):
         }
     return response
 
-                        pass
-                    elif result.total_seconds() >= 60 * int(topic['requiredTimeTest']):
-                        #Last test's session expired return fail
-                        return Fail
-                    else:
-                        #Continue the last test's session
-                        pass
 
-            
-
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
-        'body': json.dumps('Hello from your new Amplify Python lambda!')
-    }
+def evaluate(user, topic):
+    #Check user's answers. Compare with topics requirements. If pass give user a permission to write
+    try:
+        selectionsResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+        )
+    except ClientError as e:
+        print(e.selectionsResponse['Error']['Message'])
+    else:
+        selections = selectionsResponse['Items']
+        total, true, false = 0, 0, 0
+        for selection in selections:
+            if selection['sortKey'] != 'METADATA':
+                total += 1
+                if selection[True]: true += 1
+                else: false += 1
+        successRate = (true / total) * 100
+        #Collect topics success rate requirement
+        try:
+            successResponse = table.get_item(Key={'PK': "TOPIC#" + topic, 'sortKey': "METADATA"})
+        except ClientError as e:
+            print(e.successResponse['Error']['Message'])
+        else:
+            successFromTopic = int(successResponse['Item']['successRequired'])
+            requiredNumberQuestions = int(successResponse['Item']['numberOfTestQuestions'])
+            if len(selections) >= requiredNumberQuestions and successRate >= successFromTopic:
+                #User can write. Give permission to write
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + user + '#PERMISSION',
+                        'sortKey': topic,
+                        'text': 'Success',
+                    }
+                )
+                res = {
+                    'message': 'Success'
+                }
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+            else:
+                #User can't write. Don't give permission to write
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + user + '#PERMISSION',
+                        'sortKey': topic,
+                        'text': 'Fail',
+                    }
+                )
+                res = {
+                    'message': 'Fail'
+                }
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
 
 def questionPick(user, topic):
     pass
