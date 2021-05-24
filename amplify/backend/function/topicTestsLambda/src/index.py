@@ -115,29 +115,34 @@ def handler(event, context):
                             print(e.answerResponse['Error']['Message'])
                             return Fail
                         else:
-                            if permissionResponse['Items']['text'] == 'Succeess' and permissionResponse['Items']['sortKey'] == topic:
-                                #User have permissions to write at specified topic
-                                return Fail
-                            else:
-                                prev['dateTime'] = datetime.now().isoformat()
-                                prev['finished'] = 'False'
-                                prev['successRate'] = '0'
-                                table.put_item(Item=prev)
-                                
-                                #Delete previus user selections
-                                try:
-                                    prevAnswers = table.query(
-                                        KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
-                                    )
-                                except ClientError as e:
-                                    print(e.prevAnswers['Error']['Message'])
+                            if len(permissionResponse['Items']) != 0:
+                                #If permission item before
+                                if permissionResponse['Items'][0]['text'] == 'Succeess':
+                                    #User have permissions to write at specified topic. Don't needs to take test again
                                     return Fail
                                 else:
-                                    for answer in prevAnswers['Items']:
-                                        if answer['sortKey'] == 'METADATA':
-                                            continue
-                                        else:
+                                    #User solved and didn't passed
+                                    prev['dateTime'] = datetime.now().isoformat()
+                                    prev['finished'] = 'False'
+                                    prev['successRate'] = '0'
+                                    table.put_item(Item=prev)
+                                    
+                                    #Delete previus user selections
+                                    try:
+                                        prevAnswers = table.query(
+                                            KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+                                        )
+                                    except ClientError as e:
+                                        print(e.prevAnswers['Error']['Message'])
+                                        return Fail
+                                    else:
+                                        for answer in prevAnswers['Items']:
+                                            if answer['sortKey'] == 'METADATA':
+                                                continue
+                                            else:
+                                                table.delete_item(Item=answer)                
                                             table.delete_item(Item=answer)                
+                                                table.delete_item(Item=answer)                
 
                                 question = questionPick(user, topic)
                                 table.put_item(
