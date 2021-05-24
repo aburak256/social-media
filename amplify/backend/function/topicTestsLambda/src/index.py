@@ -42,9 +42,9 @@ def handler(event, context):
         except ClientError as e:
             print(e.response['Error']['Message'])
         else:
-            topic = response['Item']
-            topic['numberOfQuestions']
-            #Check if user solved a test before about this topic
+            topicResult = response['Item']
+            numberOfQuestions = topicResult['numberOfQuestions']
+            #Check if user solved the test before, about this topic
             try:
                 checkResponse = table.query(
                 KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWER#' + topic) & Key('sortKey').eq('METADATA')
