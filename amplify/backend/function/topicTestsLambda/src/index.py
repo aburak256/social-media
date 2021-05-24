@@ -120,6 +120,19 @@ def handler(event, context):
                                                 continue
                                             else:
                                                 table.delete_item(Item=answer)                
+
+                                    question = questionPick(user, topic, numberOfQuestions)
+                                    table.put_item(
+                                                Item={
+                                                        'PK': "USER#" + user + "#ANSWERS#" + topic,
+                                                        'sortKey': '1',
+                                                        'text': '',
+                                                        'True': 'False',
+                                                        'questionId' :question['PK'],
+                                                    }
+                                                )
+                                    #Collect options for this question
+                                    return collectAnswers(question)
                                             table.delete_item(Item=answer)                
                                                 table.delete_item(Item=answer)                
 
