@@ -194,28 +194,29 @@ def questionPick(user, topic, numberOfQuestions):
                     pass
 
 
-                                answers = []
-                                for i in range(int(question['numberOfAnswers'])):
-                                    try:
-                                        answerResponse = table.query(
-                                            KeyConditionExpression=Key('PK').eq(question['PK'] + "#ANSWER") & Key('sortKey').eq(str(i))
-                                        )
-                                    except ClientError as e:
-                                        print(e.answerResponse['Error']['Message'])
-                                        return Fail
-                                    else:
-                                        answers.append(response['Items'][0])
-                                res = {'question': question['text'], 'answers':answers}
-                                response = {
-                                        'statusCode': 200,
-                                        'body': json.dumps(res),
-                                        'headers': {
-                                            'Access-Control-Allow-Headers': '*',
-                                            'Access-Control-Allow-Origin': '*',
-                                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                                        },
-                                    }
-                                return response
+def collectAnswers(question):
+    answers = []
+    for i in range(int(question['numberOfAnswers'])):
+        try:
+            answerResponse = table.query(
+                KeyConditionExpression=Key('PK').eq(question['PK'] + "#ANSWER") & Key('sortKey').eq(str(i))
+            )
+        except ClientError as e:
+            print(e.answerResponse['Error']['Message'])
+            return Fail
+        else:
+            answers.append(response['Items'][0])
+    res = {'question': question['text'], 'answers':answers}
+    response = {
+            'statusCode': 200,
+            'body': json.dumps(res),
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+        }
+    return response
 
                         pass
                     elif result.total_seconds() >= 60 * int(topic['requiredTimeTest']):
