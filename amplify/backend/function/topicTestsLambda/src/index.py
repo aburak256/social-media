@@ -3,7 +3,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
 import random
-import datetime
+from datetime import datetime
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
 table = dynamodb.Table('SingleTableDesign')
@@ -13,7 +13,7 @@ def handler(event, context):
     print(event)
 
     Fail = {
-            'statusCode': 404,
+            'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
@@ -48,7 +48,7 @@ def handler(event, context):
             #Check if user solved the test before, about this topic
             try:
                 checkResponse = table.query(
-                KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWER#' + topic) & Key('sortKey').eq('METADATA')
+                KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic) & Key('sortKey').eq('METADATA')
             )
             except ClientError as e:
                 print(e.checkResponse['Error']['Message'])
@@ -62,7 +62,7 @@ def handler(event, context):
                                         'sortKey': 'METADATA',
                                         'dateTime': datetime.now().isoformat(),
                                         'finished': 'False',
-                                        'successRate': '0',
+                                        'success': '0',
                                         'topicId': topic,
                                     }
                                 )
@@ -83,8 +83,8 @@ def handler(event, context):
                 #User solved this before, check time and finish status. Also check permissions, if he/she has write permissions, refuse to create new test
                 else :               
                     prev = checkResponse['Items'][-1]
-                    dateTimePrev = datetime.datetime.strptime(prev['dateTime'], '%Y-%m-%d %H:%M:%S.%f')
-                    now = datetime.datetime.now()
+                    dateTimePrev = datetime.strptime(prev['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                    now = datetime.now()
                     result = now - dateTimePrev
                     if result.total_seconds() >= 3600 * 24 * 90:
                         #After 90 days, last test is expired. Check users permissions then if not permitted to write, create new test
@@ -105,7 +105,7 @@ def handler(event, context):
                                     #User solved and didn't passed
                                     prev['dateTime'] = datetime.now().isoformat()
                                     prev['finished'] = 'False'
-                                    prev['successRate'] = '0'
+                                    prev['success'] = '0'
                                     table.put_item(Item=prev)
                                     
                                     #Delete previus user selections
@@ -159,7 +159,6 @@ def handler(event, context):
                                             'Access-Control-Allow-Origin': '*',
                                             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                                         },
-                                        'body': json.dumps('Hello from your new Amplify Python lambda!')
                                     }
                                     return response
 
@@ -172,7 +171,7 @@ def handler(event, context):
                                                         'sortKey': 'METADATA',
                                                         'dateTime': datetime.now().isoformat(),
                                                         'finished': 'False',
-                                                        'successRate': '0',
+                                                        'success': '0',
                                                         'topicId': topic,
                                                     }
                                                 )
@@ -204,9 +203,9 @@ def handler(event, context):
                                     #Collect options for this question
                                     return collectAnswers(question)
 
-                    elif result.total_seconds() >= 60 * int(topic['requiredTimeTest']):
+                    elif result.total_seconds() >= 60 * int(topicResult['requiredTimeTest']):
                         #Last test's session expired, check for success if there is a failure then return fail
-                        if int(prev['success']) >= int(topic['successRequired']):
+                        if int(prev['success']) >= int(topicResult['successRequired']):
                             #Give user a permission
                             table.put_item(
                                         Item={
@@ -225,7 +224,6 @@ def handler(event, context):
                                     'Access-Control-Allow-Origin': '*',
                                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                                 },
-                                'body': json.dumps('Hello from your new Amplify Python lambda!')
                             }
                             return response
                         else:
@@ -261,7 +259,18 @@ def handler(event, context):
                                                         'questionId' :question['PK'],
                                                     }
                                                 )
-                                    return collectAnswers(question)    
+                                    return collectAnswers(question)
+                            else:
+                                #User didn't answered his/her latest question. Send same question again
+                                try:
+                                    questionResponse = table.get_item(
+                                        Key={'PK': (lastObject['questionId']), 'sortKey': 'METADATA'}
+                                    )
+                                except ClientError as e:
+                                    print(e.questionResponse['Error']['Message'])
+                                else:
+                                    question = questionResponse['Item']
+                                    return collectAnswers(question)
     return {
         'statusCode': 200,
         'headers': {
@@ -285,10 +294,13 @@ def questionPick(user, topic, numberOfQuestions):
         selections = selectionsResponse['Items']
         questionIds = []
         for selection in selections:
-            questionIds.append(selection['questionId'])
+            if selection['sortKey'] == 'METADATA':
+                continue
+            else:
+                questionIds.append(selection['questionId'])
         #Pick a random question in topic until its not in questions object
         while True:
-            randomNumber = str(random.random.randint(0, int(numberOfQuestions)))
+            randomNumber = str(random.randint(1, int(numberOfQuestions)))
             try:
                 #Collect the question at randomNumber and check
                 randomResponse = table.query(
@@ -328,7 +340,7 @@ def collectAnswers(question):
             'body': json.dumps("Couldn't find the request")
         }
     answers = []
-    for i in range(int(question['numberOfAnswers'])):
+    for i in range(1, int(question['numberOfAnswers']) + 1):
         try:
             answerResponse = table.query(
                 KeyConditionExpression=Key('PK').eq(question['PK'] + "#ANSWER") & Key('sortKey').eq(str(i))
@@ -337,7 +349,13 @@ def collectAnswers(question):
             print(e.answerResponse['Error']['Message'])
             return Fail
         else:
-            answers.append(answerResponse['Items'][0])
+            if len(answerResponse['Items']) >= 1:
+                del answerResponse['Items'][0]['True']
+                del answerResponse['Items'][0]['PK']
+                del answerResponse['Items'][0]['sortKey']
+                answers.append(answerResponse['Items'][0])
+            else:
+                return Fail
     res = {'question': question['text'], 'answers':answers}
     response = {
             'statusCode': 200,
