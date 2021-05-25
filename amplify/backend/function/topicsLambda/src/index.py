@@ -48,7 +48,7 @@ def handler(event, context):
         resp = table.query(
             KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST")
         )
-
+        permission = 'Reader'
         user = None
         if 'identity' in event['requestContext']:
             user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
@@ -71,12 +71,22 @@ def handler(event, context):
                     if len(likeResponse['Items']) != 0:
                         Reaction = likeResponse['Items'][0]['text']      
                         post['Reaction'] = Reaction
+                    try:
+                        permissionResponse = table.get_item(
+                            Key={'PK': 'USER#' + user + '#PERMISSION', 'sortKey': topic}
+                        )
+                    except ClientError as e:
+                        print(e.permissionResponse['Error']['Message'])
+                    else:
+                        if permissionResponse['Item']['text'] == 'Success':
+                            permission = 'Writer'
+                            
             posts.append(post)
         
-        print(posts)
+        res = {'posts': posts, 'permission': permission}
         response = {
             'statusCode': 200,
-            'body': json.dumps(posts),
+            'body': json.dumps(res),
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
