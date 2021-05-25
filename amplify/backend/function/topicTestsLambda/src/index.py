@@ -439,4 +439,79 @@ def evaluate(user, topic):
 
 
 def postHandler(event, context):
-    pass
+    #User post an answer to api. Check if answer is correct and add this to users answers.
+    #If there are required number of questions solved by the user then end the test. Return end = true in body
+    #Else send new question
+    Fail = {
+        'statusCode': 500,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps("We didn't understand your request")
+    }
+
+    params = event['pathParameters']    
+    topic = params['proxy'].upper()
+    if 'identity' in event['requestContext']:
+        user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+    else:
+        return Fail
+    if 'answer' in event['body']:
+        body = json.loads(event['body'])
+        answer = body['answer']
+        try:
+            #Default order is ascending. Last element is metadata item. Take previous item to continue
+            latestAnswer = table.query(
+                KeyConditionExpression=Key('PK').eq('USER#' + user + '#ANSWERS#' + topic)
+            )
+        except ClientError as e:
+            print(e.latestAnswer['Error']['Message'])
+        else:
+            lastObject = latestAnswer['Items'][-2]
+            if len(lastObject['text']) == 0:
+                #User didn't answered last question. Change the answer of this one and send new
+                lastObject['text'] = answer
+                if checkAnswer(lastObject['questionId'], answer):
+                    lastObject['True'] = 'True'
+                else:
+                    lastObject['True'] = 'False'
+                table.put_item(Item=lastObject)
+
+            else:
+                #User answered latest one. Evaluate and send new
+                if checkAnswer(lastObject['questionId'], lastObject['text']):
+                    lastObject['True'] = 'True'
+                else:
+                    lastObject['True'] = 'False'
+                table.put_item(Item=lastObject)
+
+            #Check if user finished test.
+            countNow = latestAnswer['Items'][-2]['sortKey']
+            try:
+                topicResponse = table.get_item(
+                    Key={'PK': 'TOPIC#' + topic, 'sortKey': 'METADATA'}
+                )
+            except ClientError as e:
+                print(e.topicResponse['Error']['Message'])
+            else:
+                if int(countNow) >= int(topicResponse['Item']['numberOfTestQuestions']):
+                    #User answered required number of questions. Evaluate
+                    return evaluate(user, topic)
+                else:
+                    #Send new question to user
+                    question = questionPick(user, topic, topicResponse['Item']['numberOfQuestions'])
+                    table.put_item(
+                                Item={
+                                        'PK': "USER#" + user + "#ANSWERS#" + topic,
+                                        'sortKey': str(int(countNow) + 1 ),
+                                        'text': '',
+                                        'True': 'False',
+                                        'questionId' :question['PK'],
+                                    }
+                                )
+                    return collectAnswers(question)                
+
+    else:
+        return Fail
