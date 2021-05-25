@@ -1,8 +1,8 @@
 import React from 'react';
-import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
+import { VStack, Box, Badge, Text} from '@chakra-ui/layout';
 import {Link} from 'react-router-dom'
 import { ViewIcon } from '@chakra-ui/icons'
-import { Image, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import { Image, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {API} from "aws-amplify";
 
 

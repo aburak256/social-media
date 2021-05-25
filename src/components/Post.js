@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import {API} from "aws-amplify";
-import {Auth} from 'aws-amplify'
-import { Spinner, Image,  Stack} from "@chakra-ui/react"
-import { Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
-import { VStack, Box, Badge, HStack, Text, Center} from '@chakra-ui/layout';
+import { Image} from "@chakra-ui/react"
+import {  SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import {Popularity} from './Popularity';
 

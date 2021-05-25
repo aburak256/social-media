@@ -1,7 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import '../../App.css';
 import {Auth} from 'aws-amplify'
-import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components'
 
 function Signup() {
     const [user, setUser] = useState("");

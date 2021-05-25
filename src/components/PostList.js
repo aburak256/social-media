@@ -2,7 +2,7 @@ import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
-import { Spinner, Image,  Skeleton, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import { Image, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
 import { Popularity } from './Popularity';
 
