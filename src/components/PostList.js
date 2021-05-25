@@ -2,9 +2,10 @@ import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
-import { Image, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
+import { Image, SkeletonCircle, SkeletonText, Button } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
 import { Popularity } from './Popularity';
+import {SendPost} from './SendPost'
 
 
 export default class PostList extends React.Component {
@@ -12,15 +13,14 @@ export default class PostList extends React.Component {
     posts: [],
     loading:true,
     sizeOfArray: '',
-
+    permission: false,
   }
   
   async componentDidMount() {
     const path = '/topics/' + (this.props.topic).toUpperCase()
     const data = await API.get(`topicsApi`, path)
-    this.setState({ title: this.props.topic , sizeOfArray: data.length})
+    this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
     this.setState({ loading: false })
-    this.setState({ posts: data })
   }
 
   async postLike(postId, index){
@@ -58,7 +58,23 @@ export default class PostList extends React.Component {
               <SkeletonText mt="4" noOfLines={6} spacing="4" />
             </Box>
             :  
-            <>{this.state.sizeOfArray ? <> {this.state.posts.map((post, index) => 
+            <>{this.state.sizeOfArray ?          
+            <> {this.state.permission == 'Writer' ? <> <SendPost/> </>: 
+              <>
+                <VStack>
+                  <Text
+                    fontWeight="semibold"
+                    lineHeight="tight"
+                    fontSize='lg'
+                  >
+                    You are not a writer. If you want you can take test
+                  </Text>
+                  <Link to={'/test/' + this.props.topic}>
+                    <Button bg='teal.200'>Go to Test</Button>
+                  </Link>      
+                </VStack>
+              </>}          
+            {this.state.posts.map((post, index) => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
               <Box p="4" paddingLeft="4">
                 <Box alignItems="baseline">
