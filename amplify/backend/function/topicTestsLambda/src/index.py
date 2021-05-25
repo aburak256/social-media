@@ -13,7 +13,7 @@ def handler(event, context):
     print(event)
 
     Fail = {
-            'statusCode': 200,
+            'statusCode': 500,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
@@ -205,29 +205,7 @@ def handler(event, context):
 
                     elif result.total_seconds() >= 60 * int(topicResult['requiredTimeTest']):
                         #Last test's session expired, check for success if there is a failure then return fail
-                        if int(prev['success']) >= int(topicResult['successRequired']):
-                            #Give user a permission
-                            table.put_item(
-                                        Item={
-                                                'PK': 'USER#' + user + '#PERMISSION',
-                                                'sortKey': topic,
-                                                'text': 'Success',
-                                            }
-                                        )
-                            response = {
-                                'statusCode': 200,
-                                'body': {
-                                    'message': 'You have a permission'
-                                },
-                                'headers': {
-                                    'Access-Control-Allow-Headers': '*',
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                                },
-                            }
-                            return response
-                        else:
-                            return Fail
+                        return evaluate(user, topic)
                     else:
                         #Continue the last test's session
                         #Find the latest answer object that writed to db. Check if its selected then send it to user
@@ -318,7 +296,7 @@ def questionPick(user, topic, numberOfQuestions):
                     else:
                         #Didnt't solved before. Collect question itself from db and return.
                         try:
-                            questionResponse =table.get_item(Key={'PK': "QUESTION#" + randomResponse['Items'][0]['questionId'], 'sortKey': "METADATA"})
+                            questionResponse =table.get_item(Key={'PK': randomResponse['Items'][0]['questionId'], 'sortKey': "METADATA"})
                         except ClientError as e:
                             print(e.questionResponse['Error']['Message'])
                             pass
@@ -383,7 +361,7 @@ def evaluate(user, topic):
         for selection in selections:
             if selection['sortKey'] != 'METADATA':
                 total += 1
-                if selection[True]: true += 1
+                if selection['True'] == 'True': true += 1
                 else: false += 1
         successRate = (true / total) * 100
         #Collect topics success rate requirement
@@ -403,8 +381,11 @@ def evaluate(user, topic):
                         'text': 'Success',
                     }
                 )
+                selections[-1]['success'] = str(successRate)
+                table.put_item(Item=selections[-1])
                 res = {
-                    'message': 'Success'
+                    'message': 'Success',
+                    'end': 'True',
                 }
                 return {
                     'statusCode': 200,
@@ -425,7 +406,8 @@ def evaluate(user, topic):
                     }
                 )
                 res = {
-                    'message': 'Fail'
+                    'message': 'Fail',
+                    'end': 'True'
                 }
                 return {
                     'statusCode': 200,
