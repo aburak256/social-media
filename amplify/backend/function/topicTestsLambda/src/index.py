@@ -515,3 +515,19 @@ def postHandler(event, context):
 
     else:
         return Fail
+
+#Check the given answer is true or false. Return bool
+def checkAnswer(questionId, answer):
+    try:
+        answersResponse = table.query(
+            KeyConditionExpression=Key('PK').eq(questionId + '#ANSWER')
+        )
+    except ClientError as e:
+        print(e.answersResponse['Error']['Message'])
+    else:
+        for option in answersResponse['Items']:
+            if answer == option['text']:
+                #This is the selection that user made
+                if option['True'] == 'True':
+                    return True
+        return False
