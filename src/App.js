@@ -7,7 +7,7 @@ import TopicDetail from './components/pages/TopicDetail';
 import PostDetail from './components/pages/PostDetail';
 import Test from './components/pages/Test'
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
-import Amplify, {API} from "aws-amplify";
+import Amplify, {API, Storage} from "aws-amplify";
 import awsExports from "./aws-exports";
 import { withAuthenticator } from '@aws-amplify/ui-react';
 Amplify.configure(awsExports);
