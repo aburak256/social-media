@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Box, Textarea, Center, VStack, HStack, Button } from "@chakra-ui/react"
+import { Box, Textarea, VStack, HStack, Button, Progress, Text } from "@chakra-ui/react"
 import { Storage, Auth, API } from 'aws-amplify';
 import { AttachmentIcon } from '@chakra-ui/icons'
 
@@ -8,7 +8,8 @@ export class SendPost extends Component {
         post: '',
         image: null,
         topic:'',
-        user: ''
+        user: '',
+        prog: 0,
     }
     componentDidMount(){
         this.setState({topic: this.props.topic})
@@ -26,17 +27,21 @@ export class SendPost extends Component {
     
     imageSelectHandler = event => {
         this.setState({ image: event.target.files[0]})
-        console.log(Date().toLocaleString(), this.state.user.attributes.sub)
     }
 
     async post (){
         const path = '/posts/' + this.props.topic
         let image = null
         if(this.state.image != null){
-            const result = await Storage.put( this.state.user.attributes.sub + Date().toLocaleString(), this.state.image, {
+            const config = {
                 level: 'public',
                 contentType: 'image/png',
-            })
+                progressCallback: progressEvent => {
+                    let prog = (progressEvent.loaded / progressEvent.total) * 100
+                    this.setState({ prog: prog })
+                }
+              }
+            const result = await Storage.put(this.state.user.attributes.sub + Date().toLocaleString(), this.state.image, config)
             console.log(result)
             image = result.key
         }
@@ -48,7 +53,6 @@ export class SendPost extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
-        console.log(data)
     }
 
     render() {
@@ -68,9 +72,10 @@ export class SendPost extends Component {
                     <label htmlFor='fileInput'>
                         <AttachmentIcon color='teal.400' w={8} h={8}/>
                     </label>
-                    <input id='fileInput' type='file' style={{display:'none'}} onChange={this.imageSelectHandler} />        
+                    <input id='fileInput' type='file' style={{display:'none'}} onChange={this.imageSelectHandler} />                   
                     <Button bg='teal.300' onClick={this.post.bind(this)}>Post</Button>
                 </HStack>
+                {this.state.prog = 0 ? <>   </> : <Progress w='70%' value={this.state.prog}/>}
             </VStack>
         )
     }
