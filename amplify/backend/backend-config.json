@@ -109,6 +109,10 @@
       "serviceType": "imported",
       "providerPlugin": "awscloudformation",
       "dependsOn": []
+    },
+    "image": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation"
     }
   },
   "analytics": {
