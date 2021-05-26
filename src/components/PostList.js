@@ -77,11 +77,22 @@ export default class PostList extends React.Component {
             {this.state.posts.map((post, index) => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
               <Box p="4" paddingLeft="4">
-                <Box alignItems="baseline">
+                <HStack alignItems="baseline">
                   <Badge borderRadius="full" px="2" colorScheme="teal">
                   {post.username}
                   </Badge>
-                </Box>
+                  <Box
+                      color="gray.400"
+                      fontWeight="semibold"
+                      letterSpacing="wide"
+                      fontSize="xs"
+                      textTransform="uppercase"
+                      ml="6"
+                      pl='2'
+                  >
+                      Posted at {post.dateTime}
+                  </Box>
+                </HStack>            
                 <HStack>     
                   <Text
                     w='70%'

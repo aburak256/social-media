@@ -2,7 +2,7 @@ import json
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
-
+from datetime import datetime
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
 table = dynamodb.Table('SingleTableDesign')
@@ -80,7 +80,8 @@ def handler(event, context):
                     else:
                         if permissionResponse['Item']['text'] == 'Success':
                             permission = 'Writer'
-                            
+            dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+            post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")           
             posts.append(post)
         
         res = {'posts': posts, 'permission': permission}

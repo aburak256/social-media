@@ -77,7 +77,8 @@ def handler(event, context):
                                 if len(commentsLikeResponse['Items']) != 0:
                                     Reaction = commentsLikeResponse['Items'][0]['text']      
                                     comments[-1]['Reaction'] = Reaction
-        
+        dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+        post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
         print(post, comments)
         res = {'post': post, 'comments':comments}
         response = {
@@ -185,7 +186,8 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
-
+                        dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
                         response = {
                             'statusCode': 200,
@@ -250,7 +252,8 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
-
+                        dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
                         response = {
                             'statusCode': 200,
