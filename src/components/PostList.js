@@ -21,6 +21,7 @@ export default class PostList extends React.Component {
     const data = await API.get(`topicsApi`, path)
     this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
     this.setState({ loading: false })
+    console.log(data)
   }
 
   async postLike(postId, index){
@@ -59,7 +60,7 @@ export default class PostList extends React.Component {
             </Box>
             :  
             <>{this.state.sizeOfArray ?          
-            <> {this.state.permission == 'Writer' ? <> <SendPost/> </>: 
+            <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic}/> : 
               <>
                 <VStack>
                   <Text
