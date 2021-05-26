@@ -3,10 +3,13 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
 from datetime import datetime
-
+import uuid
+import urllib.parse
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+s3_client = boto3.client('s3')
 table = dynamodb.Table('SingleTableDesign')
+bucket = "smapp-image131342-dev"
 
 def handler(event, context):
     print('received event:')
@@ -186,8 +189,8 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
-                        dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
-                        post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
+                        dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
                         response = {
                             'statusCode': 200,
@@ -252,8 +255,8 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
-                        dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
-                        post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
+                        dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
                         response = {
                             'statusCode': 200,
@@ -267,5 +270,89 @@ def postHandler(event, context):
                         
             return response
             
-                
+    elif 'post' in event['body']:
+        #User posted a post. Check permissions then create a post object with TOPIC#POST and POST
+        #Also if user uploaded an image add image link to dynamodb.
+        Fail = {
+            'statusCode': 404,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': json.dumps("Couldn't find the request")
+        }
+        body = json.loads(event['body'])
+        params = event['pathParameters']
+        topic = params['proxy'].upper()
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+        try:
+            response = table.get_item(Key={'PK': "USER#" + user + '#PERMISSION', 'sortKey': topic})
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+            return Fail
+        else:
+            if response['Item']['text'] == 'Success':
+                #User has permission to write
+                url = ""
+                if body['image']:
+                    #Create image URL
+                    #Changed bucket policy to give unauth. users to read objects
+                    key = urllib.parse.quote(body['image'])
+                    url = ("https://{bucket}.s3.us-east-2.amazonaws.com/public/{key}".format(bucket=bucket, key=key))
+                if len(body['text']) == 0 : return Fail
+                #Get username of user
+                try:
+                    userResponse = table.get_item(Key={'PK': "USER#" + user , 'sortKey': 'METADATA'})
+                except ClientError as e:
+                    print(e.userResponse['Error']['Message'])
+                    return Fail
+                else:
+                    username = userResponse['Item']['userName']
+                    #Create post
+                    postId = str(uuid.uuid4())
+                    post = {
+                            'PK': 'POST#' + postId,
+                            'sortKey': 'METADATA',
+                            'imageURL': url,
+                            'numberOfComments': '0',
+                            'dateTime': datetime.now().isoformat(),
+                            'numberOfDislikes': '0',
+                            'numberOfLikes': '0',
+                            'postId': postId,
+                            'text': body['text'],
+                            'userId': user,
+                            'username': username,
+                            'topicId': topic
+                        }
+                    table.put_item(
+                        Item=post
+                    )
+                    #Create post link in topics
+                    table.put_item(
+                        Item={
+                            'PK': 'TOPIC#' + topic + '#POST',
+                            'sortKey': datetime.now().isoformat(),
+                            'postId': postId
+                        }
+                    )
+                    res = {'post': post}
+                    response = {
+                        'statusCode': 200,
+                        'body': json.dumps(res),
+                        'headers': {
+                            'Access-Control-Allow-Headers': '*',
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                        },
+                    }
+                    return response
+
+
+            else:
+                return Fail
+
             
