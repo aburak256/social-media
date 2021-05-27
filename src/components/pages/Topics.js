@@ -8,12 +8,10 @@ function Topics() {
         
         <div>
             <title>Topics</title>
-            <Center> 
-                <VStack spacing="24px" width="70%">            
+                <Center spacing="24px" width="80%" pl='15%'>            
                     <br/>
                     <TopicList/>
-                </VStack>
-            </Center>
+                </Center>
         </div>
     )
 }

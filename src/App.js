@@ -10,6 +10,7 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import Amplify, {API, Storage} from "aws-amplify";
 import awsExports from "./aws-exports";
 import { withAuthenticator } from '@aws-amplify/ui-react';
+import Sidebar from './components/Sidebar';
 Amplify.configure(awsExports);
 
 
@@ -19,6 +20,7 @@ function App() {
         <div className = "App">
             <Router>
                 <Navbar />
+                <Sidebar/>
                 <Switch>
                     <Route path='/' exact component={Home} />
                     <Route path='/sign-up' exact component={Signup} />
