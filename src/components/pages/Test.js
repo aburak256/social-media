@@ -87,7 +87,7 @@ export default class Test extends React.Component{
                         <HStack width="100%" mt="4">
                             <Box width="80%"/>
                             <Box width="15%" align='center' py="3" borderRadius="lg" boxShadow="lg" bg='gray.200'>
-                                <Timer ref='timer'/>          
+                                <Timer ref='timer' topic={this.props.match.params.topic}/>          
                             </Box>  
                         </HStack>
                         {this.state.answers.length == 0 ? <>

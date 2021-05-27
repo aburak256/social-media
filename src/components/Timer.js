@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import {HStack, Text} from '@chakra-ui/layout';
+import {API} from "aws-amplify";
 
 export default class Timer extends Component {
     constructor() {
         super();
-        this.state = { time: {}, seconds: 500 };
+        this.state = { time: {}, seconds: 0 };
         this.timer = 0;
         this.startTimer = this.startTimer.bind(this);
         this.countDown = this.countDown.bind(this);
@@ -27,9 +28,15 @@ export default class Timer extends Component {
         return obj;
       }
     
-      componentDidMount() {
+      async componentDidMount() {
+            const topic = this.props.topic
+            const path = '/topics/' + topic.toString()
+            const data = await API.get(`topicsApi`, path)
+            this.setState({seconds: parseInt(data['time'])})
             let timeLeftVar = this.secondsToTime(this.state.seconds);
-            this.setState({ time: timeLeftVar });
+            this.setState({ time: timeLeftVar, seconds: this.props.seconds});
+            
+          
       }
     
       startTimer() {

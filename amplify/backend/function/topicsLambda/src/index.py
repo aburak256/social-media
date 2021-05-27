@@ -44,7 +44,8 @@ def handler(event, context):
 
     if "/topics" in event['resource']:
         params = event['pathParameters']
-        topic = params['proxy']
+        topic = params['proxy'].upper()
+        timeRequired = '0'
         resp = table.query(
             KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST")
         )
@@ -78,13 +79,24 @@ def handler(event, context):
                     except ClientError as e:
                         print(e.permissionResponse['Error']['Message'])
                     else:
-                        if permissionResponse['Item']['text'] == 'Success':
+                        if 'Item' in permissionResponse and permissionResponse['Item']['text'] == 'Success':
                             permission = 'Writer'
+            
             dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
             post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")           
             posts.append(post)
         
         res = {'posts': posts, 'permission': permission}
+        try:
+            timeResponse = table.get_item(
+                Key={'PK': 'TOPIC#' + topic , 'sortKey':'METADATA'}
+            )
+        except ClientError as e:
+            print(e.timeResponse['Error']['Message'])
+        else:
+            if 'Item' in timeResponse:
+                timeRequired = str(int(timeResponse['Item']['requiredTimeTest']) * 60)
+                res['time'] = timeRequired
         response = {
             'statusCode': 200,
             'body': json.dumps(res),
