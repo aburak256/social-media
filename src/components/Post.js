@@ -5,6 +5,7 @@ import {  SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import {Popularity} from './Popularity';
+import SendComment from './SendComment';
 
 export class Post extends Component {
     state = {
@@ -74,6 +75,12 @@ export class Post extends Component {
         this.setState({ comments: comments})
     }
     
+    handlePostComment = (comment) =>{
+        let comments = this.state.comments
+        comments.splice(0, 0, comment.comment)
+        this.setState({comments: comments}) 
+    }
+
     render() {
         return (
             <VStack w="90%">
@@ -145,6 +152,7 @@ export class Post extends Component {
                         </Box>
                     </Box>)}
                     <VStack w='100%' p='6' spacing='17px'>
+                        <SendComment post={this.props.post} onPostComment={this.handlePostComment}/>
                         {this.state.comments.map((comment, index) =>
                             <Box w='70%' boxShadow='md' bg='teal.50' padding='4' borderRadius='md'>
                                 <HStack padding='2'>
