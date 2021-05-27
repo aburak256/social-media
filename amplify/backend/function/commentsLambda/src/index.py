@@ -188,3 +188,70 @@ def postHandler(event, context):
 
 
         return response
+    #If user sent a comment
+    #Create a comment object and link to post object
+    elif 'text' in event['body']:
+        body = json.loads(event['body'])
+        params = event['pathParameters']
+        postId = params['proxy']
+        if postId == 'undefined': return Fail
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+        if len(body['text']) >= 1:
+            commentId = str(uuid.uuid4())
+            #Collect username
+            try:
+                userResponse = table.get_item(
+                    Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+                )
+            except ClientError as e:
+                print(e.userResponse['Error']['Message'])
+                return Fail
+            else:
+                if 'Item' in userResponse: username = userResponse['Item']['userName']
+                else: return Fail
+            date = datetime.now().isoformat()
+            comment = {
+                        'PK': "COMMENT#" + commentId ,
+                        'sortKey': 'METADATA',
+                        'text': body['text'],
+                        'userId': user,
+                        'username': username,
+                        'numberOfLikes': '0',
+                        'numberOfDislikes': '0',
+                        'dateTime': date,
+                        'commentId': commentId,
+                    }
+            table.put_item(
+                Item=comment
+                )
+            table.put_item(
+                Item={
+                    'PK': 'POST#' + postId + '#COMMENT',
+                    'sortKey':  date,
+                    'userId': user,         
+                    'commentId': commentId,
+                }
+            )
+            dateTimeComment = datetime.strptime(comment['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+            comment['dateTime'] = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
+
+            res = {'comment': comment}
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(res),
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+            }
+            return response
+
+
+        else: return Fail
+
+        
+        
