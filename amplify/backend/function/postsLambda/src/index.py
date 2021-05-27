@@ -57,7 +57,8 @@ def handler(event, context):
             comments = []
             try :
                 commentsResponse = table.query(
-                    KeyConditionExpression=Key('PK').eq("POST#" + postId + "#COMMENT")
+                    KeyConditionExpression=Key('PK').eq("POST#" + postId + "#COMMENT"),
+                    ScanIndexForward=False
                 )
             except ClientError as e:
                 print(e.commentsResponse['Error']['Message'])
@@ -68,6 +69,8 @@ def handler(event, context):
                     except ClientError as e:
                         print(e.comment['Error']['Message'])
                     else:
+                        dateTimeComment = datetime.strptime(comment['Item']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        comment['Item']['dateTime'] = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
                         comments.append(comment['Item'])
                         if user != None:
                             try:
