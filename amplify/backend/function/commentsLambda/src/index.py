@@ -195,6 +195,7 @@ def postHandler(event, context):
         return response
     #If user sent a comment
     #Create a comment object and link to post object
+    #Update number of comments in post
     elif 'text' in event['body']:
         body = json.loads(event['body'])
         params = event['pathParameters']
@@ -217,6 +218,17 @@ def postHandler(event, context):
             else:
                 if 'Item' in userResponse: username = userResponse['Item']['userName']
                 else: return Fail
+            try:
+                postResponse = table.get_item(
+                    Key={'PK': 'POST#' + postId, 'sortKey': 'METADATA'}
+                )
+            except ClientError as e:
+                print(e.postResponse['Error']['Message'])
+            else:
+                if 'Item' in postResponse:
+                    post = postResponse['Item']
+                    post['numberOfComments'] = str(int(post['numberOfComments']) + 1)
+            table.put_item(Item=post)
             date = datetime.now().isoformat()
             comment = {
                         'PK': "COMMENT#" + commentId ,
@@ -228,10 +240,11 @@ def postHandler(event, context):
                         'numberOfDislikes': '0',
                         'dateTime': date,
                         'commentId': commentId,
+                        'postId': postId,
                     }
             table.put_item(
                 Item=comment
-                )
+                )         
             table.put_item(
                 Item={
                     'PK': 'POST#' + postId + '#COMMENT',
