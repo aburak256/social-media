@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Box, Textarea, VStack, HStack, Button, Progress, Text } from "@chakra-ui/react"
+import { Box, Textarea, VStack, HStack, Button, Progress, Text, Alert, AlertIcon, } from "@chakra-ui/react"
 import { Storage, Auth, API } from 'aws-amplify';
 import { AttachmentIcon } from '@chakra-ui/icons'
 
@@ -10,6 +10,7 @@ export class SendPost extends Component {
         topic:'',
         user: '',
         prog: 0,
+        message: '',
     }
     componentDidMount(){
         this.setState({topic: this.props.topic})
@@ -26,7 +27,12 @@ export class SendPost extends Component {
       }
     
     imageSelectHandler = event => {
-        this.setState({ image: event.target.files[0]})
+        if(event.target.files[0].type == "image/png" || event.target.files[0].type == "image/jpeg"){
+            this.setState({ image: event.target.files[0]})
+        }
+        else{
+            this.setState({message: "Uploaded file is not a png or jpeg file"})
+        }
     }
 
     async post (){
@@ -68,14 +74,24 @@ export class SendPost extends Component {
                     boxShadow="lg"
                     borderRadius="lg"
                 />
+                {this.state.prog = 0 ? <>   </> : <Progress size='xs' w='70%' value={this.state.prog}/>}
                 <HStack spacing='8'>
                     <label htmlFor='fileInput'>
                         <AttachmentIcon color='teal.400' w={8} h={8}/>
                     </label>
-                    <input id='fileInput' type='file' style={{display:'none'}} onChange={this.imageSelectHandler} />                   
+                    <input id='fileInput' type='file' style={{display:'none'}} onChange={this.imageSelectHandler} />   
+                                    
                     <Button bg='teal.300' onClick={this.post.bind(this)}>Post</Button>
+                    {this.state.message ? 
+                    <> 
+                    <Alert status="error">
+                        <AlertIcon />
+                        {this.state.message}
+                    </Alert>
+                    </> :
+                    <> </> }
                 </HStack>
-                {this.state.prog = 0 ? <>   </> : <Progress w='70%' value={this.state.prog}/>}
+                
             </VStack>
         )
     }
