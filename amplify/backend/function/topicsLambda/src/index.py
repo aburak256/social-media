@@ -47,7 +47,8 @@ def handler(event, context):
         topic = params['proxy'].upper()
         timeRequired = '0'
         resp = table.query(
-            KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST")
+            KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
+            ScanIndexForward=False
         )
         permission = 'Reader'
         user = None
