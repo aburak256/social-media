@@ -3,6 +3,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
 from datetime import datetime
+import uuid
 
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
@@ -107,7 +108,8 @@ def postHandler(event, context):
                                 'sortKey': previousSortKey,
                             }
                         )
-                    
+                    dateTimeComment = datetime.strptime(comment['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                    comment['dateTime'] = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
                     res = {'comment': comment}
                     response = {
                         'statusCode': 200,
@@ -175,6 +177,9 @@ def postHandler(event, context):
                             }
                         )
                     
+                    dateTimeComment = datetime.strptime(comment['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                    comment['dateTime'] = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
+
                     res = {'comment': comment}
                     response = {
                         'statusCode': 200,
