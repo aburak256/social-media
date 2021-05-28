@@ -62,6 +62,7 @@ def handler(event, context):
                 KeyConditionExpression=Key('PK').eq("POST#" + item['postId'])
         )
             post = response['Items'][0]
+            #Collect reactions and bookmarks for user
             if user != None:      
                 try:
                     likeResponse = table.query(
@@ -74,19 +75,30 @@ def handler(event, context):
                         Reaction = likeResponse['Items'][0]['text']      
                         post['Reaction'] = Reaction
                     try:
-                        permissionResponse = table.get_item(
-                            Key={'PK': 'USER#' + user + '#PERMISSION', 'sortKey': topic}
+                        bookmarkResponse = table.get_item(
+                            Key={'PK': 'USER#' + user + '#BOOKMARK', 'sortKey': post['postId'].upper()}
                         )
                     except ClientError as e:
-                        print(e.permissionResponse['Error']['Message'])
+                        print(bookmarkResponse['Error']['Message'])
                     else:
-                        if 'Item' in permissionResponse and permissionResponse['Item']['text'] == 'Success':
-                            permission = 'Writer'
+                        if 'Item' in bookmarkResponse:
+                            post['bookmark'] = "True"
+                    
             
             dateTimePost = datetime.strptime(post['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
             post['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")           
             posts.append(post)
         
+        if user != None:
+            try:
+                permissionResponse = table.get_item(
+                    Key={'PK': 'USER#' + user + '#PERMISSION', 'sortKey': topic}
+                )
+            except ClientError as e:
+                print(e.permissionResponse['Error']['Message'])
+            else:
+                if 'Item' in permissionResponse and permissionResponse['Item']['text'] == 'Success':
+                    permission = 'Writer'
         res = {'posts': posts, 'permission': permission}
         try:
             timeResponse = table.get_item(

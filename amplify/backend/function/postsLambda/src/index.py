@@ -192,6 +192,15 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
+                        try:
+                            bookmarkResponse = table.get_item(
+                                Key={'PK': 'USER#' + user + '#BOOKMARK', 'sortKey': postId.upper()}
+                            )
+                        except ClientError as e:
+                            print(bookmarkResponse['Error']['Message'])
+                        else:
+                            if 'Item' in bookmarkResponse:
+                                post[0]['bookmark'] = "True"
                         dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
                         post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
@@ -258,6 +267,15 @@ def postHandler(event, context):
                                     'sortKey': previousSortKey,
                                 }
                             )
+                        try:
+                            bookmarkResponse = table.get_item(
+                                Key={'PK': 'USER#' + user + '#BOOKMARK', 'sortKey': postId.upper()}
+                            )
+                        except ClientError as e:
+                            print(bookmarkResponse['Error']['Message'])
+                        else:
+                            if 'Item' in bookmarkResponse:
+                                post[0]['bookmark'] = "True"
                         dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
                         post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
                         res = {'post': post}
@@ -276,15 +294,6 @@ def postHandler(event, context):
     elif 'post' in event['body']:
         #User posted a post. Check permissions then create a post object with TOPIC#POST and POST
         #Also if user uploaded an image add image link to dynamodb.
-        Fail = {
-            'statusCode': 404,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps("Couldn't find the request")
-        }
         body = json.loads(event['body'])
         params = event['pathParameters']
         topic = params['proxy'].upper()
