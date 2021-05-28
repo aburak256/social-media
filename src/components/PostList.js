@@ -2,10 +2,11 @@ import React from 'react';
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
-import { Image, SkeletonCircle, SkeletonText, Button } from "@chakra-ui/react"
+import { Image, SkeletonCircle, SkeletonText, Button, Icon } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
 import { Popularity } from './Popularity';
 import {SendPost} from './SendPost'
+import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
 
 
 export default class PostList extends React.Component {
@@ -50,6 +51,20 @@ export default class PostList extends React.Component {
     this.setState({posts: posts})
 }
 
+  async postBookmark(postId, index){
+    const path = '/posts/' + postId
+    const myInit = {
+        body: {
+            bookmark: postId
+        }
+    }
+    const data = await API.post(`topicsApi`, path, myInit)
+    console.log(data)
+    let posts = this.state.posts
+    posts[index].bookmark = data["bookmark"]
+    this.setState({posts: posts})
+  }
+
   render() {
     return (
         <VStack w="100%">
@@ -68,6 +83,7 @@ export default class PostList extends React.Component {
                     lineHeight="tight"
                     fontSize='lg'
                   >
+                    
                     You are not a writer. If you want you can take test
                   </Text>
                   <Link to={'/test/' + this.props.topic}>
@@ -135,9 +151,19 @@ export default class PostList extends React.Component {
                     ml='7'
                   >
                     <ChatIcon
+                      w={4} h={4}
                       color='teal.500'
                     /> : {post.numberOfComments}
                   </Text>
+                  <Box as="span" fontSize="sm" ml="6">
+                    <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
+                      <Icon
+                        as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
+                        w={6} h={6}
+                        color='teal.500'
+                      />
+                    </button>
+                  </Box>
                 </Box>             
               </Box>
             </Box>             
