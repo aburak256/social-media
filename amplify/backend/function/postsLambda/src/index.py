@@ -357,5 +357,51 @@ def postHandler(event, context):
 
             else:
                 return Fail
+    #Bookmark posts
+    #Add PK= USER#<username>#BOOKMARK sortKey= postId
+    #Collect this bookmarks while getting list of posts
+    elif 'bookmark' in event['body']:
+        body = json.loads(event['body'])
+        params = event['pathParameters']
+        postId = params['proxy'].upper()
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+        #Check if user bookmarked before
+        try:
+            bookmarkResponse = table.get_item(
+                Key={'PK': "USER#" + user + '#BOOKMARK' , 'sortKey': postId}
+            )
+        except ClientError as e:
+            print(e.bookmarkResponse['Error']['Message'])
+        else:
+            if 'Item' in bookmarkResponse:
+                #User bookmarked this post before. Undo bookmark
+                table.delete_item(
+                    Key={'PK': bookmarkResponse['Item']['PK'], 'sortKey': bookmarkResponse['Item']['sortKey']})
+                res={"bookmark": "False"}
+            else:
+                #Create new bookmark item
+                bookmarkItem = {
+                    'PK': "USER#" + user + '#BOOKMARK',
+                    'sortKey': postId,
+                    'dateTime': datetime.now().isoformat(),
+                }
+                table.put_item(Item=bookmarkItem)
+                res={"bookmark": "True"}
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(res),
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+            }
+            return response
+            
 
             
+        
+       
