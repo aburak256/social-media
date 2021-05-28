@@ -18,11 +18,19 @@ export default class PostList extends React.Component {
   }
   
   async componentDidMount() {
-    const path = '/topics/' + (this.props.topic).toUpperCase()
-    const data = await API.get(`topicsApi`, path)
-    this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
-    this.setState({ loading: false })
-    console.log(data)
+    if(this.props.topic){
+      const path = '/topics/' + (this.props.topic).toUpperCase()
+      const data = await API.get(`topicsApi`, path)
+      this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+      this.setState({ loading: false })
+    }
+    else{
+      const path = this.props.path
+      const data = await API.get(`topicsApi`, path)
+      this.setState({ sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+      this.setState({ loading: false })
+    }
+    
   }
 
   async postLike(postId, index){
@@ -74,23 +82,29 @@ export default class PostList extends React.Component {
               <SkeletonText mt="4" noOfLines={6} spacing="4" />
             </Box>
             :  
-            <>{this.state.sizeOfArray ?          
-            <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic}/> : 
-              <>
-                <VStack>
-                  <Text
-                    fontWeight="semibold"
-                    lineHeight="tight"
-                    fontSize='lg'
-                  >
-                    
-                    You are not a writer. If you want you can take test
-                  </Text>
-                  <Link to={'/test/' + this.props.topic}>
-                    <Button bg='teal.200'>Go to Test</Button>
-                  </Link>      
-                </VStack>
-              </>}          
+            <>{this.state.sizeOfArray ?  
+              <>{this.props.topic ? 
+                <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic}/> : 
+                  <>
+                    <VStack>
+                      <Text
+                        fontWeight="semibold"
+                        lineHeight="tight"
+                        fontSize='lg'
+                      >                   
+                        You are not a writer. If you want you can take test
+                      </Text>
+                      <Link to={'/test/' + this.props.topic}>
+                        <Button bg='teal.200'>Go to Test</Button>
+                      </Link>      
+                    </VStack>
+                  </>} 
+                </>
+                :
+                <> 
+                </>
+                }       
+                     
             {this.state.posts.map((post, index) => 
             <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
               <Box p="4" paddingLeft="4">
