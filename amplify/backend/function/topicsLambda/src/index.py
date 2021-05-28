@@ -45,6 +45,8 @@ def handler(event, context):
     if "/topics" in event['resource']:
         params = event['pathParameters']
         topic = params['proxy'].upper()
+        if topic == 'BOOKMARKS':
+            return bookmarks(event, context)
         timeRequired = '0'
         resp = table.query(
             KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
@@ -54,8 +56,6 @@ def handler(event, context):
         user = None
         if 'identity' in event['requestContext']:
             user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
-
-        print(resp['Items'])
         posts = []
         for item in resp['Items']:
             response = table.query(
@@ -132,3 +132,68 @@ def handler(event, context):
         },
         'body': json.dumps("Couldn't find the request")
     }
+
+def bookmarks(event, context):
+    Fail = {
+        'statusCode': 404,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps("Couldn't find the request")
+    }
+
+    if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+    else:
+        return Fail
+    try:
+        postsResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('USER#' + user + '#BOOKMARK'),
+            ScanIndexForward=False
+        )
+    except ClientError as e:
+        print(e.postsResponse['Error']['Message'])
+    else:
+        if 'Items' in postsResponse:
+            posts = []
+            for post in postsResponse['Items']:
+                try:
+                    postPull = table.query(
+                        KeyConditionExpression=Key('PK').eq("POST#" + post['sortKey'].lower())
+                    )
+                except ClientError as e:
+                    print(e.postPull['Error']['Message'])
+                else:
+                    if 'Items' in postPull:
+                        postFetched = postPull['Items'][0]
+                        dateTimePost = datetime.strptime(postFetched['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                        postFetched['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")
+                        try:
+                            likeResponse = table.query(
+                                KeyConditionExpression=Key('PK').eq("POST#" + postFetched['postId'] + "#REACTION#" + user)
+                            )
+                        except ClientError as e:
+                            print(e.likeResponse['Error']['Message'])
+                        else:
+                            if len(likeResponse['Items']) != 0:
+                                Reaction = likeResponse['Items'][0]['text']      
+                                postFetched['Reaction'] = Reaction
+                        postFetched['bookmark'] = "True"           
+                        posts.append(postFetched)
+            
+            res = {'posts': posts}
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(res),
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+            }
+            return response
+
+        else:
+            return Fail
