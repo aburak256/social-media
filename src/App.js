@@ -5,6 +5,7 @@ import Signup from './components/pages/Signup';
 import Topics from './components/pages/Topics';
 import TopicDetail from './components/pages/TopicDetail';
 import PostDetail from './components/pages/PostDetail';
+import Bookmarks from './components/pages/Bookmarks'
 import Test from './components/pages/Test'
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import Amplify, {API, Storage} from "aws-amplify";
@@ -24,6 +25,7 @@ function App() {
                     <Route path='/' exact component={Home} />
                     <Route path='/sign-up' exact component={Signup} />
                     <Route path='/topics' exact component={Topics} />
+                    <Route path='/Bookmarks' exact component={Bookmarks} />
                     <Route exact path="/topics/:topic" component={TopicDetail} />
                     <Route exact path="/test/:topic" component={Test} />
                     <Route exact path="/posts/:post" component={PostDetail} />
