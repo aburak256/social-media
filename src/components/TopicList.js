@@ -31,7 +31,7 @@ export default class PostList extends React.Component {
           :  
           <>     
           { this.state.topics.map(topic => 
-          <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg">  
+          <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" mt='4'>  
             <Image src={topic.imageURL} alt={topic.topic} />       
             <Box p="6">
               <Box alignItems="baseline">
