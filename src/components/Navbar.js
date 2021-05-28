@@ -3,6 +3,9 @@ import {Link} from 'react-router-dom'
 import {Button} from './Button';
 import {Auth} from 'aws-amplify'
 import './Navbar.css';
+import Sidebar from './Sidebar'
+import Logo from './Logo';
+import { Box } from '@chakra-ui/layout';
 
 
 function Navbar() {
@@ -37,9 +40,12 @@ function Navbar() {
     return (
         <>
             <nav className="navbar">
+                <Sidebar />
                 <div className="navbar-container">
                     <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
-                        SOCM
+                        <Box ml='15vh'>
+                            <Logo />
+                        </Box>
                     </Link>
                     <div className='menu-icon' onClick={handleClick}>
                         <i className={click ? 'fas fa-times': 'fas fa-bars'} />

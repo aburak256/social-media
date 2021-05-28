@@ -20,7 +20,6 @@ function App() {
         <div className = "App">
             <Router>
                 <Navbar />
-                <Sidebar/>
                 <Switch>
                     <Route path='/' exact component={Home} />
                     <Route path='/sign-up' exact component={Signup} />

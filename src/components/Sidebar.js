@@ -22,7 +22,13 @@ import {
     const btnRef = React.useRef()
         return (
             <Box pl='2' pt='2'>
-                <Button ref={btnRef} colorScheme="teal" onClick={onOpen}>
+                <Button ref={btnRef}
+                    colorScheme="black"
+                    _hover={{
+                        bgGradient: "linear(to-r, gray.500, gray.800)",
+                    }} 
+                    onClick={onOpen}
+                >
                     <ArrowRightIcon/>
                 </Button>
                 <Drawer
@@ -31,8 +37,8 @@ import {
                     onClose={onClose}
                     finalFocusRef={btnRef}
                 >
-                    <DrawerOverlay />
-                    <DrawerContent>
+                    <DrawerOverlay  />
+                    <DrawerContent bgGradient="linear(to-b, teal.200,green.200)">
                     <DrawerCloseButton />
                     <DrawerHeader><Logo /></DrawerHeader>
 
