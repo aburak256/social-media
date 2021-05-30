@@ -15,10 +15,6 @@ function PostDetail() {
       }
     )
 
-    // const [creds, setCreds] = useState("");
-    // Auth.currentCredentials().then(
-    //     creds => setCreds(creds)
-    // )
     return (
         <div>
             <title>Post</title>
