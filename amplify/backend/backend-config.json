@@ -53,6 +53,11 @@
           ]
         }
       ]
+    },
+    "conversationsLambda": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "auth": {
@@ -95,6 +100,14 @@
         {
           "category": "function",
           "resourceName": "topicTestsLambda",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "conversationsLambda",
           "attributes": [
             "Name",
             "Arn"

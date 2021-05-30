@@ -65,6 +65,18 @@
                 ]
             },
             "policyResourceName": "/topicTest"
+        },
+        {
+            "name": "/conversations",
+            "lambdaFunction": "conversationsLambda",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET"
+                ]
+            },
+            "policyResourceName": "/conversations"
         }
     ],
     "resourceName": "topicsApi",
@@ -81,10 +93,13 @@
         },
         {
             "lambdaFunction": "topicTestsLambda"
+        },
+        {
+            "lambdaFunction": "conversationsLambda"
         }
     ],
     "privacy": {
-        "auth": 4,
+        "auth": 5,
         "unauth": 2,
         "authRoleName": "amplify-socialmedia-dev-131342-authRole",
         "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
@@ -121,7 +136,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "conversationsLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
     ],
-    "uuid": "113a2735"
+    "uuid": "a0459ee7"
 }
