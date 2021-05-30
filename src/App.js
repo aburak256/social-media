@@ -7,6 +7,7 @@ import TopicDetail from './components/pages/TopicDetail';
 import PostDetail from './components/pages/PostDetail';
 import Bookmarks from './components/pages/Bookmarks'
 import Test from './components/pages/Test'
+import Messages from './components/pages/Messages'
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import Amplify, {API, Storage} from "aws-amplify";
 import awsExports from "./aws-exports";
@@ -26,6 +27,7 @@ function App() {
                     <Route path='/sign-up' exact component={Signup} />
                     <Route path='/topics' exact component={Topics} />
                     <Route path='/Bookmarks' exact component={Bookmarks} />
+                    <Route path='/Messages' exact component={Messages} />
                     <Route exact path="/topics/:topic" component={TopicDetail} />
                     <Route exact path="/test/:topic" component={Test} />
                     <Route exact path="/posts/:post" component={PostDetail} />
