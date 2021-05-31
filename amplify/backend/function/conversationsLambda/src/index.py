@@ -29,8 +29,97 @@ def handler(event, context):
         path = event['resource']
     else:
         return Fail
+
+    #Collect data for a specific conversation
+    #Find the conversation metadata. Then collect messages with reverse index. Collect other user's information
+    if "/conversations/{proxy+}" == event['resource']:
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+
+        conversationId = event['pathParameters']['proxy']
+        try:
+            conversationResponse = table.get_item(
+                Key={'PK': 'CONVERSATION#' + conversationId, 'sortKey': 'METADATA'}
+            )
+        except ClientError as e:
+            print(e.conversationResponse['Error']['Message'])
+        else:
+            if 'Item' in conversationResponse:
+                #Check if user is one of the members of this conversation
+                if user == conversationResponse['Item']['user1'] or user == conversationResponse['Item']['user2']:
+                    #Collect messages
+                    try:
+                        messagesResponse = table.query(
+                            KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId),
+                            ScanIndexForward = False
+                        )
+                    except ClientError as e:
+                        print(e.messagesResponse['Error']['Message'])
+                    else:
+                        messages = []
+                        for item in messagesResponse['Items']:
+                            if item['sortKey'] != 'METADATA':
+                                dateTimeMessage = datetime.strptime(item['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
+                                dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
+                                messageObject = {
+                                        'seen' : item['seen'],
+                                        'dateTime': dateTime,
+                                        'text': item['text'],
+                                        'reply': item['reply']
+                                    }
+                                if item['sender'] == user:
+                                    messageObject['sender'] = 'user'
+                                else:
+                                    messageObject['sender'] = 'friend'
+                                    item['seen'] = 'True'
+                                    table.put_item(Item=item)
+                                messages.append(messageObject)
+
+                        #Collect other user's information
+                        if user == conversationResponse['Item']['user1']: otherUser = conversationResponse['Item']['user2']
+                        else: otherUser = conversationResponse['Item']['user1'] 
+                        try:
+                            userResponse = table.get_item(
+                                Key={'PK': 'USER#' + otherUser, 'sortKey': 'METADATA'}
+                            )
+                        except ClientError as e:
+                            print(e.userResponse['Error']['Message'])
+                        else:
+                            if 'Item' in userResponse:
+                                #Found other user is exist. Add user's information to response
+                                imageUrl = None
+                                if 'Image' in userResponse['Item']: imageUrl = userResponse['Item']['image']
+                                userInfo = {
+                                    'username': userResponse['Item']['userName'],
+                                    'image': imageUrl,
+                                }
+                            else:
+                                return Fail
+
+                            res = {'userInfo': userInfo, 'messages': messages}
+                            response = {
+                                'statusCode': 200,
+                                'body': json.dumps(res),
+                                'headers': {
+                                    'Access-Control-Allow-Headers': '*',
+                                    'Access-Control-Allow-Origin': '*',
+                                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                                },
+                            }
+
+                            return response
+
+
+
+            else:
+                return Fail
+
+
+    
     #Collect list of conversations of given user
-    if "/conversations" in event['resource']:
+    elif "/conversations" in event['resource']:
         if 'identity' in event['requestContext']:
             user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
         else:
@@ -49,8 +138,10 @@ def handler(event, context):
             #Collect last sended messages dateTime of selected conversation.
             dateTimeComment = datetime.strptime(conversation['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
             dateTime = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
+            
             returnObject = {
                 'dateTime': dateTime,
+                'conversationId':  conversation['conversationId']
             }
 
             #Collect last message sended in that conversation
@@ -68,6 +159,7 @@ def handler(event, context):
                     for item in lastMessage['Items']:
                         if item['sortKey'] != 'METADATA':
                             returnObject['lastMessage'] = item['text']
+                            
             
             #Collect other user's information
             print(conversation['otherUser'])
