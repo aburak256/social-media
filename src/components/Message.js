@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import {API} from "aws-amplify";
 import { Text, VStack, Box, StackDivider, HStack, Center, Flex, Spacer } from '@chakra-ui/layout';
-import {InfoOutlineIcon} from '@chakra-ui/icons'
+import {InfoOutlineIcon, CloseIcon} from '@chakra-ui/icons'
 import { Image } from '@chakra-ui/image';
-import {Icon, Button} from '@chakra-ui/react'
+import {Icon, Button, Input, Textarea} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
 import {RiDeleteBinLine} from 'react-icons/ri'
 import {
@@ -22,7 +22,8 @@ export class Message extends Component {
         userInfo: '',
         replySelection: null,
         modal: false,
-        deleteSelection: null
+        deleteSelection: null,
+        userText: '',
     }   
 
     async componentDidUpdate(prevProps){
@@ -34,13 +35,59 @@ export class Message extends Component {
         }
     }
 
+    cancelReply(){
+        this.setState({replySelection: null})
+    }
+
     deleteMessageModalOpen(message){
         this.setState({ deleteSelection: message, modal:true})
     }
 
-    selectReply(text){
-        this.setState({replySelection : text})
+    selectReply(message){
+        this.setState({replySelection : message.text, replySelectionDateTime: message.dateTime})
     }
+
+    textChange = (e) => {
+        let inputValue = e.target.value
+        this.setState({userText: inputValue})
+      }
+    
+      async sendMessage(){
+          if(this.state.replySelection && this.state.userText){
+            const path = '/conversations/' + this.props.conversation
+            const myInit = {
+                body:{
+                    type: 'message',
+                    text: this.state.userText, 
+                    reply: this.state.replySelection,
+                    repliedDateTime: this.state.replySelectionDateTime,
+                }
+            }
+            console.log(myInit)
+            const data = await API.post(`topicsApi`, path, myInit)
+            const message = data['message']
+            let messages = this.state.messages
+            messages.splice(this.state.messages.length, 0, message)
+            this.setState({messages: messages}) 
+
+            
+          }
+          else if(this.state.userText){
+            const path = '/conversations/' + this.props.conversation
+            const myInit = {
+                body:{
+                    type: 'message',
+                    text: this.state.userText
+                }
+            }
+            const data = await API.post(`topicsApi`, path, myInit)
+            const message = data['message']
+            let messages = this.state.messages
+            messages.splice(this.state.messages.length, 0, message)
+            this.setState({messages: messages}) 
+
+          }
+      }
 
     render() {
         return (
@@ -57,7 +104,7 @@ export class Message extends Component {
                         </Text>
                     </HStack> 
                 : <> </>}
-                <VStack w='50%' h='90vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3}>
+                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll'>
                     {this.state.messages.map((message, index) =>  
                         <Box
                             w='100%'
@@ -101,7 +148,7 @@ export class Message extends Component {
                                             </button>
                                         </Box>
                                         <Box mr='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message.text)}>
+                                            <button onClick={() => this.selectReply(message)}>
                                                 <Icon as={BsFillReplyAllFill} />
                                             </button> 
                                         </Box>
@@ -110,21 +157,29 @@ export class Message extends Component {
                                     <>
                                     </>
                                     }
-                                    <Text
-                                        bgGradient="linear(to-r,gray.200,teal.200,green.200)"
-                                        maxW='35vh'
-                                        pl = {message.sender == 'user' ? '2' : '4'}
-                                        pr = {message.sender == 'user' ? '4' : '2'}
-                                        borderRadius='lg'
-                                        fontSize='md'
+                                    <VStack w='100%'
+                                        align={message.sender == 'user' ? 'right' : 'left'}
+                                        spacing='0'
                                     >
-                                        {message.text}
-                                    </Text>
+                                        <Text
+                                            bgGradient="linear(to-r,gray.200,teal.200,green.200)"
+                                            maxW='35vh'
+                                            pl = {message.sender == 'user' ? '2' : '4'}
+                                            pr = {message.sender == 'user' ? '4' : '2'}
+                                            borderRadius='lg'
+                                            fontSize='md'
+                                        >
+                                            {message.text}
+                                        </Text>
+                                        <Text fontSize='xs' color='gray.500'>
+                                            {message.dateTime}
+                                        </Text>
+                                    </VStack>
                                     {message.sender == 'friend' ?
                                     <> 
                                         <Spacer />
                                         <Box ml='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message.text)}>
+                                            <button onClick={() => this.selectReply(message)}>
                                                 <Icon as={BsFillReplyAllFill} />
                                             </button> 
                                         </Box>
@@ -137,6 +192,35 @@ export class Message extends Component {
                                 </Flex>
                         </Box>   
                     )}
+                </VStack>
+                <VStack w='50%'>
+                    {this.state.replySelection ? 
+                    <Flex
+                        w='100%'
+                        align='left'
+                        fontSize='xs'
+                        pl='3'
+                        bgGradient="linear(to-r,gray.400,gray.50)"
+                        borderRadius='md'
+                    >
+                        <Text>
+                            Reply: {this.state.replySelection}
+                        </Text>
+                        <Spacer />
+                        <Box mr='2'>
+                            <button onClick={this.cancelReply.bind(this)}>
+                                <CloseIcon />
+                            </button>
+                        </Box>
+                    </Flex>
+                    :
+                    <> </>}
+                    <HStack w='100%'>
+                        <Textarea w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
+                        <Button onClick={this.sendMessage.bind(this)} w='20%' bgGradient="linear(to-r,gray.200,teal.200,green.100)">
+                            Send
+                        </Button>
+                    </HStack>
                 </VStack>
             </VStack>
         )
