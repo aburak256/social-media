@@ -10,26 +10,25 @@ export class Conversations extends Component {
 
     async componentDidMount(){
         const path = '/conversations/'
-        console.log('Conversations Refreshed')
         const data = await API.get(`topicsApi`, path)
         this.setState({ conversations: data['conversations']})
 
         //Refresh the list of conversations at every 10 seconds
         setTimeout(async () => {
             const path = '/conversations/'
-            console.log('Conversations Refreshed')
             const data = await API.get(`topicsApi`, path)
             this.setState({ conversations: data['conversations']})
         }, 10000);       
     }
 
-    selectConversation (conversationId) {
+    selectConversation (conversation) {
+        const conversationId = conversation.conversationId
         this.props.onSelectConversation(conversationId)
     }
 
     render() {
         return (
-            <VStack w='25%' bgGradient="linear(to-b, gray.100, teal.50 )" divider={<StackDivider borderColor="gray.200" />}>
+            <VStack w='25%' bgGradient="linear(to-b, gray.100, teal.50 )" divider={<StackDivider borderColor="gray.200" />} boxShadow="lg">
                 <Box
                     bgGradient="linear(to-r, teal.200, gray.200)"
                     w='100%'
@@ -58,7 +57,7 @@ export class Conversations extends Component {
                         }} 
                     >   
                         {conversation.Image ? <Image src={conversation.image} h='5vh' maxW='5vh' borderRadius='lg'/> : <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxxnv-Gfi0iwmcUHwRzfBSHutl9CsYoSd0Xg&usqp=CAU" h='5vh' maxW='5vh' borderRadius='lg'/>}
-                        <button onClick={() => this.selectConversation(conversation.conversationtId)}>
+                        <button onClick={() => this.selectConversation(conversation)}>
                             <HStack w='100%' >             
                                     <Box >
                                         <Text fontSize='md' isTruncated w='20vh' align='left'>
