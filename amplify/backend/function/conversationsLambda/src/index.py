@@ -1,8 +1,8 @@
 import json
 import boto3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError 
-from datetime import datetime
+from datetime import date, datetime
 import uuid
 import urllib.parse
 
@@ -24,6 +24,9 @@ Fail = {
 def handler(event, context):
     print('received event:')
     print(event)
+
+    if event['httpMethod'] == 'POST':
+        return postHandler(event, context)
 
     if 'resource' in event:
         path = event['resource']
@@ -136,8 +139,8 @@ def handler(event, context):
         conversations = []
         for conversation in conversationsResponse['Items']:
             #Collect last sended messages dateTime of selected conversation.
-            dateTimeComment = datetime.strptime(conversation['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
-            dateTime = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
+            dateTimeConversation = datetime.strptime(conversation['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
+            dateTime = dateTimeConversation.strftime("%m/%d/%Y, %H:%M:%S")
             
             returnObject = {
                 'dateTime': dateTime,
@@ -194,4 +197,113 @@ def handler(event, context):
         }
 
         return response
+
+def postHandler(event, context):
+    body = json.loads(event['body'])
+    params = event['pathParameters']
+    conversationId = params['proxy']
+
+    #If user send a message
+    #Find user and conversation. If there is a reply in request add reply to db.
+    if body['type'] == 'message':
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail 
+        
+        #Find conversation that user involved. Else return fail
+        try:
+            conversationUserResponse = table.query(
+                KeyConditionExpression=Key('PK').eq('USER#' + user + '#CONVERSATION'),
+                FilterExpression=Attr('conversationId').eq(conversationId)
+            )
+        except ClientError as e:
+            print(e.conversationUserResponse['Error']['Message'])
+        else:
+            if 'Items' in conversationUserResponse:
+                #Create message object
+                message = {
+                    'PK': 'CONVERSATION#' + conversationId,
+                    'sortKey': datetime.now().isoformat(),
+                    'seen': 'False',
+                    'sender': user,
+                    'text': body['text'],
+                    'reply': ''
+                }
+                if 'reply' in body:
+                    #Find replied message. If its not in messages return Fail
+                    searchDatetime = datetime.strptime(body['repliedDateTime'], "%m/%d/%Y, %H:%M:%S").isoformat()
+                    try:
+                        replyResponse = table.query(
+                            KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId) & Key('sortKey').begins_with(searchDatetime),
+                            FilterExpression=Attr('text').eq(body['reply']) 
+                        )
+                    except ClientError as e:
+                        print(e.replyResponse['Error']['Message'])
+                        return Fail
+                    else:
+                        print(replyResponse , searchDatetime)
+                        if 'Items' in replyResponse and len(replyResponse['Items']) >= 1:              
+                            message['reply'] = {
+                                'text': body['reply'],
+                                'user': replyResponse['Items'][0]['sender'],
+                            }
+                        else:
+                            return Fail
+
+                #Update the user conversation items to fetch newer data for users.                
+                dateTimeMessage = datetime.strptime(message['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
+                dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
+                conversationUserResponse['Items'][0]['sortKey'] = dateTime
+
+                #Fetch other user's conversation item to update.
+                otherUser = conversationUserResponse['Items'][0]['otherUser']
+                try:
+                    otherUserResponse = table.query(
+                        KeyConditionExpression=Key('PK').eq('USER#' + otherUser + '#CONVERSATION'),
+                        FilterExpression=Attr('otherUser').eq(user)
+                    )
+                except ClientError as e:
+                    print(e.otherUserResponse['Error']['Message'])
+                    return Fail
+                else:
+                    if 'Items' in otherUserResponse:
+                        table.delete_item(
+                            Key={'PK': otherUserResponse['Items'][0]['PK'] , 'sortKey': otherUserResponse['Items'][0]['sortKey']}
+                        )
+                        otherUserResponse['Items'][0]['sortKey'] = dateTime
+                        table.put_item(Item=otherUserResponse['Items'][0])
+                
+                #Also update our user's conversation data. 
+                table.delete_item(
+                    Key={'PK': conversationUserResponse['Items'][0]['PK'] , 'sortKey':conversationUserResponse['Items'][0]['sortKey']}
+                )
+                conversationUserResponse['Items'][0]['sortKey'] = dateTime
+
+                table.put_item(Item=conversationUserResponse['Items'][0])
+     
+                table.put_item(Item=message)
+                messageReturn = {
+                    'seen' : 'False',
+                    'dateTime': dateTime,
+                    'text': message['text'],
+                    'reply': message['reply'],
+                    'sender': 'user'
+                }
+
+                res = {'message': messageReturn}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+
+            else:
+                return Fail
 

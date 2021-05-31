@@ -39,7 +39,7 @@
         },
         "conversationsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/conversationsLambda-674c5147546a63645935-build.zip"
+          "s3Key": "amplify-builds/conversationsLambda-70574c436d5938544f46-build.zip"
         }
       },
       "auth": {
