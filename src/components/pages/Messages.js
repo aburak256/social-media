@@ -20,7 +20,7 @@ export class Messages extends Component {
                     divider={<StackDivider borderColor="gray.200" />}
                     spacing={4}
                     align="stretch"
-                    h='100vh'
+                    h='90vh'
                     ml='35vh'
                 >
                     <Conversations onSelectConversation={this.showmessages.bind(this)}/>
