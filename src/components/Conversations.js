@@ -42,7 +42,7 @@ export class Conversations extends Component {
                         lineHeight="tight"
                         fontSize='xl'
                     >
-                        Conversations
+                        Messages
                     </Text>
                 </Box>
                 {this.state.conversations.map((conversation, index) => 

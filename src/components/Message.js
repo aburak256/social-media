@@ -6,6 +6,7 @@ import { Image } from '@chakra-ui/image';
 import {Icon, Button, Input, Textarea} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
 import {RiDeleteBinLine} from 'react-icons/ri'
+import {BiCheckDouble} from 'react-icons/bi'
 import {
     Modal,
     ModalOverlay,
@@ -98,8 +99,9 @@ export class Message extends Component {
             const message = data['message']
             let messages = this.state.messages
             messages.splice(this.state.messages.length, 0, message)
-            this.setState({messages: messages}) 
-            this.scrollToBottom();           
+            this.setState({messages: messages, replySelection: null, userText: null}) 
+            this.scrollToBottom()
+            this.refs.messageArea.value = ''          
           }
           else if(this.state.userText){
             const path = '/conversations/' + this.props.conversation
@@ -113,8 +115,9 @@ export class Message extends Component {
             const message = data['message']
             let messages = this.state.messages
             messages.splice(this.state.messages.length, 0, message)
-            this.setState({messages: messages}) 
-            this.scrollToBottom();
+            this.setState({messages: messages, userText: null}) 
+            this.scrollToBottom()
+            this.refs.messageArea.value = ''
           }
       }
 
@@ -122,7 +125,7 @@ export class Message extends Component {
         return (
             <VStack w='100%' align='left' boxShadow="lg">
                 {this.state.userInfo ?
-                    <HStack w='50%' h='5vh' bgGradient="linear(to-r,gray.200,teal.200,green.200)" align='left' pl='4' py='2.5' borderRadius='md'>
+                    <HStack w='50%' h='5vh' bgGradient="linear(to-r,gray.300,teal.200)" align='left' pl='4' py='2.5' borderRadius='md'>
                         {this.state.userInfo.image ? 
                             <Image src={this.state.userInfo.image} h={6} maxW={6} />
                         :
@@ -182,21 +185,26 @@ export class Message extends Component {
                                             </button> 
                                         </Box>
                                         <Spacer /> 
+                                        <Box my='auto' mr='1'>
+                                                <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
+                                        </Box>          
                                     </> :
                                     <>
                                     </>
                                     }
-                                    <VStack w='100%'
+                                    <VStack
                                         align={message.sender == 'user' ? 'right' : 'left'}
                                         spacing='0'
                                     >
                                         <Text
-                                            bgGradient="linear(to-r,gray.200,teal.200,green.200)"
+                                            bg={message.sender == 'user' ? 'cyan.400' : 'blue.500'}
                                             maxW='35vh'
+                                            color={message.sender == 'user' ? 'black' : 'white'}
                                             pl = {message.sender == 'user' ? '2' : '4'}
                                             pr = {message.sender == 'user' ? '4' : '2'}
                                             borderRadius='lg'
-                                            fontSize='md'
+                                            fontSize='sm'
+                                            as='cite'
                                         >
                                             {message.text}
                                         </Text>
@@ -248,7 +256,7 @@ export class Message extends Component {
                     :
                     <> </>}
                     <HStack w='100%'>
-                        <Textarea w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
+                        <Textarea ref='messageArea' w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
                         <Button onClick={this.sendMessage.bind(this)} w='20%' bgGradient="linear(to-r,gray.200,teal.200,green.100)">
                             Send
                         </Button>
