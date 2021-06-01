@@ -203,14 +203,14 @@ def postHandler(event, context):
     params = event['pathParameters']
     conversationId = params['proxy']
 
+    if 'identity' in event['requestContext']:
+        user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+    else:
+        return Fail
+
     #If user send a message
     #Find user and conversation. If there is a reply in request add reply to db.
-    if body['type'] == 'message':
-        if 'identity' in event['requestContext']:
-            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
-        else:
-            return Fail 
-        
+    if body['type'] == 'message':  
         #Find conversation that user involved. Else return fail
         try:
             conversationUserResponse = table.query(
@@ -254,6 +254,7 @@ def postHandler(event, context):
                 #Update the user conversation items to fetch newer data for users.                
                 dateTimeMessage = datetime.strptime(message['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
                 dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
+                oldSortKey = conversationUserResponse['Items'][0]['sortKey']
                 conversationUserResponse['Items'][0]['sortKey'] = dateTime
 
                 #Fetch other user's conversation item to update.
@@ -271,14 +272,14 @@ def postHandler(event, context):
                         table.delete_item(
                             Key={'PK': otherUserResponse['Items'][0]['PK'] , 'sortKey': otherUserResponse['Items'][0]['sortKey']}
                         )
-                        otherUserResponse['Items'][0]['sortKey'] = dateTime
+                        otherUserResponse['Items'][0]['sortKey'] = message['sortKey']
                         table.put_item(Item=otherUserResponse['Items'][0])
                 
                 #Also update our user's conversation data. 
                 table.delete_item(
-                    Key={'PK': conversationUserResponse['Items'][0]['PK'] , 'sortKey':conversationUserResponse['Items'][0]['sortKey']}
+                    Key={'PK': conversationUserResponse['Items'][0]['PK'] , 'sortKey':oldSortKey}
                 )
-                conversationUserResponse['Items'][0]['sortKey'] = dateTime
+                conversationUserResponse['Items'][0]['sortKey'] = message['sortKey']
 
                 table.put_item(Item=conversationUserResponse['Items'][0])
      
@@ -304,6 +305,38 @@ def postHandler(event, context):
 
                 return response
 
+            else:
+                return Fail
+
+    #User wants to delete one of his messages. Find given message, check if it belongs to user
+    elif body['type'] == 'delete':
+        searchDatetime = datetime.strptime(body['dateTime'], "%m/%d/%Y, %H:%M:%S").isoformat()
+        try:
+            messageResponse = table.query(
+                KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId) & Key('sortKey').begins_with(searchDatetime),
+                FilterExpression=Attr('text').eq(body['text']) & Attr('sender').eq(user)
+            )
+        except ClientError as e:
+            print(e.messageResponse['Error']['Message'])
+            return Fail
+        else:
+            if 'Items' in messageResponse and len(messageResponse['Items']) >= 1:
+                #Found the message.Checked it belongs to user. Delete
+                table.delete_item(
+                    Key={'PK': messageResponse['Items'][0]['PK'], 'sortKey':messageResponse['Items'][0]['sortKey']}
+                )
+                res = {'Success': 'True'}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
             else:
                 return Fail
 
