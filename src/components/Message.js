@@ -23,6 +23,8 @@ export class Message extends Component {
         replySelection: null,
         modal: false,
         deleteSelection: null,
+        deleteDateTime: null,
+        deleteIndex: null,
         userText: '',
     }   
 
@@ -30,8 +32,16 @@ export class Message extends Component {
         if(this.props.conversation !== prevProps.conversation){
             const path = '/conversations/' + this.props.conversation
             const data = await API.get(`topicsApi`, path)
-            this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
-            this.scrollToBottom();     
+                this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
+                () => this.scrollToBottom()
+            )
+                    
+            //Update at every 10 seconds
+            setInterval(async () => {
+                const path = '/conversations/' + this.props.conversation
+                const data = await API.get(`topicsApi`, path)
+                this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+                }, 10000);
         }
     }
 
@@ -43,8 +53,25 @@ export class Message extends Component {
         this.setState({replySelection: null})
     }
 
-    deleteMessageModalOpen(message){
-        this.setState({ deleteSelection: message, modal:true})
+    deleteMessageModalOpen(message, index){
+        this.setState({ deleteSelection: message.text, deleteDateTime: message.dateTime, deleteIndex: index ,modal:true})
+    }
+
+    async deleteMessage(){
+        const path = '/conversations/' + this.props.conversation
+        const myInit = {
+            body:{
+                type: 'delete',
+                text: this.state.deleteSelection, 
+                dateTime: this.state.deleteDateTime,
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        if (data['Success'] == 'True'){
+            let messages = this.state.messages
+            messages.splice(this.state.deleteIndex, 1)
+            this.setState({messages: messages, modal: false})
+        } 
     }
 
     selectReply(message){
@@ -67,7 +94,6 @@ export class Message extends Component {
                     repliedDateTime: this.state.replySelectionDateTime,
                 }
             }
-            console.log(myInit)
             const data = await API.post(`topicsApi`, path, myInit)
             const message = data['message']
             let messages = this.state.messages
@@ -133,7 +159,7 @@ export class Message extends Component {
                                         <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
                                             <ModalOverlay />
                                             <ModalContent>
-                                            <ModalHeader>Modal Title</ModalHeader>
+                                            <ModalHeader>Delete Message</ModalHeader>
                                             <ModalCloseButton />
                                             <ModalBody>
                                                 Do you want to delete selected message?
@@ -141,12 +167,12 @@ export class Message extends Component {
                                                 Message: {this.state.deleteSelection}
                                             </ModalBody>
                                             <ModalFooter>
-                                                <Button onClick={this.deleteMessage}>Close</Button>
+                                                <Button bg='red.500' onClick={this.deleteMessage.bind(this)}>Delete</Button>
                                             </ModalFooter>
                                             </ModalContent>
                                         </Modal>
                                         <Box mr='2' my='auto'>
-                                            <button onClick={() => this.deleteMessageModalOpen(message.text)}>
+                                            <button onClick={() => this.deleteMessageModalOpen(message, index)}>
                                                 <Icon as={RiDeleteBinLine} color='red'/>
                                             </button>
                                         </Box>
