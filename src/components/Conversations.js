@@ -14,10 +14,11 @@ export class Conversations extends Component {
         this.setState({ conversations: data['conversations']})
 
         //Refresh the list of conversations at every 10 seconds
-        setTimeout(async () => {
+        setInterval(async () => {
             const path = '/conversations/'
             const data = await API.get(`topicsApi`, path)
             this.setState({ conversations: data['conversations']})
+            console.log(data)
         }, 10000);       
     }
 
