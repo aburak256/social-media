@@ -18,7 +18,6 @@ export class Conversations extends Component {
             const path = '/conversations/'
             const data = await API.get(`topicsApi`, path)
             this.setState({ conversations: data['conversations']})
-            console.log(data)
         }, 10000);       
     }
 
