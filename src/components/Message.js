@@ -30,10 +30,14 @@ export class Message extends Component {
         if(this.props.conversation !== prevProps.conversation){
             const path = '/conversations/' + this.props.conversation
             const data = await API.get(`topicsApi`, path)
-            console.log(data)
             this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+            this.scrollToBottom();     
         }
     }
+
+    scrollToBottom = () => {
+        this.messagesEnd.scrollIntoView({ behavior: "smooth" });
+      }
 
     cancelReply(){
         this.setState({replySelection: null})
@@ -69,8 +73,7 @@ export class Message extends Component {
             let messages = this.state.messages
             messages.splice(this.state.messages.length, 0, message)
             this.setState({messages: messages}) 
-
-            
+            this.scrollToBottom();           
           }
           else if(this.state.userText){
             const path = '/conversations/' + this.props.conversation
@@ -85,7 +88,7 @@ export class Message extends Component {
             let messages = this.state.messages
             messages.splice(this.state.messages.length, 0, message)
             this.setState({messages: messages}) 
-
+            this.scrollToBottom();
           }
       }
 
@@ -104,7 +107,7 @@ export class Message extends Component {
                         </Text>
                     </HStack> 
                 : <> </>}
-                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll'>
+                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox'>
                     {this.state.messages.map((message, index) =>  
                         <Box
                             w='100%'
@@ -174,6 +177,9 @@ export class Message extends Component {
                                         <Text fontSize='xs' color='gray.500'>
                                             {message.dateTime}
                                         </Text>
+                                        <div style={{ float:"left", clear: "both" }}
+                                            ref={(el) => { this.messagesEnd = el; }}>
+                                        </div>
                                     </VStack>
                                     {message.sender == 'friend' ?
                                     <> 
