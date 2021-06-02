@@ -165,7 +165,6 @@ def handler(event, context):
                             
             
             #Collect other user's information
-            print(conversation['otherUser'])
             try:
                 otherUser = table.get_item(
                     Key={'PK': 'USER#' + conversation['otherUser'], 'sortKey':'METADATA'}
@@ -340,3 +339,106 @@ def postHandler(event, context):
             else:
                 return Fail
 
+    elif body['type'] == 'create':
+        #Collect other user's information. Check if there is a conversation between two users. Check other user's message permissions
+        if 'otherUser' in body:
+            try:
+                otherUserResponse = table.get_item(
+                    Key={'PK': 'USER#' + body['otherUser'] , 'sortKey': 'METADATA'}
+                )
+            except ClientError as e:
+                print(e.otherUserResponse['Error']['Message'])
+            else:
+                if 'Item' in otherUserResponse:
+                    #Check user's conversations
+                    try:
+                        conversationCheckResponse = table.query(
+                            KeyConditionExpression=Key('PK').eq('USER#'+user+'#CONVERSATION'),
+                            FilterExpression=Attr('otherUser').eq(otherUserResponse['Item'][-36:])
+                        )
+                    except ClientError as e:
+                        print(e.conversationCheckResponse['Error']['Message'])
+                    else:
+                        if 'Items' in conversationCheckResponse and len(conversationCheckResponse['Items']) >= 1:
+                            return Fail
+                        else:
+                            #There are no conversations between two users. Check other user's permissions and create one.
+                            if 'messagePermissions' in otherUserResponse['Item'] and otherUserResponse['Item']['messagePermissions'] == 'Follows':
+                                #Check if other user follows our user
+                                try:
+                                    followResponse = table.get_item(
+                                        Key={'PK': 'USER#' + body['otherUser'] + '#FOLLOWS' , 'sortKey': user}
+                                    )
+                                except ClientError as e:
+                                    print(e.followResponse['Error']['Message'])
+                                else:
+                                    if 'Item' in followResponse:
+                                        #Permissions fulfilled. Create conversation and create user conversations
+                                        return createConversation(user, body['otherUser'])
+                                    else:
+                                        return Fail
+                            else:
+                                return createConversation(user, body['otherUser'])
+
+                                
+            
+        else: return Fail
+
+
+def createConversation(user, otherUser):
+    conversationId = str(uuid.uuid4())
+    dateTime = datetime.now().isoformat()
+    Item = {
+        'PK' : 'CONVERSATION#' + conversationId,
+        'sortKey': 'METADATA',
+        'user1': user,
+        'user2':  body['otherUser'] 
+    }
+
+    conv1 = {
+        'PK': 'USER#' + user + '#CONVERSATION',
+        'sortKey': dateTime,
+        'conversationId': conversationId,
+        'otherUser': body['otherUser']
+    }
+    
+    conv2 = {
+        'PK': 'USER#' + body['otherUser'] + '#CONVERSATION',
+        'sortKey': dateTime,
+        'conversationId': conversationId,
+        'otherUser': user
+    }
+    table.put_item(Item=Item)
+    table.put_item(Item=conv1)
+    table.put_item(Item=conv2)
+    #Collect other user info to return. Also return empty messages array
+    messages = []
+
+    try:
+        getUserInfo = table.get_item(
+            Key={'PK': 'USER#'+ otherUser, 'sortKey':'METADATA'}
+        )
+    except ClientError as e:
+        print(e.getUserInfo['Error']['Message'])
+    else:
+        if 'Item' in getUserInfo:
+            imageUrl = None
+            if 'Image' in getUserInfo['Item']: imageUrl = getUserInfo['Item']['image']
+            userInfo = {
+                'username': getUserInfo['Item']['userName'],
+                'image': imageUrl,
+            }
+
+
+    res = {'userInfo': userInfo, 'messages': messages}
+    response = {
+        'statusCode': 200,
+        'body': json.dumps(res),
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+    }
+
+    return response
