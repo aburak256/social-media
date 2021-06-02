@@ -5,6 +5,7 @@ import {Auth} from 'aws-amplify'
 import './Navbar.css';
 import Sidebar from './Sidebar'
 import Logo from './Logo';
+import MessageDrawer from './MessageDrawer'
 import { Box } from '@chakra-ui/layout';
 
 
@@ -50,11 +51,17 @@ function Navbar() {
                     <div className='menu-icon' onClick={handleClick}>
                         <i className={click ? 'fas fa-times': 'fas fa-bars'} />
                     </div>
+                    
                     <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                         <li className='nav-item'>
                             <Link to='/' className='nav-links' onClick={closeMobileMenu}>
                                 Home
                             </Link>
+                        </li>
+                        <li className='nav-item'>
+                            <div className='nav-links'>
+                                <MessageDrawer />
+                            </div>
                         </li>
                         <li className='nav-item'>
                             <Link to='/topics' className='nav-links' onClick={closeMobileMenu}>
