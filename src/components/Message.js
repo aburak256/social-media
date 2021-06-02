@@ -15,6 +15,15 @@ import {
     ModalFooter,
     ModalBody,
     ModalCloseButton,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverHeader,
+    PopoverBody,
+    PopoverFooter,
+    PopoverArrow,
+    PopoverCloseButton,
+    Portal
   } from "@chakra-ui/react"
 
 export class Message extends Component {
@@ -134,6 +143,9 @@ export class Message extends Component {
                         <Text ml='3'>
                             {this.state.userInfo.username}
                         </Text>
+                        <Box w='100%' align='right' pr='2' fontSize='xs'>
+                            To reply or delete: Click the message
+                        </Box>
                     </HStack> 
                 : <> </>}
                 <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox'>
@@ -174,16 +186,6 @@ export class Message extends Component {
                                             </ModalFooter>
                                             </ModalContent>
                                         </Modal>
-                                        <Box mr='2' my='auto'>
-                                            <button onClick={() => this.deleteMessageModalOpen(message, index)}>
-                                                <Icon as={RiDeleteBinLine} color='red'/>
-                                            </button>
-                                        </Box>
-                                        <Box mr='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message)}>
-                                                <Icon as={BsFillReplyAllFill} />
-                                            </button> 
-                                        </Box>
                                         <Spacer /> 
                                         <Box my='auto' mr='1'>
                                                 <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
@@ -196,20 +198,48 @@ export class Message extends Component {
                                         align={message.sender == 'user' ? 'right' : 'left'}
                                         spacing='0'
                                     >
-                                        <Text
-                                            bg={message.sender == 'user' ? 'cyan.400' : 'blue.500'}
-                                            maxW='35vh'
-                                            color={message.sender == 'user' ? 'black' : 'white'}
-                                            pl = {message.sender == 'user' ? '2' : '4'}
-                                            pr = {message.sender == 'user' ? '4' : '2'}
-                                            borderRadius='lg'
-                                            fontSize='sm'
-                                            as='cite'
-                                        >
-                                            {message.text}
-                                        </Text>
-                                        <Text fontSize='xs' color='gray.500'>
-                                            {message.dateTime}
+                                       <Popover>
+                                            <PopoverTrigger>
+                                                <Text
+                                                    bg={message.sender == 'user' ? 'cyan.400' : 'cyan.500'}
+                                                    maxW='35vh'
+                                                    color={message.sender == 'user' ? 'white' : 'white'}
+                                                    pl = {message.sender == 'user' ? '2' : '4'}
+                                                    pr = {message.sender == 'user' ? '4' : '2'}
+                                                    borderRadius='lg'
+                                                    fontSize='14'
+                                                    as='cite'
+                                                >
+                                                    {message.text}
+                                                </Text>
+                                                </PopoverTrigger>
+                                                <Portal>
+                                                    <PopoverContent color="white" bg="black" borderColor="blue.800" w='25vh'>
+                                                        <PopoverArrow />
+                                                        <PopoverCloseButton />
+                                                        <PopoverBody>
+                                                        <HStack>
+                                                            {message.sender =='user' ? 
+                                                            <Box mr='2' my='auto'>
+                                                                <Button bg='red.600' onClick={() => this.deleteMessageModalOpen(message, index)}>
+                                                                    Delete
+                                                                </Button>
+                                                            </Box> : <> </> }
+                                                            
+                                                            <Box mr='2' my='auto'>
+                                                                <Button bg='cyan.600' onClick={() => this.selectReply(message)}>
+                                                                    Reply
+                                                                </Button> 
+                                                            </Box>
+                                                        </HStack>
+                                                        </PopoverBody>
+                                                    </PopoverContent>
+                                                </Portal>
+                                            </Popover>
+                                            
+                                        
+                                        <Text fontSize='10' color='gray.500'>
+                                            {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
                                         </Text>
                                         <div style={{ float:"left", clear: "both" }}
                                             ref={(el) => { this.messagesEnd = el; }}>
@@ -218,11 +248,7 @@ export class Message extends Component {
                                     {message.sender == 'friend' ?
                                     <> 
                                         <Spacer />
-                                        <Box ml='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message)}>
-                                                <Icon as={BsFillReplyAllFill} />
-                                            </button> 
-                                        </Box>
+                                        
                                          
                                     </>
                                     :
