@@ -31,7 +31,7 @@ export class MessageInDrawer extends Component {
     }   
 
     async componentDidUpdate(prevProps){
-        if(this.props.conversation !== prevProps.conversation){
+        if((this.props !== prevProps)){
             const path = '/conversations/' + this.props.conversation
             const data = await API.get(`topicsApi`, path)
             this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
@@ -138,7 +138,7 @@ export class MessageInDrawer extends Component {
                         </Text>
                     </HStack> 
                 : <> </>}
-                <VStack w='100%' h={this.state.messages.length == 0 ? '35vh' : '25vh'} bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
+                <VStack w='100%' h={this.state.messages.length == 0 ? '35vh' : '30vh'} bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
                     '&::-webkit-scrollbar': {
                     width: '8px',
                     borderRadius: '8px',
