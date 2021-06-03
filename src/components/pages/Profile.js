@@ -1,6 +1,14 @@
 import React, { Component } from 'react'
-import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonText, Image, Text, Button, Badge, Icon } from "@chakra-ui/react"
-import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
+import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonText, Image, Text, Button, Badge, Icon, Spacer,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    Textarea, } from "@chakra-ui/react"
+import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon } from '@chakra-ui/icons'
 import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
 import {API} from "aws-amplify";
@@ -11,7 +19,9 @@ export class Profile extends Component {
         profile:'',
         posts: [],
         own: false,
-        loading: true
+        loading: true,
+        isOpen: false,
+        newBio: ''
     }
 
     async componentDidMount(){
@@ -19,13 +29,11 @@ export class Profile extends Component {
             const path = '/profile/' + this.props.match.params.profile
             console.log(path)
             const data = await API.get(`topicsApi`, path)
-            console.log(data)
             this.setState({ profile: data['profile'], posts: data['posts'], user: data['user'], loading:false})
         }
         else{
             const path = '/profile'
             const data = await API.get(`topicsApi`, path)
-            console.log(data)
             this.setState({ profile: data['profile'], posts: data['posts'], own:true , loading:false})
         }
     }
@@ -33,6 +41,33 @@ export class Profile extends Component {
     followUser(){
         console.log('Follow User' + this.props.match.params.profile)
     }
+
+    onClose(){
+        this.setState({isOpen: false})
+    }
+
+    openEditModal(){
+        this.setState({isOpen: true})
+    }
+
+    async saveNewBio(){
+        const path = '/profile'
+        const myInit = {
+            body:{
+                type: 'bioChange',
+                text: this.state.newBio, 
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        let profile = this.state.profile
+        profile.bio = data['bio']
+        this.setState({profile: profile, isOpen: false})
+    }
+
+    textChange = (e) => {
+        let inputValue = e.target.value
+        this.setState({newBio: inputValue})
+      }
 
     async postLike(postId, index){
         const path = '/posts/' + postId
@@ -114,10 +149,35 @@ export class Profile extends Component {
                                             fontSize='sm'
                                             color='gray.600'
                                             w='100%'
-                                            noOfLines={[1, 2, 3, 4, 5, 6]}
+                                            
                                             pr='3vh'
                                         >
                                             {this.state.profile.bio}
+                                            <Spacer />
+                                            <button onClick={this.openEditModal.bind(this)}>
+                                                <EditIcon />
+                                            </button>
+                                            <Modal
+                                                isCentered
+                                                onClose={this.onClose.bind(this)}
+                                                isOpen={this.state.isOpen}
+                                                motionPreset="slideInBottom"
+                                            >
+                                                <ModalOverlay />
+                                                <ModalContent>
+                                                    <ModalHeader>Change your bio</ModalHeader>
+                                                    <ModalCloseButton />
+                                                    <ModalBody>
+                                                        <Textarea onChange={this.textChange}/>
+                                                    </ModalBody>
+                                                    <ModalFooter>
+                                                        <Button colorScheme="blue" mr={3} onClick={this.onClose.bind(this)}>
+                                                            Close
+                                                        </Button>
+                                                        <Button onClick={this.saveNewBio.bind(this)} variant="ghost">Save</Button>
+                                                    </ModalFooter>
+                                                </ModalContent>
+                                            </Modal>
                                         </Text>
                                     </HStack>
                                 </HStack>
