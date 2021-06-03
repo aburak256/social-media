@@ -153,31 +153,37 @@ export class Profile extends Component {
                                             pr='3vh'
                                         >
                                             {this.state.profile.bio}
-                                            <Spacer />
-                                            <button onClick={this.openEditModal.bind(this)}>
-                                                <EditIcon />
-                                            </button>
-                                            <Modal
-                                                isCentered
-                                                onClose={this.onClose.bind(this)}
-                                                isOpen={this.state.isOpen}
-                                                motionPreset="slideInBottom"
-                                            >
-                                                <ModalOverlay />
-                                                <ModalContent>
-                                                    <ModalHeader>Change your bio</ModalHeader>
-                                                    <ModalCloseButton />
-                                                    <ModalBody>
-                                                        <Textarea onChange={this.textChange}/>
-                                                    </ModalBody>
-                                                    <ModalFooter>
-                                                        <Button colorScheme="blue" mr={3} onClick={this.onClose.bind(this)}>
-                                                            Close
-                                                        </Button>
-                                                        <Button onClick={this.saveNewBio.bind(this)} variant="ghost">Save</Button>
-                                                    </ModalFooter>
-                                                </ModalContent>
-                                            </Modal>
+                                            <>
+                                                {this.state.own == 'True' ? <>
+                                                    <Spacer />
+                                                        <button onClick={this.openEditModal.bind(this)}>
+                                                            <EditIcon />
+                                                        </button>
+                                                    <Modal
+                                                        isCentered
+                                                        onClose={this.onClose.bind(this)}
+                                                        isOpen={this.state.isOpen}
+                                                        motionPreset="slideInBottom"
+                                                    >
+                                                        <ModalOverlay />
+                                                        <ModalContent>
+                                                            <ModalHeader>Change your bio</ModalHeader>
+                                                            <ModalCloseButton />
+                                                            <ModalBody>
+                                                                <Textarea onChange={this.textChange}/>
+                                                            </ModalBody>
+                                                            <ModalFooter>
+                                                                <Button colorScheme="blue" mr={3} onClick={this.onClose.bind(this)}>
+                                                                    Close
+                                                                </Button>
+                                                                <Button onClick={this.saveNewBio.bind(this)} variant="ghost">Save</Button>
+                                                            </ModalFooter>
+                                                        </ModalContent>
+                                                    </Modal> </>
+                                                    :
+                                                    <> </>} 
+                                            </>
+                                            
                                         </Text>
                                     </HStack>
                                 </HStack>
