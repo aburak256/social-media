@@ -1,18 +1,144 @@
 import json
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+from botocore.exceptions import ClientError 
+from datetime import date, datetime
+import uuid
+import urllib.parse
+
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+s3_client = boto3.client('s3')
+table = dynamodb.Table('SingleTableDesign')
+bucket = "smapp-image131342-dev"
+
+Fail = {
+            'statusCode': 404,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            'body': json.dumps("Couldn't find the request")
+        }
 
 def handler(event, context):
-  print('received event:')
-  print(event)
-  
-  return {
-      'statusCode': 200,
-      'headers': {
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-      },
-      'body': json.dumps('Hello from your new Amplify Python lambda!')
-  }
+    print('received event:')
+    print(event)
+
+    #There can be two different requests. Without body and with body. 
+    #Create a function that collects user info
+    if event['httpMethod'] == 'POST':
+        return postHandler(event, context)
+
+    if 'resource' in event:
+        path = event['resource']
+    else:
+        return Fail
+
+    if "/profile/{proxy+}" == event['resource']:
+        #Collect another user's information.
+        #Check if the user exist. Then collect info and send
+        #Also collect the information of follow between two users
+        otherUser = event['pathParameters']['proxy']
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+        try:
+            userResponse = table.get_item(
+                Key={'PK': 'USER#' + otherUser, 'sortKey':'METADATA'}
+            )
+        except ClientError as e:
+            print(userResponse['Error']['Message'])
+        else:
+            if 'Item' in userResponse:
+                posts = collectUserPosts(otherUser)
+
+                if user == otherUser:
+                    followInfo = 'Self'
+                try:
+                    followResponse = table.get_item(
+                        Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': otherUser}
+                    )
+                except ClientError as e:
+                    print(followResponse['Error']['Message'])
+                else:
+                    if 'Item' in followResponse:
+                        followInfo = 'True'
+                    else:
+                        followInfo = 'False'
+
+                userInfo = {
+                    'imageUrl': userResponse['Item']['imageUrl'],
+                    'username': userResponse['Item']['userName'],
+                    'bio': userResponse['Item']['text'],
+                    'followers': userResponse['Item']['numberOfFollowers'],
+                    'follows':userResponse['Item']['numberOfFollows'],
+                    'followInfo': followInfo
+                }
+                
+                res={'posts': posts, 'profile': userInfo}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+
+    elif "/profile" == event['resource']:
+        #Collect our user's information.
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else:
+            return Fail
+        
+        try:
+            userResponse = table.get_item(
+                Key={'PK': 'USER#' + user, 'sortKey':'METADATA'}
+            )
+        except ClientError as e:
+            print(userResponse['Error']['Message'])
+        else:
+            if 'Item' in userResponse:
+                posts = collectUserPosts(user)
+                userInfo = {
+                    'imageUrl': userResponse['Item']['imageUrl'],
+                    'username': userResponse['Item']['userName'],
+                    'bio': userResponse['Item']['text'],
+                    'followers': userResponse['Item']['numberOfFollowers'],
+                    'follows':userResponse['Item']['numberOfFollows'],
+                }
+                
+                res={'posts': posts, 'profile': userInfo}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+
+
+
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        },
+        'body': json.dumps('Hello from your new Amplify Python lambda!')
+    }
+
 def collectUserPosts(user):
     posts = []
 
@@ -60,3 +186,5 @@ def collectUserPosts(user):
             return posts
                                 
 
+def postHandler(event, context):
+    pass        
