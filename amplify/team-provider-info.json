@@ -23,23 +23,27 @@
         },
         "topicsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/topicsLambda-4246515a787170796639-build.zip"
+          "s3Key": "amplify-builds/topicsLambda-47467a6e4c494864616f-build.zip"
         },
         "postsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/postsLambda-613052486e3473716a52-build.zip"
+          "s3Key": "amplify-builds/postsLambda-49344433307353467962-build.zip"
         },
         "commentsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/commentsLambda-3062536f52505a745059-build.zip"
+          "s3Key": "amplify-builds/commentsLambda-32773853475430563472-build.zip"
         },
         "topicTestsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/topicTestsLambda-46506e515a5274363755-build.zip"
+          "s3Key": "amplify-builds/topicTestsLambda-32733031623862542f4c-build.zip"
         },
         "conversationsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/conversationsLambda-6a655a38634a45384e61-build.zip"
+          "s3Key": "amplify-builds/conversationsLambda-533533596d5a42416738-build.zip"
+        },
+        "profileLambda": {
+          "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+          "s3Key": "amplify-builds/profileLambda-6c3230476d776845434c-build.zip"
         }
       },
       "auth": {

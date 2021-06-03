@@ -58,6 +58,11 @@
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "profileLambda": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "auth": {
@@ -108,6 +113,14 @@
         {
           "category": "function",
           "resourceName": "conversationsLambda",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "profileLambda",
           "attributes": [
             "Name",
             "Arn"
