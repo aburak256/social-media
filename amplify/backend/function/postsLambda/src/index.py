@@ -292,7 +292,7 @@ def postHandler(event, context):
             return response
             
     elif 'post' in event['body']:
-        #User posted a post. Check permissions then create a post object with TOPIC#POST and POST
+        #User posted a post. Check permissions then create a post object with TOPIC#POST, POST, USER#POST
         #Also if user uploaded an image add image link to dynamodb.
         body = json.loads(event['body'])
         params = event['pathParameters']
@@ -347,6 +347,14 @@ def postHandler(event, context):
                     table.put_item(
                         Item={
                             'PK': 'TOPIC#' + topic + '#POST',
+                            'sortKey': datetime.now().isoformat(),
+                            'postId': postId
+                        }
+                    )
+                    #Create post link in user
+                    table.put_item(
+                        Item={
+                            'PK': 'USER#' + user + '#POST',
                             'sortKey': datetime.now().isoformat(),
                             'postId': postId
                         }
