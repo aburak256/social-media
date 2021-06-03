@@ -187,4 +187,56 @@ def collectUserPosts(user):
                                 
 
 def postHandler(event, context):
-    pass        
+    body = json.loads(event['body'])
+    if 'identity' in event['requestContext']:
+        user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+    else:
+        return Fail
+
+    if body['type'] == 'Follow':
+        otherUser = event['pathParameters']['proxy'] 
+
+        pass
+
+    elif body['type'] == 'bioChange':
+        #Find user item in db. Change the text value in metadata. save
+
+        try:
+            userResponse = table.get_item(
+                Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+            )
+        except ClientError as e:
+             print(e.userResponse['Error']['Message'])
+        else:
+            if 'Item' in userResponse:
+                userResponse['Item']['text'] = body['text']
+                table.put_item(Item=userResponse['Item'])
+
+                userInfo = {
+                    'imageUrl': userResponse['Item']['imageUrl'],
+                    'username': userResponse['Item']['userName'],
+                    'bio': userResponse['Item']['text'],
+                    'followers': userResponse['Item']['numberOfFollowers'],
+                    'follows':userResponse['Item']['numberOfFollows'],
+                }
+
+                res = {'userInfo': userInfo}   
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+
+            else: return Fail
+
+
+    return Fail
+
+
+
