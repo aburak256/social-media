@@ -154,7 +154,7 @@ export class Profile extends Component {
                                         >
                                             {this.state.profile.bio}
                                             <>
-                                                {this.state.own == 'True' ? <>
+                                                {this.state.own == true ? <>
                                                     <Spacer />
                                                         <button onClick={this.openEditModal.bind(this)}>
                                                             <EditIcon />
