@@ -53,8 +53,19 @@ export class Profile extends Component {
         }
     }
 
-    followUser(){
-        console.log('Follow User' + this.props.match.params.profile)
+    async followUser(){
+        if(this.props.match.params.profile){
+            const path = '/profile/' + this.props.match.params.profile
+            const myInit = {
+                body:{
+                    type: "Follow", 
+                }
+            }
+            const data = await API.get(`topicsApi`, path, myInit)
+            let profile = this.state.profile
+            profile.followInfo = data['followInfo']
+            this.setState({profile: profile})
+        }
     }
 
     onClose(){
