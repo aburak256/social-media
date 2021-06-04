@@ -198,7 +198,7 @@ export class Profile extends Component {
                                         <AlertIcon />
                                         <AlertTitle mr={2}>Error</AlertTitle>
                                         <AlertDescription>{this.state.message}</AlertDescription>
-                                        <CloseButton position="absolute" right="8px" top="8px" />
+                                        <CloseButton position="absolute" right="8px" top="8px" onClick={() => this.setState({message: null})}/>
                                     </Alert> :
                                     <> </>}
                                 <HStack w='100%' bg='gray.50' boxShadow='lg' borderRadius='lg'>        
