@@ -61,7 +61,7 @@ export class Profile extends Component {
                     type: "Follow", 
                 }
             }
-            const data = await API.get(`topicsApi`, path, myInit)
+            const data = await API.post(`topicsApi`, path, myInit)
             let profile = this.state.profile
             profile.followInfo = data['followInfo']
             this.setState({profile: profile})
