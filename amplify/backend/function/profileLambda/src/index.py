@@ -214,7 +214,7 @@ def postHandler(event, context):
                     dateTimePrev = datetime.strptime(userResponse['Item']['imageChangeDateTime'], '%Y-%m-%dT%H:%M:%S.%f')
                     now = datetime.now()
                     result = now - dateTimePrev
-                    if result.total_seconds() >= 60*24:
+                    if result.total_seconds() >= 60*60*24:
                         #Return success to allow user to make a new upload.
                         res = {'upload': 'Allowed'}   
                     else:
