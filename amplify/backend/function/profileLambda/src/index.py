@@ -396,4 +396,70 @@ def postHandler(event, context):
     return Fail
 
 
+def addPosts(user, otherUser):
+    try:
+        userResponse = table.get_item(
+            Key={'PK': 'USER#' + user + '#TIMELINE', 'sortKey': 'METADATA'}
+        )
+    except ClientError as e:
+            print(e.userResponse['Error']['Message'])
+    else:
+        if 'Item' in userResponse:
+            pass
+        else:
+            table.put_item(
+                Item={
+                    'PK': 'USER#' + user + '#TIMELINE',
+                    'sortKey': 'METADATA'
+                }
+            )
+        #Collect the last 50 post of otherUser
+        try:
+            postsResponse = table.query(
+                KeyConditionExpression=Key('PK').eq('USER#' + otherUser + '#POST'),
+                ScanIndexForward=False,
+                Limit=50
+            )
+        except ClientError as e:
+            print(e.postsResponse['Error']['Message'])
+        else:
+            if 'Items' in postsResponse and len(postsResponse['Items']) >= 1:
+                for postLink in postsResponse['Items']:
+                    #For every post of last 50 otherUser posts, add link to user timeline
+                    #Add otherUser information to delete easily
+                    table.put_item(
+                        Item={
+                            'PK': 'USER#' + user + '#TIMELINE#POST',
+                            'sortKey': postLink['sortKey'],
+                            'postId': postLink['postId'],
+                            'userId': otherUser,
+                        }
+                    )
 
+
+def clearPosts(user, otherUser):
+    try:
+        userResponse = table.get_item(
+            Key={'PK': 'USER#' + user + '#TIMELINE', 'sortKey': 'METADATA'}
+        )
+    except ClientError as e:
+            print(e.userResponse['Error']['Message'])
+    else:
+        if 'Item' in userResponse:
+            try:
+                postsResponse = table.query(
+                    KeyConditionExpression=Key('PK').eq('USER#' + user + '#TIMELINE#POST'),
+                    FilterExpression=Attr('userId').eq(otherUser),
+                    ScanIndexForward=False,
+                    Limit=500
+                )
+            except ClientError as e:
+                print(e.postsResponse['Error']['Message'])
+            else:
+                if 'Items' in postsResponse and len(postsResponse['Items']) >= 1:
+                    for post in postsResponse['Items']:
+                        table.delete(
+                            Key={'PK': post['PK'], 'sortKey': post['sortKey']}
+                        )          
+                                
+        else: return Fail
