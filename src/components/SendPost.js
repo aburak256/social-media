@@ -48,7 +48,6 @@ export class SendPost extends Component {
                 }
               }
             const result = await Storage.put(this.state.user.attributes.sub + Date().toLocaleString(), this.state.image, config)
-            console.log(result)
             image = result.key
         }
         const myInit = {
