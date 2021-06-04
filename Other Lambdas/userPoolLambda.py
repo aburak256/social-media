@@ -27,9 +27,16 @@ def lambda_handler(event, context):
                 'mail' : attr['email'],
                 'userName': username,
                 'phone': phone,
+                'imageUrl': '',
             }
         )
-        print(response)
+        #Also create user timeline item with metadata. 
+        response = table.put_item(
+           Item={
+                'PK': "USER#" + attr['sub'] + '#TIMELINE',
+                'sortKey': "METADATA",
+            }
+        )
         return event
     else:
         print("Failed request")
