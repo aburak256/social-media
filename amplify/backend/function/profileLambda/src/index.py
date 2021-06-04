@@ -230,6 +230,9 @@ def postHandler(event, context):
                 else:
                     if 'Item' in otherUserResponse:
                         usernameOther = otherUserResponse['Item']['userName']
+                        #Increase numberOfFollowers
+                        otherUserResponse['Item']['numberOfFollowers'] = str(int(otherUserResponse['Item']['numberOfFollowers']) + 1)
+                        table.put_item(otherUserResponse['Item'])
 
                 try:
                     userResponse = table.get_item(
@@ -241,6 +244,8 @@ def postHandler(event, context):
                 else:
                     if 'Item' in userResponse:
                         username = userResponse['Item']['userName']
+                        userResponse['Item']['numberOfFollowers'] = str(int(userResponse['Item']['numberOfFollowers']) + 1)
+                        table.put_item(userResponse['Item'])
 
 
                 #Create follow information items
