@@ -198,9 +198,81 @@ def postHandler(event, context):
 
         pass
 
+
+    elif body['type'] == 'photoChange':
+        #Find user item in db. Check imageChangeDateTime, if its bigger than one day allow to upload. If not imageChangeDateTime add.
+        try:
+            userResponse = table.get_item(
+                Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+            )
+        except ClientError as e:
+             print(e.userResponse['Error']['Message'])
+        else:
+            if 'Item' in userResponse:
+                if 'imageChangeDateTime' in userResponse['Item']:
+                    #Check time interval.
+                    dateTimePrev = datetime.strptime(userResponse['Item']['imageChangeDateTime'], '%Y-%m-%dT%H:%M:%S.%f')
+                    now = datetime.now()
+                    result = now - dateTimePrev
+                    if result.total_seconds() >= 60*24:
+                        #Return success to allow user to make a new upload.
+                        res = {'upload': 'Allowed'}   
+                    else:
+                        res = {'upload': 'Denied'}   
+                    
+                else:
+                    #Allow user to upload. Add imageChangeDateTime when user uploaded
+                    res = {'upload': 'Allowed'}
+
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+    elif body['type'] == 'photoUpload':
+        #User uploaded a new picture. Set imageChangeDateTime to now. Change imageUrl to generated url
+        url = ""
+        if body['image']:
+            #Create image URL
+            #Changed bucket policy to give unauth. users to read objects
+            key = urllib.parse.quote(body['image'])
+            url = ("https://{bucket}.s3.us-east-2.amazonaws.com/public/{key}".format(bucket=bucket, key=key))
+        try:
+            userResponse = table.get_item(
+                Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+            )
+        except ClientError as e:
+             print(e.userResponse['Error']['Message'])
+        else:
+            if 'Item' in userResponse:
+                userResponse['Item']['imageUrl'] = url
+                userResponse['Item']['imageChangeDateTime'] = datetime.now().isoformat()
+                table.put_item(
+                    Item=userResponse['Item']
+                )
+
+            res = {'newImage': url}
+
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(res),
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+            }
+
+            return response
+
     elif body['type'] == 'bioChange':
         #Find user item in db. Change the text value in metadata. save
-
         try:
             userResponse = table.get_item(
                 Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
