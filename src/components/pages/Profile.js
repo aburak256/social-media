@@ -8,10 +8,10 @@ import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonT
     ModalBody,
     ModalCloseButton,
     Textarea, } from "@chakra-ui/react"
-import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon } from '@chakra-ui/icons'
+import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon, AttachmentIcon } from '@chakra-ui/icons'
 import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
-import {API} from "aws-amplify";
+import {API, Auth, Storage} from "aws-amplify";
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
 
 export class Profile extends Component {
@@ -21,10 +21,19 @@ export class Profile extends Component {
         own: false,
         loading: true,
         isOpen: false,
-        newBio: ''
+        newBio: '',
+        photoUploadAllowed: false,
+        photoModalOpen: false,
+        image: null,
+        user: null,
     }
 
     async componentDidMount(){
+        Auth.currentAuthenticatedUser().then(
+            (result) => {
+                this.setState({user: result})
+            }
+          )
         if(this.props.match.params.profile){
             const path = '/profile/' + this.props.match.params.profile
             console.log(path)
@@ -46,8 +55,62 @@ export class Profile extends Component {
         this.setState({isOpen: false})
     }
 
+    onCloseProfile(){
+        this.setState({photoModalOpen: false})
+    }
+
     openEditModal(){
         this.setState({isOpen: true})
+    }
+
+    async saveNewPicture(){
+        const path = '/profile'
+        let image = null
+        if(this.state.image != null && this.state.own == true){
+            const config = {
+                level: 'public',
+                contentType: 'image/png',
+                progressCallback: progressEvent => {
+                    let prog = (progressEvent.loaded / progressEvent.total) * 100
+                    this.setState({ prog: prog })
+                }
+              }
+            const result = await Storage.put(this.state.user.attributes.sub + Date().toLocaleString(), this.state.image, config)
+            image = result.key
+            const myInit = {
+                body:{
+                    type: "photoUpload", 
+                    image: image
+                }
+            }
+            const data = await API.post(`topicsApi`, path, myInit)
+            let profile = this.state.profile
+            profile['imageUrl'] = data['newImage']
+            this.setState({profile:profile, photoModalOpen:false, photoUploadAllowed: false})
+        }
+    }
+
+    imageSelectHandler = event => {
+        if(event.target.files[0].type == "image/png" || event.target.files[0].type == "image/jpeg"){
+            this.setState({ image: event.target.files[0]})
+        }
+        else{
+            this.setState({message: "Uploaded file is not a png or jpeg file"})
+        }
+    }
+
+    async checkProfileChange(){
+        const path = '/profile'
+        const myInit = {
+            body:{
+                type: 'photoChange', 
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        console.log(data)
+        if (data['upload'] == 'Allowed'){
+            this.setState({ photoUploadAllowed: true, photoModalOpen: true})
+        }
     }
 
     async saveNewBio(){
@@ -130,6 +193,35 @@ export class Profile extends Component {
                                             color='gray.600'
                                         >
                                             {this.state.profile.username}
+                                            {this.state.own ? <>
+                                                <button onClick={this.checkProfileChange.bind(this)}>
+                                                    <EditIcon />
+                                                </button>
+                                                <Modal
+                                                    isCentered
+                                                    onClose={this.onCloseProfile.bind(this)}
+                                                    isOpen={this.state.photoModalOpen}
+                                                    motionPreset="slideInBottom"
+                                                >
+                                                    <ModalOverlay />
+                                                    <ModalContent>
+                                                        <ModalHeader>Change your profile picture</ModalHeader>
+                                                        <ModalCloseButton />
+                                                        <ModalBody>
+                                                        <label htmlFor='fileInput'>
+                                                            <AttachmentIcon color='teal.400' w={8} h={8}/>
+                                                        </label>
+                                                        <input id='fileInput' type='file' style={{display:'none'}} onChange={this.imageSelectHandler} />
+                                                        </ModalBody>
+                                                        <ModalFooter>
+                                                            <Button colorScheme="blue" mr={3} onClick={this.onCloseProfile.bind(this)}>
+                                                                Close
+                                                            </Button>
+                                                            <Button onClick={this.saveNewPicture.bind(this)} variant="ghost">Save</Button>
+                                                        </ModalFooter>
+                                                    </ModalContent>
+                                                </Modal>
+                                             </> : <> </> }
                                         </Text>
                                         { !this.state.own && this.state.profile.followInfo == 'False' ? <>  <Button bg='gray.300' borderRadius='lg' boxShadow='lg' onClick={this.followUser.bind(this)}>Follow</Button> </> : <> </>}
                                         { !this.state.own && this.state.profile.followInfo == 'True' ? <>  <Button bg='red.400' borderRadius='lg' boxShadow='lg' onClick={this.followUser.bind(this)}>Unfollow</Button> </> : <> </>}
