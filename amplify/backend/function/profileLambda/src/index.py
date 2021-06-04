@@ -194,7 +194,92 @@ def postHandler(event, context):
         return Fail
 
     if body['type'] == 'Follow':
-        otherUser = event['pathParameters']['proxy'] 
+        otherUser = event['pathParameters']['proxy']
+        #Check if user is following the user
+        try:
+            followCheckResponse = table.get_item(
+                Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': otherUser}
+            ) 
+        except ClientError as e:
+            print(e.followCheckResponse['Error']['Message'])
+        else:
+            if 'Item' in followCheckResponse:
+                #User is currently following the given user. Unfollow and delete posts links in timeline
+                table.delete_item(
+                    Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': otherUser}
+                )
+
+                table.delete_item(
+                    Key={'PK': 'USER#' + otherUser + '#FOLLOWER', 'sortKey': user}
+                )
+
+                clearPosts(user, otherUser)
+                res = {'followInfo': 'False'}
+            
+            else:
+                #User is not following the given user. Add this user's posts to the user timeline.
+                #Add follow and follower item to the users.
+
+                try:
+                    otherUserResponse = table.get_item(
+                        Key={'PK': 'USER#' + otherUser , 'sortKey': 'METADATA'}
+                    )
+                except ClientError as e:
+                    print(e.otherUserResponse['Error']['Message'])
+                    return Fail
+                else:
+                    if 'Item' in otherUserResponse:
+                        usernameOther = otherUserResponse['Item']['userName']
+
+                try:
+                    userResponse = table.get_item(
+                        Key={'PK': 'USER#' + user , 'sortKey': 'METADATA'}
+                    )
+                except ClientError as e:
+                    print(e.userResponse['Error']['Message'])
+                    return Fail
+                else:
+                    if 'Item' in userResponse:
+                        username = userResponse['Item']['userName']
+
+
+                #Create follow information items
+                dateTime = datetime.now().isoformat()
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + user + '#FOLLOWS',
+                        'sortKey': otherUser,
+                        'dateTime':dateTime,
+                        'username': usernameOther
+                    }
+                )
+
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + otherUser + '#FOLLOWER',
+                        'sortKey': user,
+                        'dateTime':dateTime,
+                        'username': username
+                    }
+                )
+
+                #Put otheruser's posts to the our user's timeline object.
+                addPosts(user, otherUser)
+                res = {'followInfo': 'True'}
+
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(res),
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+            }
+
+            return response
+
+
 
         pass
 
