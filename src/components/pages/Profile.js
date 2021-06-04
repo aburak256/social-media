@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonText, Image, Text, Button, Badge, Icon, Spacer,
+import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonText, Image, Text, Button, Badge, Icon, Spacer, useToast ,
     Modal,
     ModalOverlay,
     ModalContent,
@@ -7,7 +7,12 @@ import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonT
     ModalFooter,
     ModalBody,
     ModalCloseButton,
-    Textarea, } from "@chakra-ui/react"
+    Textarea, 
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    AlertDescription,
+    CloseButton} from "@chakra-ui/react"
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon, AttachmentIcon } from '@chakra-ui/icons'
 import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
@@ -26,6 +31,7 @@ export class Profile extends Component {
         photoModalOpen: false,
         image: null,
         user: null,
+        message: '',
     }
 
     async componentDidMount(){
@@ -111,6 +117,9 @@ export class Profile extends Component {
         if (data['upload'] == 'Allowed'){
             this.setState({ photoUploadAllowed: true, photoModalOpen: true})
         }
+        else if(data['upload'] == 'Denied'){
+            this.setState({ message: 'You are can change your profile picture only once in a day'})
+        }
     }
 
     async saveNewBio(){
@@ -184,8 +193,16 @@ export class Profile extends Component {
                             </Box>
                             :  
                             <>
-                                <HStack w='100%' bg='gray.50' boxShadow='lg' borderRadius='lg'>
-                                    <VStack ml='4vh' py='2vh' w='25%'>
+                            {this.state.message ? 
+                                    <Alert status="error">
+                                        <AlertIcon />
+                                        <AlertTitle mr={2}>Error</AlertTitle>
+                                        <AlertDescription>{this.state.message}</AlertDescription>
+                                        <CloseButton position="absolute" right="8px" top="8px" />
+                                    </Alert> :
+                                    <> </>}
+                                <HStack w='100%' bg='gray.50' boxShadow='lg' borderRadius='lg'>        
+                                    <VStack ml='4vh' py='2vh' w='25%'>                              
                                         <Box>
                                             <Image borderRadius='full' boxShadow="lg" h='20vh' maxw='20vh' src={this.state.profile.imageUrl ? this.state.profile.imageUrl : 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'} />
                                         </Box>
@@ -358,7 +375,7 @@ export class Profile extends Component {
                                 )} </> : <> </>}
                                 
                             </>}
-                        </VStack>
+                        </VStack>                            
                 </Center>      
             </div>
         )
