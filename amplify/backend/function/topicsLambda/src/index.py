@@ -197,3 +197,51 @@ def bookmarks(event, context):
 
         else:
             return Fail
+
+
+def getTopicInfo(event, context):
+    params = event['pathParameters']
+    topic = params['proxy'].upper().split("/")[1]
+    #Collect topic's info and return
+    user = None
+    if 'identity' in event['requestContext']:
+        user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+
+    try:
+        topicResponse = table.get_item(
+            Key={'PK': 'TOPIC#' + topic, 'sortKey':'METADATA'}
+        )
+    except ClientError as e:
+        print(e.topicResponse['Error']['Message'])
+    else:
+        if 'Item' in topicResponse:
+            returnObject = {
+                'Followers': topicResponse['Item']['numberOfFollowers'],
+                'Description': topicResponse['Item']['text'],
+            }
+
+            #Check if user is following this topic
+            try:
+                followResponse = table.get_item(
+                    Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': topic}
+                )
+            except ClientError as e:
+                print(e.followResponse['Error']['Message'])
+            else:
+                if 'Item' in followResponse:
+                    returnObject['followInfo'] = 'True'
+                else:
+                    returnObject['followInfo'] = 'False'
+                
+                res = {'topic': returnObject}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+                return response
+
