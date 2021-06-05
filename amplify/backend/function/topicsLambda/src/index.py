@@ -23,6 +23,9 @@ def handler(event, context):
             'body': json.dumps("Couldn't find the request")
         }
 
+    if event['httpMethod'] == 'POST':
+        return postHandler(event, context)
+
     if event['resource'] == "/topics":
         resp = table.scan(
             # Scanning because in this GSI there are only few elements
@@ -47,6 +50,8 @@ def handler(event, context):
         topic = params['proxy'].upper()
         if topic == 'BOOKMARKS':
             return bookmarks(event, context)
+        if 'INFO/' in topic:
+            return getTopicInfo(event,context)
         timeRequired = '0'
         resp = table.query(
             KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
@@ -244,4 +249,149 @@ def getTopicInfo(event, context):
                     },
                 }
                 return response
+
+
+def postHandler(event, context):
+    body = json.loads(event['body'])
+    if 'identity' in event['requestContext']:
+        user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+    else:
+        return Fail
+
+    if body['type'] == 'follow':
+        params = event['pathParameters']
+        topic = params['proxy'].upper()
+
+        #Check if topic exists
+        try:
+            topicResponse = table.get_item(
+                Key={'PK': 'TOPIC#' + topic, 'sortKey': 'METADATA'}
+            )
+        except ClientError as e:
+            print(e.topicResponse['Error']['Message'])
+        else:
+            if 'Item' in topicResponse:
+                #Topic exists
+                #Check if user currently following the topic
+                #Increase number of followers by one
+                #Add links of posts of this topic to user
+                #Increase number of follows of user by one
+
+                try:
+                    userFollow = table.query(
+                        KeyConditionExpression=Key('PK').eq('USER#' + user + '#FOLLOWS') & Key('sortKey').eq(topic)
+                    )
+                except ClientError as e:
+                    print(e.userFollow['Error']['Message'])
+                else:
+                    if 'Items' in userFollow and len(userFollow['Items']) >= 1:
+                        #User currently following this topic. Unfollow this topic and delete the posts in user timeline.
+                        #Decrease the follow informations
+                        table.delete_item(
+                            Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey' : topic}
+                        )
+                        table.delete_item(
+                            Key={'PK': 'TOPIC#' + topic + '#FOLLOWER', 'sortKey': user}
+                        )
+
+                        #Clear the user timeline
+                        try:
+                            timelineOperation = table.query(
+                                KeyConditionExpression=Key('PK').eq('TOPIC#' + topic + '#POST'),
+                                ScanIndexForward=False,
+                                Limit=200,
+                            )
+                        except ClientError as e:
+                            print(e.timelineOperation['Error']['Message'])
+                        else: 
+                            if 'Items' in timelineOperation and len(timelineOperation['Items']) >= 1:
+                                for postLink in timelineOperation['Items']:
+                                    table.delete_item(
+                                        Key={'PK': 'USER#' + user + '#TIMELINE#POST', 'sortKey' : postLink['sortKey']} 
+                                    )
+
+                            #Decrease topic followers
+                            topicResponse['Item']['numberOfFollowers'] = str(int(topicResponse['Item']['numberOfFollowers']) - 1)
+                            table.put_item(Item=topicResponse['Item'])
+
+                            #Decrease user follows
+                            try:
+                                userFollowResponse = table.get_item(
+                                    Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+                                )
+                            except ClientError as e:
+                                print(e.userFollowResponse['Error']['Message'])
+                            else:
+                                if 'Item' in userFollowResponse:
+                                    userFollowResponse['Item']['numberOfFollows'] = str(int(userFollowResponse['Item']['numberOfFollows']) - 1)
+                                    table.put_item(Item=userFollowResponse['Item'])
+
+                                    res={'followInfo': 'False'}                      
+
+
+                    else:
+                        #User is not following this topic
+                        topicResponse['Item']['numberOfFollowers'] = str(int(topicResponse['Item']['numberOfFollowers']) + 1)
+                        table.put_item(Item=topicResponse['Item'])
+
+                        table.put_item(
+                            Item={
+                                'PK': 'USER#' + user + '#FOLLOWS',
+                                'sortKey': topic,
+                                'userId': user
+                            }
+                        )
+
+                        table.put_item(
+                            Item={
+                                'PK': 'TOPIC#' + topic + '#FOLLOWER',
+                                'sortKey': user,
+                                'userId': user
+                            }
+                        )
+
+                        try:
+                            postsResponse = table.query(
+                                KeyConditionExpression=Key('PK').eq('TOPIC#' + topic + '#POST'),
+                                ScanIndexForward= False,
+                                Limit=150
+                            )
+                        except ClientError as e:
+                            print(e.postsResponse['Error']['Message'])
+                        else:
+                            if 'Items' in postsResponse and len(postsResponse['Items']) >= 1:
+                                for postLink in postsResponse['Items']:
+                                    #Create link for every post
+                                    postObject = {
+                                        'PK': 'USER#' + user + '#TIMELINE#POST',
+                                        'sortKey': postLink['sortKey'],
+                                        'postId': postLink['postId'],
+                                    }
+
+                                    table.put_item(Item=postObject)
+
+                            try:
+                                userFollowResponse = table.get_item(
+                                    Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+                                )
+                            except ClientError as e:
+                                print(e.userFollowResponse['Error']['Message'])
+                            else:
+                                if 'Item' in userFollowResponse:
+                                    userFollowResponse['Item']['numberOfFollows'] = str(int(userFollowResponse['Item']['numberOfFollows']) + 1)
+                                    table.put_item(Item=userFollowResponse['Item'])
+
+                                    res={'followInfo': 'True'}
+
+                    response = {
+                        'statusCode': 200,
+                        'body': json.dumps(res),
+                        'headers': {
+                            'Access-Control-Allow-Headers': '*',
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                        },
+                    }
+                    return response
+
 
