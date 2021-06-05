@@ -73,6 +73,12 @@ export default class PostList extends React.Component {
     this.setState({posts: posts})
   }
 
+  handlePost = (post) =>{
+    let posts = this.state.posts
+    posts.splice(0, 0, post)
+    this.setState({posts: posts}) 
+}
+
   render() {
     return (
         <VStack w="100%">
@@ -84,7 +90,7 @@ export default class PostList extends React.Component {
             :  
             <>{this.state.sizeOfArray ?  
               <>{this.props.topic ? 
-                <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic}/> : 
+                <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic} onPost={this.handlePost}/> : 
                   <>
                     <VStack>
                       <Text
