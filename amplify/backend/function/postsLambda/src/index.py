@@ -326,12 +326,13 @@ def postHandler(event, context):
                     username = userResponse['Item']['userName']
                     #Create post
                     postId = str(uuid.uuid4())
+                    dateTime = datetime.now().isoformat()
                     post = {
                             'PK': 'POST#' + postId,
                             'sortKey': 'METADATA',
                             'imageURL': url,
                             'numberOfComments': '0',
-                            'dateTime': datetime.now().isoformat(),
+                            'dateTime':dateTime,
                             'numberOfDislikes': '0',
                             'numberOfLikes': '0',
                             'postId': postId,
@@ -347,7 +348,7 @@ def postHandler(event, context):
                     table.put_item(
                         Item={
                             'PK': 'TOPIC#' + topic + '#POST',
-                            'sortKey': datetime.now().isoformat(),
+                            'sortKey': dateTime,
                             'postId': postId
                         }
                     )
@@ -355,10 +356,14 @@ def postHandler(event, context):
                     table.put_item(
                         Item={
                             'PK': 'USER#' + user + '#POST',
-                            'sortKey': datetime.now().isoformat(),
+                            'sortKey': dateTime,
                             'postId': postId
                         }
                     )
+
+                    #Add timeline of user's who follows this topic
+                    addTimelineTopic(topic, post)
+                    addTimelineuser(user, post)
                     res = {'post': post}
                     response = {
                         'statusCode': 200,
@@ -421,4 +426,41 @@ def postHandler(event, context):
 
             
         
-       
+def addTimelineTopic(topic, post):
+    #Find the followers of this post
+    try:
+        followerResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('TOPIC#' + topic + '#FOLLOWER')
+        )
+    except ClientError as e:
+        print(e.followerResponse['Error']['Message'])
+    else:
+        if 'Items' in followerResponse and len(followerResponse['Items']) >= 1:
+            for user in followerResponse['Items']:
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + user['sortKey'] + '#TIMELINE#POST',
+                        'sortKey': post['dateTime'],
+                        'userId': post['userId'],
+                        'postId': post['postId'],
+                })
+
+def addTimelineuser(user, post):
+    #Find followers of the user
+    #No need to check for duplicates because their sortKey will be same
+    try:
+        followerResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('USER#' + user + '#FOLLOWER')
+        )
+    except ClientError as e:
+        print(e.followerResponse['Error']['Message'])
+    else:
+        if 'Items' in followerResponse and len(followerResponse['Items']) >= 1:
+            for user in followerResponse['Items']:
+                table.put_item(
+                    Item={
+                        'PK': 'USER#' + user['sortKey'] + '#TIMELINE#POST',
+                        'sortKey': post['dateTime'],
+                        'userId': post['userId'],
+                        'postId': post['postId'],
+                })
