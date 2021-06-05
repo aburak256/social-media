@@ -58,6 +58,7 @@ export class SendPost extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
+        this.props.onPost(data['post'])
     }
 
     render() {
