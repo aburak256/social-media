@@ -14,7 +14,6 @@ export class InfoBar extends Component {
         if(this.props.topic){
             const path = '/topics/info/' + (this.props.topic).toUpperCase()
             const data = await API.get(`topicsApi`, path)
-            console.log(data)
             this.setState({follow: data['topic']['followInfo'], followers: data['topic']['Followers'], description: data['topic']['Description']})
         }
     }
