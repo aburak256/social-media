@@ -277,6 +277,12 @@ export class Profile extends Component {
                                         <Button onClick={ () => this.setState({sendMessage: true})}>
                                             Send Message
                                         </Button>
+                                        { this.state.successMessage ? 
+                                            <Alert status="success">
+                                                <AlertIcon />
+                                                Message sent
+                                                <CloseButton position="absolute" right="8px" top="8px" onClick={() => this.setState({successMessage: null})}/>
+                                            </Alert> : <> </>}
                                         <Modal
                                             isCentered
                                             onClose={() => this.setState({sendMessage: false})}
