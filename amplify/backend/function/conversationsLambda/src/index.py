@@ -339,12 +339,13 @@ def postHandler(event, context):
             else:
                 return Fail
 
-    elif body['type'] == 'create':
+    elif body['type'] == 'createMessage':
         #Collect other user's information. Check if there is a conversation between two users. Check other user's message permissions
-        if 'otherUser' in body:
+        otherUser = event['pathParameters']['proxy']
+        if otherUser:
             try:
                 otherUserResponse = table.get_item(
-                    Key={'PK': 'USER#' + body['otherUser'] , 'sortKey': 'METADATA'}
+                    Key={'PK': 'USER#' + otherUser , 'sortKey': 'METADATA'}
                 )
             except ClientError as e:
                 print(e.otherUserResponse['Error']['Message'])
@@ -354,63 +355,77 @@ def postHandler(event, context):
                     try:
                         conversationCheckResponse = table.query(
                             KeyConditionExpression=Key('PK').eq('USER#'+user+'#CONVERSATION'),
-                            FilterExpression=Attr('otherUser').eq(otherUserResponse['Item'][-36:])
+                            FilterExpression=Attr('otherUser').eq(otherUser)
                         )
                     except ClientError as e:
                         print(e.conversationCheckResponse['Error']['Message'])
                     else:
                         if 'Items' in conversationCheckResponse and len(conversationCheckResponse['Items']) >= 1:
-                            return Fail
+                            if 'text' in body:
+                                #send this message to user
+                                return sendMessage(user, otherUser, body['text'])
+                            else:
+                                return Fail
                         else:
                             #There are no conversations between two users. Check other user's permissions and create one.
                             if 'messagePermissions' in otherUserResponse['Item'] and otherUserResponse['Item']['messagePermissions'] == 'Follows':
                                 #Check if other user follows our user
                                 try:
                                     followResponse = table.get_item(
-                                        Key={'PK': 'USER#' + body['otherUser'] + '#FOLLOWS' , 'sortKey': user}
+                                        Key={'PK': 'USER#' + otherUser + '#FOLLOWS' , 'sortKey': user}
                                     )
                                 except ClientError as e:
                                     print(e.followResponse['Error']['Message'])
                                 else:
                                     if 'Item' in followResponse:
                                         #Permissions fulfilled. Create conversation and create user conversations
-                                        return createConversation(user, body['otherUser'])
+                                        return createConversation(user, otherUser, body['text'])
                                     else:
                                         return Fail
                             else:
-                                return createConversation(user, body['otherUser'])
+                                return createConversation(user, otherUser, body['text'])
 
                                 
             
         else: return Fail
 
 
-def createConversation(user, otherUser):
+def createConversation(user, otherUser, text):
     conversationId = str(uuid.uuid4())
     dateTime = datetime.now().isoformat()
     Item = {
         'PK' : 'CONVERSATION#' + conversationId,
         'sortKey': 'METADATA',
         'user1': user,
-        'user2':  body['otherUser'] 
+        'user2':  otherUser 
     }
 
     conv1 = {
         'PK': 'USER#' + user + '#CONVERSATION',
         'sortKey': dateTime,
         'conversationId': conversationId,
-        'otherUser': body['otherUser']
+        'otherUser': otherUser
     }
     
     conv2 = {
-        'PK': 'USER#' + body['otherUser'] + '#CONVERSATION',
+        'PK': 'USER#' + otherUser + '#CONVERSATION',
         'sortKey': dateTime,
         'conversationId': conversationId,
         'otherUser': user
     }
+
+    conv3 = {
+        'PK': 'CONVERSATION#' + conversationId,
+        'sortKey': dateTime,
+        'seen': 'False',
+        'sender': user,
+        'text': text,
+        'reply': '',
+    }
     table.put_item(Item=Item)
     table.put_item(Item=conv1)
     table.put_item(Item=conv2)
+    table.put_item(Item=conv3)
     #Collect other user info to return. Also return empty messages array
     messages = []
 
@@ -430,7 +445,7 @@ def createConversation(user, otherUser):
             }
 
 
-    res = {'userInfo': userInfo, 'messages': messages}
+    res = {'userInfo': userInfo, 'messages': messages, 'messageSend': 'Message send'}
     response = {
         'statusCode': 200,
         'body': json.dumps(res),
@@ -442,3 +457,70 @@ def createConversation(user, otherUser):
     }
 
     return response
+
+
+def sendMessage(user, otherUser, message):
+    #Update user's conversation items. Create new message item with same dateTime.
+
+    dateTime = datetime.now().isoformat()
+
+    #Collect user's conversation to update
+    try:
+        userMessageResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('USER#'+user+'#CONVERSATION'),
+            FilterExpression=Attr('otherUser').eq(otherUser)
+        )
+    except ClientError as e:
+        print(e.userMessageResponse['Error']['Message'])
+    else:
+        if 'Items' in userMessageResponse and len(userMessageResponse['Items']) >= 1:
+            conversation = userMessageResponse['Items'][0]
+            #Collect other user's conversation item
+            try:
+                otherUserMessageResponse =  table.query(
+                    KeyConditionExpression=Key('PK').eq('USER#'+otherUser+'#CONVERSATION'),
+                    FilterExpression=Attr('otherUser').eq(user)
+                )
+            except ClientError as e:
+                print(e.otherUserMessageResponse['Error']['Message'])
+            else:
+                if 'Items' in otherUserMessageResponse and len(otherUserMessageResponse['Items']) >= 1:
+                    conversationOther = otherUserMessageResponse['Items'][0]
+
+                    #Update the conversation items
+                    table.delete_item(
+                        Key={'PK': conversationOther['PK'] , 'sortKey': conversationOther['sortKey'] }
+                    )
+                    conversationOther['sortKey'] = dateTime
+                    table.put_item(Item=conversationOther)
+
+                    table.delete_item(
+                        Key={'PK': conversation['PK'] , 'sortKey': conversation['sortKey'] }
+                    )
+                    conversation['sortKey'] = dateTime
+                    table.put_item(Item=conversation)
+
+                    conversationId = conversation['conversationId']
+                    #Add the message itself to db
+                    message = {
+                        'PK': 'CONVERSATION#' + conversationId,
+                        'sortKey': dateTime,
+                        'seen': 'False',
+                        'sender': user,
+                        'text': message,
+                        'reply': ''
+                    }
+                    table.put_item(Item=message)
+
+                    res = {'messageSend': 'Message send'}
+                    response = {
+                        'statusCode': 200,
+                        'body': json.dumps(res),
+                        'headers': {
+                            'Access-Control-Allow-Headers': '*',
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                        },
+                    }
+
+                    return response
