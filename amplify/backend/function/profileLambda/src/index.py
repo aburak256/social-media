@@ -195,7 +195,7 @@ def postHandler(event, context):
 
     if body['type'] == 'Follow':
         otherUser = event['pathParameters']['proxy']
-        #Check if user is following the user
+        #Check if user is following the otherUser
         try:
             followCheckResponse = table.get_item(
                 Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': otherUser}
@@ -226,7 +226,7 @@ def postHandler(event, context):
 
                     try:
                         otherUserInfoResponse = table.get_item(
-                            Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+                            Key={'PK': 'USER#' + otherUser, 'sortKey': 'METADATA'}
                         ) 
                     except ClientError as e:
                         print(e.otherUserInfoResponse['Error']['Message'])
@@ -267,7 +267,7 @@ def postHandler(event, context):
                 else:
                     if 'Item' in userResponse:
                         username = userResponse['Item']['userName']
-                        userResponse['Item']['numberOfFollowers'] = str(int(userResponse['Item']['numberOfFollowers']) + 1)
+                        userResponse['Item']['numberOfFollows'] = str(int(userResponse['Item']['numberOfFollows']) + 1)
                         table.put_item(Item=userResponse['Item'])
 
 
