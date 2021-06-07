@@ -48,7 +48,7 @@ export class Profile extends Component {
                 }
             }
           )
-        if(this.props.match.params.profile){
+        if(this.props.match.params.profile && !this.state.own){
             const path = '/profile/' + this.props.match.params.profile
             console.log(path)
             const data = await API.get(`topicsApi`, path)
@@ -57,7 +57,7 @@ export class Profile extends Component {
         else{
             const path = '/profile'
             const data = await API.get(`topicsApi`, path)
-            this.setState({ profile: data['profile'], posts: data['posts'], loading:false})
+            this.setState({ profile: data['profile'], posts: data['posts'], loading:false, own: true})
         }
     }
 
