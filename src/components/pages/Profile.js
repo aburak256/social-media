@@ -72,6 +72,12 @@ export class Profile extends Component {
             const data = await API.post(`topicsApi`, path, myInit)
             let profile = this.state.profile
             profile.followInfo = data['followInfo']
+            if(data['followInfo'] == 'True'){
+                profile.followers = (parseInt(profile.followers) + 1).toString()
+            }
+            if(data['followInfo'] == 'False'){
+                profile.followers = (parseInt(profile.followers) - 1).toString()
+            }
             this.setState({profile: profile})
         }
     }
