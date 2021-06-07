@@ -12,8 +12,11 @@ import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonT
     AlertIcon,
     AlertTitle,
     AlertDescription,
-    CloseButton} from "@chakra-ui/react"
-import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon, AttachmentIcon } from '@chakra-ui/icons'
+    CloseButton, 
+    Input,
+    InputGroup,
+    InputLeftElement,} from "@chakra-ui/react"
+import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon, AttachmentIcon, MessageIcon } from '@chakra-ui/icons'
 import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
 import {API, Auth, Storage} from "aws-amplify";
@@ -32,12 +35,17 @@ export class Profile extends Component {
         image: null,
         user: null,
         message: '',
+        sendMessage: false,
+        userMessage: ''
     }
 
     async componentDidMount(){
         Auth.currentAuthenticatedUser().then(
             (result) => {
                 this.setState({user: result})
+                if(this.props.match.params.profile == result.attributes.sub){
+                    this.setState({own: true})
+                }
             }
           )
         if(this.props.match.params.profile){
@@ -49,7 +57,7 @@ export class Profile extends Component {
         else{
             const path = '/profile'
             const data = await API.get(`topicsApi`, path)
-            this.setState({ profile: data['profile'], posts: data['posts'], own:true , loading:false})
+            this.setState({ profile: data['profile'], posts: data['posts'], loading:false})
         }
     }
 
@@ -78,6 +86,18 @@ export class Profile extends Component {
 
     openEditModal(){
         this.setState({isOpen: true})
+    }
+
+    async sendMessage(){
+        const path = '/conversations/' + this.props.match.params.profile
+        const myInit = {
+            body:{
+                type: "createMessage",
+                text: this.state.userMessage 
+            }
+        }
+        const data = await API.post(`topicsApi`, path, myInit)
+        this.setState({sendMessage: false, successMessage: true})
     }
 
     async saveNewPicture(){
@@ -253,6 +273,39 @@ export class Profile extends Component {
                                         </Text>
                                         { !this.state.own && this.state.profile.followInfo == 'False' ? <>  <Button bg='gray.300' borderRadius='lg' boxShadow='lg' onClick={this.followUser.bind(this)}>Follow</Button> </> : <> </>}
                                         { !this.state.own && this.state.profile.followInfo == 'True' ? <>  <Button bg='red.400' borderRadius='lg' boxShadow='lg' onClick={this.followUser.bind(this)}>Unfollow</Button> </> : <> </>}
+                                        { !this.state.own ? <>
+                                        <Button onClick={ () => this.setState({sendMessage: true})}>
+                                            Send Message
+                                        </Button>
+                                        <Modal
+                                            isCentered
+                                            onClose={() => this.setState({sendMessage: false})}
+                                            isOpen={this.state.sendMessage}
+                                            motionPreset="slideInBottom"
+                                        >
+                                            <ModalOverlay />
+                                            <ModalContent>
+                                                <ModalHeader>Send message to user</ModalHeader>
+                                                <ModalCloseButton />
+                                                <ModalBody>
+                                                <InputGroup>
+                                                    <InputLeftElement
+                                                    pointerEvents="none"
+                                                    children={<ChatIcon color="gray.300" />}
+                                                    />
+                                                    <Input type="text" placeholder="Send Message" onChange={(e) => this.setState({userMessage: e.target.value})}/>
+                                                </InputGroup>
+                                                </ModalBody>
+                                                <ModalFooter>
+                                                    <Button colorScheme="blue" mr={3} onClick={() => this.setState({sendMessage: false})}>
+                                                        Close
+                                                    </Button>
+                                                    <Button onClick={this.sendMessage.bind(this)} variant="ghost">Send</Button>
+                                                </ModalFooter>
+                                            </ModalContent>
+                                        </Modal>
+
+                                        </> : <> </>}
                                     </VStack>
                                     <HStack w='75%'>
                                         <VStack w='45%'>
