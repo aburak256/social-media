@@ -205,6 +205,7 @@ def postHandler(event, context):
         else:
             if 'Item' in followCheckResponse:
                 #User is currently following the given user. Unfollow and delete posts links in timeline
+                #Update following and follower informations
                 table.delete_item(
                     Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': otherUser}
                 )
@@ -212,9 +213,31 @@ def postHandler(event, context):
                 table.delete_item(
                     Key={'PK': 'USER#' + otherUser + '#FOLLOWER', 'sortKey': user}
                 )
+                
+                try:
+                    userInfoResponse = table.get_item(
+                        Key={'PK': 'USER#' + user , 'sortKey': 'METADATA'}
+                    ) 
+                except ClientError as e:
+                    print(e.userInfoResponse['Error']['Message'])
+                else:
+                    if 'Item' in userInfoResponse:
+                        userInfoResponse['Item']['numberOfFollows'] = str(int(userInfoResponse['Item']['numberOfFollows']) -1 )
 
-                clearPosts(user, otherUser)
-                res = {'followInfo': 'False'}
+                    try:
+                        otherUserInfoResponse = table.get_item(
+                            Key={'PK': 'USER#' + user, 'sortKey': 'METADATA'}
+                        ) 
+                    except ClientError as e:
+                        print(e.otherUserInfoResponse['Error']['Message'])
+                    else:
+                        if 'Item' in otherUserInfoResponse:
+                            otherUserInfoResponse['Item']['numberOfFollowers'] = str(int(otherUserInfoResponse['Item']['numberOfFollowers']) -1 )
+                            
+                            table.put_item(Item=otherUserInfoResponse['Item'])
+                            table.put_item(Item=userInfoResponse['Item'])
+                            clearPosts(user, otherUser)
+                            res = {'followInfo': 'False'}
             
             else:
                 #User is not following the given user. Add this user's posts to the user timeline.
@@ -232,7 +255,7 @@ def postHandler(event, context):
                         usernameOther = otherUserResponse['Item']['userName']
                         #Increase numberOfFollowers
                         otherUserResponse['Item']['numberOfFollowers'] = str(int(otherUserResponse['Item']['numberOfFollowers']) + 1)
-                        table.put_item(otherUserResponse['Item'])
+                        table.put_item(Item=otherUserResponse['Item'])
 
                 try:
                     userResponse = table.get_item(
@@ -245,7 +268,7 @@ def postHandler(event, context):
                     if 'Item' in userResponse:
                         username = userResponse['Item']['userName']
                         userResponse['Item']['numberOfFollowers'] = str(int(userResponse['Item']['numberOfFollowers']) + 1)
-                        table.put_item(userResponse['Item'])
+                        table.put_item(Item=userResponse['Item'])
 
 
                 #Create follow information items
@@ -463,7 +486,7 @@ def clearPosts(user, otherUser):
             else:
                 if 'Items' in postsResponse and len(postsResponse['Items']) >= 1:
                     for post in postsResponse['Items']:
-                        table.delete(
+                        table.delete_item(
                             Key={'PK': post['PK'], 'sortKey': post['sortKey']}
                         )          
                                 
