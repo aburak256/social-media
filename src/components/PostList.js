@@ -21,6 +21,7 @@ export default class PostList extends React.Component {
     if(this.props.topic){
       const path = '/topics/' + (this.props.topic).toUpperCase()
       const data = await API.get(`topicsApi`, path)
+      console.log(data)
       this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
       this.setState({ loading: false })
     }
@@ -116,7 +117,9 @@ export default class PostList extends React.Component {
               <Box p="4" paddingLeft="4">
                 <HStack alignItems="baseline">
                   <Badge borderRadius="full" px="2" colorScheme="teal">
-                  {post.username}
+                    <Link to={'/profile/' + post.userId}>
+                      {post.username}
+                    </Link>
                   </Badge>
                   <Box
                       color="gray.400"
