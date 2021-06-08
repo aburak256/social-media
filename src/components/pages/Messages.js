@@ -2,7 +2,6 @@ import { HStack, StackDivider } from '@chakra-ui/layout'
 import React, { Component } from 'react'
 import {Conversations} from '../Conversations'
 import {Message} from '../Message'
-import '../Message.css'
 
 export class Messages extends Component {
     state = {
