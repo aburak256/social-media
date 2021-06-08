@@ -1,12 +1,13 @@
 import React from 'react'
-import HeroSection from '../HeroSection'
+
 import '../../App.css'
+import Timeline from '../Timeline'
 
 function Home() {
     return (
         <>
         <title>Home</title>
-            <HeroSection/>
+            <Timeline />
         </>
     )
 }
