@@ -76,7 +76,6 @@ export class SendPost extends Component {
                     <Box w='100%' boxShadow='lg' p='4' borderRadius='md' ref='editorBox'>
                         <Editor text={this.state.post} onChange={this.handleChange.bind(this)}  options={{toolbar: {buttons: ['bold', 'italic', 'underline','anchor']},
                         autoLink: true,
-                        
                         imageDragging: false,
                         placeholder: {text: 'Share post..'}}}/>
                     </Box>
