@@ -92,6 +92,19 @@
                 ]
             },
             "policyResourceName": "/profile"
+        },
+        {
+            "name": "/timeline",
+            "lambdaFunction": "timelineLambda",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/GET",
+                    "/PUT",
+                    "/PATCH"
+                ]
+            },
+            "policyResourceName": "/timeline"
         }
     ],
     "resourceName": "topicsApi",
@@ -114,10 +127,13 @@
         },
         {
             "lambdaFunction": "profileLambda"
+        },
+        {
+            "lambdaFunction": "timelineLambda"
         }
     ],
     "privacy": {
-        "auth": 6,
+        "auth": 7,
         "unauth": 2,
         "authRoleName": "amplify-socialmedia-dev-131342-authRole",
         "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
@@ -170,7 +186,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "timelineLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
     ],
-    "uuid": "0ec64188"
+    "uuid": "2cbb81ae"
 }

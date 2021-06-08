@@ -63,6 +63,11 @@
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "timelineLambda": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "auth": {
@@ -121,6 +126,14 @@
         {
           "category": "function",
           "resourceName": "profileLambda",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "timelineLambda",
           "attributes": [
             "Name",
             "Arn"
