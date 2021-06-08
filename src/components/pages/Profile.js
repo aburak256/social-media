@@ -21,6 +21,9 @@ import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
 import {API, Auth, Storage} from "aws-amplify";
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
+const Editor = require('react-medium-editor').default;
+require('medium-editor/dist/css/medium-editor.css');
+require('medium-editor/dist/css/themes/default.css');
 
 export class Profile extends Component {
     state={
@@ -401,7 +404,10 @@ export class Profile extends Component {
                                                 noOfLines={[1, 2, 3, 4]}
                                             >
                                                 <Link to={'/posts/' + post.postId }>
-                                                {post.text}
+                                                    <Editor text={post.text}  options={{
+                                                        toolbar: {buttons: []},
+                                                        disableEditing: true 
+                                                        }}/>
                                                 </Link>
                                             </Text>
                                             <Box
