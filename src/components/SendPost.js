@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
-import { Box, Textarea, VStack, HStack, Button, Progress, Text, Alert, AlertIcon, } from "@chakra-ui/react"
+import { Box, Textarea, VStack, HStack, Button, Progress, Text, Alert, AlertIcon, Center} from "@chakra-ui/react"
 import { Storage, Auth, API } from 'aws-amplify';
 import { AttachmentIcon } from '@chakra-ui/icons'
+const Editor = require('react-medium-editor').default;
+require('medium-editor/dist/css/medium-editor.css');
+require('medium-editor/dist/css/themes/default.css');
 
 export class SendPost extends Component {
     state={
@@ -35,6 +38,10 @@ export class SendPost extends Component {
         }
     }
 
+    handleChange(text, medium) {
+        this.setState({ post: text });
+      }
+
     async post (){
         const path = '/posts/' + this.props.topic
         let image = null
@@ -64,16 +71,17 @@ export class SendPost extends Component {
     render() {
         return (
             <VStack pb='4' w='100%'>
-                <Textarea
-                    onChange={this.handleInputChange}
-                    value={this.state.post}
-                    placeholder="Here is a sample placeholder"
-                    size="lg"
-                    w='70%'
-                    placeholder={'Share anything about ' + this.state.topic}
-                    boxShadow="lg"
-                    borderRadius="lg"
-                />
+                <Center w='70%'>
+                    <Box w='100%' boxShadow='lg' p='4' borderRadius='md'>
+                        <Editor tag="pre" text={this.state.post} onChange={this.handleChange.bind(this)}  options={{toolbar: {buttons: ['bold', 'italic', 'underline','anchor']},
+                        autoLink: true,
+                        imageDragging: false,
+                        // disableEditing: true add this to post detail page,
+                        placeholder: {text: 'Share post..'}}}/>
+                    </Box>
+                </Center>
+                <p>{this.state.post}</p>
+
                 {this.state.prog = 0 ? <>   </> : <Progress size='xs' w='70%' value={this.state.prog}/>}
                 <HStack spacing='8'>
                     <label htmlFor='fileInput'>
