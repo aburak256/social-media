@@ -295,20 +295,40 @@ def postHandler(event, context):
                         )
 
                         #Clear the user timeline
+                        #Check if user follows the given posts writer. 
                         try:
                             timelineOperation = table.query(
                                 KeyConditionExpression=Key('PK').eq('TOPIC#' + topic + '#POST'),
                                 ScanIndexForward=False,
-                                Limit=200,
+                                Limit=500,
                             )
                         except ClientError as e:
                             print(e.timelineOperation['Error']['Message'])
                         else: 
                             if 'Items' in timelineOperation and len(timelineOperation['Items']) >= 1:
                                 for postLink in timelineOperation['Items']:
-                                    table.delete_item(
-                                        Key={'PK': 'USER#' + user + '#TIMELINE#POST', 'sortKey' : postLink['sortKey']} 
-                                    )
+                                    try:
+                                        postItself = table.get_item(
+                                            Key={'PK': 'POST#' + postLink['postId'], 'sortKey': 'METADATA'}
+                                        )
+                                    except ClientError as e:
+                                        print(e.postItself['Error']['Message'])
+                                    else:
+                                        if 'Item' in postItself:
+                                            try:
+                                                followResponse = table.get_item(
+                                                    Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': postItself['Item']['userId']}
+                                                )
+                                            except ClienError as e:
+                                                print(e.followResponse['Error']['Message'])
+                                            else:
+                                                if 'Item' in followResponse:
+                                                    #User following the given user
+                                                    pass
+                                                else:
+                                                    table.delete_item(
+                                                        Key={'PK': 'USER#' + user + '#TIMELINE#POST', 'sortKey' : postLink['sortKey']} 
+                                                    )
 
                             #Decrease topic followers
                             topicResponse['Item']['numberOfFollowers'] = str(int(topicResponse['Item']['numberOfFollowers']) - 1)
