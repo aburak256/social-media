@@ -44,6 +44,10 @@
         "profileLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
           "s3Key": "amplify-builds/profileLambda-33717134445043314763-build.zip"
+        },
+        "timelineLambda": {
+          "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
+          "s3Key": "amplify-builds/timelineLambda-697a4d753739436d4668-build.zip"
         }
       },
       "auth": {
