@@ -221,6 +221,7 @@ export class Profile extends Component {
     render() {
         return (
             <div>
+                <title>Profile </title>
                 <Center w='100%' mt='10'>
                     <VStack w='70%'>           
                         {this.state.loading ? 
