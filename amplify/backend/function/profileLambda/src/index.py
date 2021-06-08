@@ -486,8 +486,30 @@ def clearPosts(user, otherUser):
             else:
                 if 'Items' in postsResponse and len(postsResponse['Items']) >= 1:
                     for post in postsResponse['Items']:
-                        table.delete_item(
-                            Key={'PK': post['PK'], 'sortKey': post['sortKey']}
-                        )          
+                        #Collect the post item to check if user follows selected topic
+                        try:
+                            postItself = table.get_item(
+                                Key={'PK': 'POST#' + post['PK'], 'sortKey': 'METADATA'}
+                            )
+                        except ClientError as e:
+                            print(e.postItself['Error']['Message'])
+                        else:
+                            if 'Item' in postItself:
+                                topic = postItself['Item']['topicId']
+
+                                try:
+                                    followResponse = table.get_item(
+                                        Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': topic}
+                                    )
+                                except ClientError as e:
+                                    print(e.followResponse['Error']['Message'])
+                                else:
+                                    if 'Item' in followResponse:
+                                        #User is following the selected topic. Pass this post delete
+                                        pass
+                                    else:
+                                        table.delete_item(
+                                            Key={'PK': post['PK'], 'sortKey': post['sortKey']}
+                                        )          
                                 
         else: return Fail
