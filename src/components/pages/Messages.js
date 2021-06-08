@@ -2,6 +2,7 @@ import { HStack, StackDivider } from '@chakra-ui/layout'
 import React, { Component } from 'react'
 import {Conversations} from '../Conversations'
 import {Message} from '../Message'
+import '../Message.css'
 
 export class Messages extends Component {
     state = {
@@ -15,7 +16,7 @@ export class Messages extends Component {
 
     render(){
         return (
-            <div>
+            <div className="messages">
                 <HStack
                     divider={<StackDivider borderColor="gray.200" />}
                     spacing={4}

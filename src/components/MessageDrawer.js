@@ -51,7 +51,7 @@ import {
                         <DrawerHeader>Messages</DrawerHeader>
 
                         <DrawerBody>
-                            <VStack spacing='5'>
+                            <VStack spacing='5' className='messages-drawer'>
                                 <ConversationsInDrawer onSelectConversation={this.showmessages.bind(this)}/>
                                 <MessageInDrawer conversation={this.state.selectedConversationId}/>
                             </VStack>

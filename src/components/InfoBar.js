@@ -36,7 +36,7 @@ export class InfoBar extends Component {
             <div>
                 <HStack w='100vh'  mt='3' boxShadow='lg' p='10' borderRadius='xl' bg='gray.100'>
                     <Box w='100%'>
-                        Topic: {this.props.topic}
+                        <strong>Topic:</strong> {this.props.topic}
                         <br/>
                         <Text
                             fontSize='sm'
