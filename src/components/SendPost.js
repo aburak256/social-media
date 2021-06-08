@@ -66,6 +66,7 @@ export class SendPost extends Component {
         }
         const data = await API.post(`topicsApi`, path, myInit)
         this.props.onPost(data['post'])
+        this.setState({post: ''})
     }
 
     render() {
@@ -76,11 +77,9 @@ export class SendPost extends Component {
                         <Editor tag="pre" text={this.state.post} onChange={this.handleChange.bind(this)}  options={{toolbar: {buttons: ['bold', 'italic', 'underline','anchor']},
                         autoLink: true,
                         imageDragging: false,
-                        // disableEditing: true add this to post detail page,
                         placeholder: {text: 'Share post..'}}}/>
                     </Box>
                 </Center>
-                <p>{this.state.post}</p>
 
                 {this.state.prog = 0 ? <>   </> : <Progress size='xs' w='70%' value={this.state.prog}/>}
                 <HStack spacing='8'>
