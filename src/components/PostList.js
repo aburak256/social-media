@@ -15,6 +15,7 @@ export default class PostList extends React.Component {
     loading:true,
     sizeOfArray: '',
     permission: false,
+    message: ''
   }
   
   async componentDidMount() {
@@ -28,8 +29,13 @@ export default class PostList extends React.Component {
     else{
       const path = this.props.path
       const data = await API.get(`topicsApi`, path)
-      this.setState({ sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
-      this.setState({ loading: false })
+      if (data['FailMessage']){
+        this.setState({ message: data['FailMessage'],loading: false})
+      }
+      else{
+        this.setState({ sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+        this.setState({ loading: false })
+      }
     }
     
   }
@@ -88,112 +94,121 @@ export default class PostList extends React.Component {
               <SkeletonCircle size="100" />
               <SkeletonText mt="4" noOfLines={6} spacing="4" />
             </Box>
-            :  
-            <>{this.state.sizeOfArray ?  
-              <>{this.props.topic ? 
-                <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic} onPost={this.handlePost}/> : 
-                  <>
-                    <VStack>
+            :
+            <>{this.state.message ? 
+            <>
+            <Box mt='4' fontSize='xl' fontWeight="semibold" lineHeight="tight">
+              {this.state.message} 
+            </Box>
+            </> :   
+              <>{this.state.sizeOfArray ?  
+                <>{this.props.topic ? 
+                  <> {this.state.permission == 'Writer' ? <SendPost topic={this.props.topic} onPost={this.handlePost}/> : 
+                    <>
+                      <VStack>
+                        <Text
+                          fontWeight="semibold"
+                          lineHeight="tight"
+                          fontSize='lg'
+                        >                   
+                          You are not a writer. If you want you can take test
+                        </Text>
+                        <Link to={'/test/' + this.props.topic}>
+                          <Button bg='teal.200'>Go to Test</Button>
+                        </Link>      
+                      </VStack>
+                    </>} 
+                  </>
+                  :
+                  <> 
+                  </>
+                  }       
+                      
+                {this.state.posts.map((post, index) => 
+                <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
+                  <Box p="4" paddingLeft="4">
+                    <HStack alignItems="baseline">
+                      <Badge borderRadius="full" px="2" colorScheme="teal">
+                        <Link to={'/profile/' + post.userId}>
+                          {post.username}
+                        </Link>
+                      </Badge>
+                      <Box
+                          color="gray.400"
+                          fontWeight="semibold"
+                          letterSpacing="wide"
+                          fontSize="xs"
+                          textTransform="uppercase"
+                          ml="6"
+                          pl='2'
+                      >
+                          Posted at {post.dateTime}
+                      </Box>
+                    </HStack>            
+                    <HStack>     
                       <Text
+                        w='70%'
+                        mt="2"
                         fontWeight="semibold"
                         lineHeight="tight"
-                        fontSize='lg'
-                      >                   
-                        You are not a writer. If you want you can take test
+                        noOfLines={[1, 2, 3, 4]}
+                      >
+                        <Link to={'/posts/' + post.postId }>
+                          {post.text}
+                        </Link>
                       </Text>
-                      <Link to={'/test/' + this.props.topic}>
-                        <Button bg='teal.200'>Go to Test</Button>
-                      </Link>      
-                    </VStack>
-                  </>} 
-                </>
-                :
-                <> 
-                </>
-                }       
-                     
-            {this.state.posts.map((post, index) => 
-            <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
-              <Box p="4" paddingLeft="4">
-                <HStack alignItems="baseline">
-                  <Badge borderRadius="full" px="2" colorScheme="teal">
-                    <Link to={'/profile/' + post.userId}>
-                      {post.username}
-                    </Link>
-                  </Badge>
-                  <Box
-                      color="gray.400"
-                      fontWeight="semibold"
-                      letterSpacing="wide"
-                      fontSize="xs"
-                      textTransform="uppercase"
-                      ml="6"
-                      pl='2'
-                  >
-                      Posted at {post.dateTime}
-                  </Box>
-                </HStack>            
-                <HStack>     
-                  <Text
-                    w='70%'
-                    mt="2"
-                    fontWeight="semibold"
-                    lineHeight="tight"
-                    noOfLines={[1, 2, 3, 4]}
-                  >
-                    <Link to={'/posts/' + post.postId }>
-                      {post.text}
-                    </Link>
-                  </Text>
-                  <Box
-                    w='30%'
-                  >
-                    <Image w='100%' borderRadius='xl'  src={post.imageURL}/>
-                  </Box>
-                </HStack>
-                <Box d="flex" mt="4" alignItems="center">
-                  <button id={post.postId} onClick={() => this.postLike(post.postId, index)}>                
-                    <ChevronUpIcon w={8} h={8} color={post.Reaction == "Like" ? "teal.300" : "teal.100"}/>
-                  </button>
-                  <Box
-                    as="span"
-                    color={post.Reaction == "Like" ? "teal.300" : "gray.300"}
-                    fontSize="sm"
-                    >
-                    {post.numberOfLikes}
-                  </Box>
-                  <button id={post.postId} onClick={() => this.postDislike(post.postId, index)}>
-                    <ChevronDownIcon w={8} h={8} ml="4" color={post.Reaction == "Dislike" ? "red.300" : "red.100"}/>
-                  </button>
-                  <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
-                    {post.numberOfDislikes}
-                  </Box>
-                  <Popularity likes={post.numberOfLikes} dislikes={post.numberOfDislikes}/>
-                  <Text
-                    fontSize='sm'
-                    ml='7'
-                  >
-                    <ChatIcon
-                      w={4} h={4}
-                      color='teal.500'
-                    /> : {post.numberOfComments}
-                  </Text>
-                  <Box as="span" fontSize="sm" ml="6">
-                    <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
-                      <Icon
-                        as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
-                        w={6} h={6}
-                        color='teal.500'
-                      />
-                    </button>
+                      <Box
+                        w='30%'
+                      >
+                        <Image w='100%' borderRadius='xl'  src={post.imageURL}/>
+                      </Box>
+                    </HStack>
+                    <Box d="flex" mt="4" alignItems="center">
+                      <button id={post.postId} onClick={() => this.postLike(post.postId, index)}>                
+                        <ChevronUpIcon w={8} h={8} color={post.Reaction == "Like" ? "teal.300" : "teal.100"}/>
+                      </button>
+                      <Box
+                        as="span"
+                        color={post.Reaction == "Like" ? "teal.300" : "gray.300"}
+                        fontSize="sm"
+                        >
+                        {post.numberOfLikes}
+                      </Box>
+                      <button id={post.postId} onClick={() => this.postDislike(post.postId, index)}>
+                        <ChevronDownIcon w={8} h={8} ml="4" color={post.Reaction == "Dislike" ? "red.300" : "red.100"}/>
+                      </button>
+                      <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
+                        {post.numberOfDislikes}
+                      </Box>
+                      <Popularity likes={post.numberOfLikes} dislikes={post.numberOfDislikes}/>
+                      <Text
+                        fontSize='sm'
+                        ml='7'
+                      >
+                        <ChatIcon
+                          w={4} h={4}
+                          color='teal.500'
+                        /> : {post.numberOfComments}
+                      </Text>
+                      <Box as="span" fontSize="sm" ml="6">
+                        <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
+                          <Icon
+                            as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
+                            w={6} h={6}
+                            color='teal.500'
+                          />
+                        </button>
+                      </Box>
+                    </Box>             
                   </Box>
                 </Box>             
-              </Box>
-            </Box>             
-            )} </>: 
-            <Box>
-              No posts in this topic 
-            </Box>
+                )} </>: 
+                <Box>
+                  No posts in this topic 
+                </Box>
+              }
+              </>
+              
             }
             </>
           }
