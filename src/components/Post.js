@@ -6,6 +6,9 @@ import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import {Popularity} from './Popularity';
 import SendComment from './SendComment';
+const Editor = require('react-medium-editor').default;
+require('medium-editor/dist/css/medium-editor.css');
+require('medium-editor/dist/css/themes/default.css');
 
 export class Post extends Component {
     state = {
@@ -121,7 +124,11 @@ export class Post extends Component {
                                 as="h4"
                                 lineHeight="tight"
                             >
-                                {p.text}
+                                <Editor text={p.text}  options={{
+                                    toolbar: {buttons: []},
+                                    disableEditing: true 
+                                    }}/>
+                                
                             </Text>
                             <Box d="flex" mt="2" alignItems="center">
                                 <button id={p.postId} onClick={() => this.postLike(p.postId)}>
