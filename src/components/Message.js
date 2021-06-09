@@ -6,6 +6,9 @@ import { Image } from '@chakra-ui/image';
 import {Icon, Button, Input, Textarea} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
 import {RiDeleteBinLine} from 'react-icons/ri'
+import InfiniteScroll from "react-infinite-scroll-component"
+import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import {BiCheckDouble} from 'react-icons/bi'
 import {
     Modal,
@@ -58,6 +61,8 @@ export class Message extends Component {
                 const path = '/conversations/' + this.props.conversation
                 const data = await API.get(`topicsApi`, path)
                 //Check the last elements of data. If they are same no new messages
+                if( _.isEqual(data['messages'].reverse()[data['messages'].length-1]['dateTime'], this.state.messages[this.state.messages.length - 1]['dateTime'])){
+                    //Do nothing
                 }
                 else{
                     //If there are new messages then change state
