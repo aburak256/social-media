@@ -53,10 +53,32 @@ def handler(event, context):
         if 'INFO/' in topic:
             return getTopicInfo(event,context)
         timeRequired = '0'
-        resp = table.query(
-            KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
-            ScanIndexForward=False
-        )
+        if event['queryStringParameters'] != None:
+            #Collect last post first
+            postRes = table.get_item(
+                Key={'PK': 'POST#' + event['queryStringParameters']['paginator'], 'sortKey': 'METADATA'}
+            )
+            post = postRes['Item']
+            resp = table.query(
+                KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
+                ScanIndexForward=False,
+                Limit=30,
+                ExclusiveStartKey={
+                    'PK': 'TOPIC#' + topic + '#POST',
+                    'sortKey': post['dateTime']
+                }
+            )
+            if 'LastEvaluatedKey' in resp:
+                cont = 'True'
+            else:
+                cont = 'False'
+        else:
+            resp = table.query(
+                KeyConditionExpression=Key('PK').eq("TOPIC#" + topic + "#POST"),
+                ScanIndexForward=False,
+                Limit=30
+            )
+            cont = 'True'
         permission = 'Reader'
         user = None
         if 'identity' in event['requestContext']:
@@ -104,7 +126,7 @@ def handler(event, context):
             else:
                 if 'Item' in permissionResponse and permissionResponse['Item']['text'] == 'Success':
                     permission = 'Writer'
-        res = {'posts': posts, 'permission': permission}
+        res = {'posts': posts, 'permission': permission, 'cont': cont}
         try:
             timeResponse = table.get_item(
                 Key={'PK': 'TOPIC#' + topic , 'sortKey':'METADATA'}
