@@ -103,6 +103,53 @@ export default class PostList extends React.Component {
     this.setState({posts: posts}) 
 }
 
+fetchMoreData = () => {
+  
+  if(this.state.contScroll){
+    setTimeout(async () => {
+      const myInit = {
+        queryStringParameters:{
+          paginator: this.state.posts[this.state.posts.length - 1]['postId']
+        }
+      }
+      console.log(myInit)
+      if(this.props.topic){
+        const path = '/topics/' + (this.props.topic).toUpperCase()
+        const data = await API.get(`topicsApi`, path, myInit)
+        let posts = this.state.posts
+        const result = posts.concat(data['posts'])
+        this.setState({ sizeOfArray: result.length, posts: result})
+        if( data['cont'] == 'True'){
+          this.setState({contScroll: true})
+        }
+        else{
+          this.setState({contScroll: false})
+        }
+        this.setState({ loading: false })
+      }
+      else{
+        const path = this.props.path
+        const data = await API.get(`topicsApi`, path, myInit)
+        if (data['FailMessage']){
+          this.setState({ message: data['FailMessage'],loading: false})
+        }
+        else{
+          let posts = this.state.posts
+          const result = posts.concat(data['posts'])
+          this.setState({ sizeOfArray: result.length, posts: result, permission: data['permission']})
+          if( data['cont'] == 'True'){
+            this.setState({contScroll: true})
+          }
+          else{
+            this.setState({contScroll: false})
+          }
+          this.setState({ loading: false })
+        }
+      }
+    }, 1500);
+  }
+};
+
   render() {
     return (
         <VStack w="100%">
