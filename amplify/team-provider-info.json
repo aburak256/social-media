@@ -23,7 +23,7 @@
         },
         "topicsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/topicsLambda-4e58696a6657774b2f39-build.zip"
+          "s3Key": "amplify-builds/topicsLambda-57366957656d4a356d66-build.zip"
         },
         "postsLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
@@ -47,7 +47,7 @@
         },
         "timelineLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/timelineLambda-697a4d753739436d4668-build.zip"
+          "s3Key": "amplify-builds/timelineLambda-2f572b66326d6a694972-build.zip"
         }
       },
       "auth": {
