@@ -52,7 +52,8 @@ def handler(event, context):
             print(userResponse['Error']['Message'])
         else:
             if 'Item' in userResponse:
-                posts = collectUserPosts(otherUser)
+                if event['queryStringParameters'] != None: posts, cont = collectUserPosts(otherUser, event['queryStringParameters']['paginator'])
+                else: posts, cont = collectUserPosts(otherUser, -1)
 
                 if user == otherUser:
                     followInfo = 'Self'
@@ -105,7 +106,8 @@ def handler(event, context):
             print(userResponse['Error']['Message'])
         else:
             if 'Item' in userResponse:
-                posts = collectUserPosts(user)
+                if event['queryStringParameters'] != None: posts, cont = collectUserPosts(user, event['queryStringParameters']['paginator'])
+                else: posts, cont = collectUserPosts(user, -1)
                 userInfo = {
                     'imageUrl': userResponse['Item']['imageUrl'],
                     'username': userResponse['Item']['userName'],
@@ -114,7 +116,7 @@ def handler(event, context):
                     'follows':userResponse['Item']['numberOfFollows'],
                 }
                 
-                res={'posts': posts, 'profile': userInfo}
+                res={'posts': posts, 'profile': userInfo, 'cont': cont}
                 response = {
                     'statusCode': 200,
                     'body': json.dumps(res),
@@ -139,51 +141,77 @@ def handler(event, context):
         'body': json.dumps('Hello from your new Amplify Python lambda!')
     }
 
-def collectUserPosts(user):
+def collectUserPosts(user, paginator):
     posts = []
 
-    try:
-        postsUserResponse = table.query(
+    if paginator != -1:
+        #Collect last post first
+        postRes = table.query(
             KeyConditionExpression=Key('PK').eq('USER#' + user + '#POST'),
-            ScanIndexForward=False
+            FilterExpression=Attr('postId').eq(paginator),
         )
-    except ClientError as e:
-        print(e.postsUserResponse['Error']['Message'])
+        post = postRes['Items'][0]
+        postsUserResponse = table.query(
+            KeyConditionExpression=Key('PK').eq("USER#" + user + "#POST"),
+            ScanIndexForward=False,
+            Limit=30,
+            ExclusiveStartKey={
+                'PK': 'USER#' + user + '#POST',
+                'sortKey': post['sortKey']
+            }
+        )
+        if 'LastEvaluatedKey' in postsUserResponse:
+            cont = 'True'
+        else:
+            cont = 'False'
     else:
-        if 'Items' in postsUserResponse and len(postsUserResponse['Items']) >= 1:
-            for userPost in postsUserResponse['Items']:
-                #Collect the original post's information
-                try:
-                    postResponse = table.get_item(
-                        Key={'PK': 'POST#' + userPost['postId'], 'sortKey': 'METADATA'}
-                    )
-                except ClientError as e:
-                    print(e.postResponse['Error']['Message'])
-                else:
-                    if 'Item' in postResponse:
-                        postObject = {}
-                        for info in postResponse['Item']:
-                            if info == 'PK' or info == 'sortKey':
-                                continue
-                            elif info =='dateTime':
-                                dateTimePost = datetime.strptime(postResponse['Item'][info], '%Y-%m-%dT%H:%M:%S.%f')
-                                postObject['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")
-                            else:
-                                postObject[info] = postResponse['Item'][info] 
-
-                        #Check if user liked or disliked before
-                        try:
-                            reactionResponse = table.query(
-                                KeyConditionExpression=Key('PK').eq('POST#' + userPost['postId'] + '#REACTION#' + user)
-                            )
-                        except ClientError as e:
-                            print(e.reactionResponse['Error']['Message'])
+        try:
+            postsUserResponse = table.query(
+                KeyConditionExpression=Key('PK').eq('USER#' + user + '#POST'),
+                ScanIndexForward=False,
+                Limit=30
+            )
+        except ClientError as e:
+            print(e.postsUserResponse['Error']['Message'])
+        else:
+            if 'LastEvaluatedKey' in postsUserResponse:
+                cont = 'True'
+            else:
+                cont = 'False'
+    if 'Items' in postsUserResponse and len(postsUserResponse['Items']) >= 1:
+        for userPost in postsUserResponse['Items']:
+            #Collect the original post's information
+            try:
+                postResponse = table.get_item(
+                    Key={'PK': 'POST#' + userPost['postId'], 'sortKey': 'METADATA'}
+                )
+            except ClientError as e:
+                print(e.postResponse['Error']['Message'])
+            else:
+                if 'Item' in postResponse:
+                    postObject = {}
+                    for info in postResponse['Item']:
+                        if info == 'PK' or info == 'sortKey':
+                            continue
+                        elif info =='dateTime':
+                            dateTimePost = datetime.strptime(postResponse['Item'][info], '%Y-%m-%dT%H:%M:%S.%f')
+                            postObject['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")
                         else:
-                            if 'Items' in reactionResponse and len(reactionResponse['Items']) >= 1:
-                                postObject['Reaction'] = reactionResponse['Items'][0]['text']
-                            posts.append(postObject)
-            
-            return posts
+                            postObject[info] = postResponse['Item'][info] 
+
+                    #Check if user liked or disliked before
+                    try:
+                        reactionResponse = table.query(
+                            KeyConditionExpression=Key('PK').eq('POST#' + userPost['postId'] + '#REACTION#' + user)
+                        )
+                    except ClientError as e:
+                        print(e.reactionResponse['Error']['Message'])
+                    else:
+                        if 'Items' in reactionResponse and len(reactionResponse['Items']) >= 1:
+                            postObject['Reaction'] = reactionResponse['Items'][0]['text']
+                        posts.append(postObject)
+        print(posts, cont) 
+        return posts, cont
                                 
 
 def postHandler(event, context):
