@@ -53,66 +53,93 @@ def handler(event, context):
                 #Check if user is one of the members of this conversation
                 if user == conversationResponse['Item']['user1'] or user == conversationResponse['Item']['user2']:
                     #Collect messages
-                    try:
+                    if event['queryStringParameters'] != None:
+                        dateTimeConvert = datetime.strptime(event['queryStringParameters']['paginator'], "%m/%d/%Y, %H:%M:%S").isoformat()
+                        mesRes = table.query(
+                            KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId) & Key('sortKey').begins_with(dateTimeConvert)
+                        )
+                        message = mesRes['Items'][0]
+                        print(message)
                         messagesResponse = table.query(
                             KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId),
-                            ScanIndexForward = False
+                            ScanIndexForward=False,
+                            Limit=5,
+                            ExclusiveStartKey={
+                                'PK': 'CONVERSATION#' + conversationId,
+                                'sortKey': message['sortKey']
+                            }
                         )
-                    except ClientError as e:
-                        print(e.messagesResponse['Error']['Message'])
+                        if 'LastEvaluatedKey' in messagesResponse:
+                            cont = 'True'
+                        else:
+                            cont = 'False'
                     else:
-                        messages = []
-                        for item in messagesResponse['Items']:
-                            if item['sortKey'] != 'METADATA':
-                                dateTimeMessage = datetime.strptime(item['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
-                                dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
-                                messageObject = {
-                                        'seen' : item['seen'],
-                                        'dateTime': dateTime,
-                                        'text': item['text'],
-                                        'reply': item['reply']
-                                    }
-                                if item['sender'] == user:
-                                    messageObject['sender'] = 'user'
-                                else:
-                                    messageObject['sender'] = 'friend'
-                                    item['seen'] = 'True'
-                                    table.put_item(Item=item)
-                                messages.append(messageObject)
-
-                        #Collect other user's information
-                        if user == conversationResponse['Item']['user1']: otherUser = conversationResponse['Item']['user2']
-                        else: otherUser = conversationResponse['Item']['user1'] 
                         try:
-                            userResponse = table.get_item(
-                                Key={'PK': 'USER#' + otherUser, 'sortKey': 'METADATA'}
+                            messagesResponse = table.query(
+                                KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId),
+                                ScanIndexForward = False,
+                                Limit=15
                             )
                         except ClientError as e:
-                            print(e.userResponse['Error']['Message'])
+                            print(e.messagesResponse['Error']['Message'])
                         else:
-                            if 'Item' in userResponse:
-                                #Found other user is exist. Add user's information to response
-                                imageUrl = None
-                                if 'Image' in userResponse['Item']: imageUrl = userResponse['Item']['image']
-                                userInfo = {
-                                    'username': userResponse['Item']['userName'],
-                                    'image': imageUrl,
-                                }
+                            if 'LastEvaluatedKey' in messagesResponse:
+                                cont = 'True'
                             else:
-                                return Fail
+                                cont = 'False'
+                    messages = []
+                    print(messagesResponse)
+                    for item in messagesResponse['Items']:
+                        if item['sortKey'] != 'METADATA':
+                            dateTimeMessage = datetime.strptime(item['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
+                            dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
+                            messageObject = {
+                                    'seen' : item['seen'],
+                                    'dateTime': dateTime,
+                                    'text': item['text'],
+                                    'reply': item['reply']
+                                }
+                            if item['sender'] == user:
+                                messageObject['sender'] = 'user'
+                            else:
+                                messageObject['sender'] = 'friend'
+                                item['seen'] = 'True'
+                                table.put_item(Item=item)
+                            messages.append(messageObject)
 
-                            res = {'userInfo': userInfo, 'messages': messages}
-                            response = {
-                                'statusCode': 200,
-                                'body': json.dumps(res),
-                                'headers': {
-                                    'Access-Control-Allow-Headers': '*',
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                                },
+                    #Collect other user's information
+                    if user == conversationResponse['Item']['user1']: otherUser = conversationResponse['Item']['user2']
+                    else: otherUser = conversationResponse['Item']['user1'] 
+                    try:
+                        userResponse = table.get_item(
+                            Key={'PK': 'USER#' + otherUser, 'sortKey': 'METADATA'}
+                        )
+                    except ClientError as e:
+                        print(e.userResponse['Error']['Message'])
+                    else:
+                        if 'Item' in userResponse:
+                            #Found other user is exist. Add user's information to response
+                            imageUrl = None
+                            if 'Image' in userResponse['Item']: imageUrl = userResponse['Item']['image']
+                            userInfo = {
+                                'username': userResponse['Item']['userName'],
+                                'image': imageUrl,
                             }
+                        else:
+                            return Fail
 
-                            return response
+                        res = {'userInfo': userInfo, 'messages': messages, 'cont': cont}
+                        response = {
+                            'statusCode': 200,
+                            'body': json.dumps(res),
+                            'headers': {
+                                'Access-Control-Allow-Headers': '*',
+                                'Access-Control-Allow-Origin': '*',
+                                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                            },
+                        }
+
+                        return response
 
 
 
