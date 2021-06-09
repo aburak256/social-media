@@ -21,6 +21,7 @@ import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
 import {API, Auth, Storage} from "aws-amplify";
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
+import InfiniteScroll from "react-infinite-scroll-component"
 const Editor = require('react-medium-editor').default;
 require('medium-editor/dist/css/medium-editor.css');
 require('medium-editor/dist/css/themes/default.css');
@@ -39,7 +40,9 @@ export class Profile extends Component {
         user: null,
         message: '',
         sendMessage: false,
-        userMessage: ''
+        userMessage: '',
+        paginator: '',
+        contScroll: true,
     }
 
     async componentDidMount(){
@@ -53,14 +56,25 @@ export class Profile extends Component {
           )
         if(this.props.match.params.profile && !this.state.own){
             const path = '/profile/' + this.props.match.params.profile
-            console.log(path)
             const data = await API.get(`topicsApi`, path)
             this.setState({ profile: data['profile'], posts: data['posts'], user: data['user'], loading:false})
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+            }
+            else{
+                this.setState({contScroll: false})
+            } 
         }
         else{
             const path = '/profile'
             const data = await API.get(`topicsApi`, path)
             this.setState({ profile: data['profile'], posts: data['posts'], loading:false, own: true})
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+            }
+            else{
+                this.setState({contScroll: false})
+            }
         }
     }
 
@@ -153,7 +167,6 @@ export class Profile extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
-        console.log(data)
         if (data['upload'] == 'Allowed'){
             this.setState({ photoUploadAllowed: true, photoModalOpen: true})
         }
@@ -215,11 +228,52 @@ export class Profile extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
-        console.log(data)
         let posts = this.state.posts
         posts[index].bookmark = data["bookmark"]
         this.setState({posts: posts})
       }
+
+      fetchMoreData = () => {
+  
+        if(this.state.contScroll){
+          setTimeout(async () => {
+            const myInit = {
+              queryStringParameters:{
+                paginator: this.state.posts[this.state.posts.length - 1]['postId']
+              }
+            }
+            if(this.props.match.params.profile && !this.state.own){
+                const path = '/profile/' + this.props.match.params.profile
+                const data = await API.get(`topicsApi`, path, myInit)
+                let posts = this.state.posts
+                const result = posts.concat(data['posts'])
+                this.setState({ sizeOfArray: result.length, posts: result})
+                if( data['cont'] == 'True'){
+                    this.setState({contScroll: true})
+                }
+                else{
+                    this.setState({contScroll: false})
+                }
+                this.setState({ loading: false })
+            }
+            else{
+                const path = '/profile/'
+                const data = await API.get(`topicsApi`, path, myInit)
+                let posts = this.state.posts
+                const result = posts.concat(data['posts'])
+                this.setState({ sizeOfArray: result.length, posts: result})
+                if( data['cont'] == 'True'){
+                    this.setState({contScroll: true})
+                }
+                else{
+                    this.setState({contScroll: false})
+                }
+                this.setState({ loading: false })
+            }
+          }, 1500);
+        }
+      };
+      
 
     render() {
         return (
@@ -376,8 +430,19 @@ export class Profile extends Component {
                                         </Text>
                                     </HStack>
                                 </HStack>
+                                <InfiniteScroll
+                                    dataLength={this.state.posts.length}
+                                    next={this.fetchMoreData.bind(this)}
+                                    hasMore={this.state.contScroll}
+                                    loader={<Center w='100%' h='10vh' boxShadow='lg' borderRadius='lg'>Loading...</Center>}
+                                    endMessage={
+                                        <Center w='100%' h='10vh' boxShadow='lg' borderRadius='lg'>
+                                        <b>You have seen it all</b>
+                                        </Center>
+                                    }
+                                    >  
                                 {this.state.posts ? <>{this.state.posts.map((post, index) => 
-                                <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
+                                <Box w='100vh' borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
                                     <Box p="4" paddingLeft="4">
                                         <HStack alignItems="baseline">
                                             <Badge borderRadius="full" px="2" colorScheme="teal">
@@ -456,7 +521,7 @@ export class Profile extends Component {
                                     </Box>
                                 </Box>             
                                 )} </> : <> </>}
-                                
+                                </InfiniteScroll>
                             </>}
                         </VStack>                            
                 </Center>      
