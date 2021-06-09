@@ -1,11 +1,12 @@
 import React from 'react';
-import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
+import { VStack, Box, Badge, HStack, Text, Center} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon } from '@chakra-ui/icons'
 import {API} from "aws-amplify";
 import { Image, SkeletonCircle, SkeletonText, Button, Icon } from "@chakra-ui/react"
 import {Link} from 'react-router-dom'
 import { Popularity } from './Popularity';
 import {SendPost} from './SendPost'
+import InfiniteScroll from "react-infinite-scroll-component"
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
 const Editor = require('react-medium-editor').default;
 require('medium-editor/dist/css/medium-editor.css');
@@ -18,15 +19,22 @@ export default class PostList extends React.Component {
     loading:true,
     sizeOfArray: '',
     permission: false,
-    message: ''
+    message: '',
+    paginator: 1,
+    contScroll: true,
   }
   
   async componentDidMount() {
     if(this.props.topic){
       const path = '/topics/' + (this.props.topic).toUpperCase()
       const data = await API.get(`topicsApi`, path)
-      console.log(data)
       this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+      if( data['cont'] == 'True'){
+        this.setState({contScroll: true})
+      }
+      else{
+        this.setState({contScroll: false})
+      }
       this.setState({ loading: false })
     }
     else{
@@ -37,6 +45,12 @@ export default class PostList extends React.Component {
       }
       else{
         this.setState({ sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+        if( data['cont'] == 'True'){
+          this.setState({contScroll: true})
+        }
+        else{
+          this.setState({contScroll: false})
+        }
         this.setState({ loading: false })
       }
     }
@@ -126,9 +140,20 @@ export default class PostList extends React.Component {
                   <> 
                   </>
                   }       
-                      
+
+                <InfiniteScroll
+                  dataLength={this.state.posts.length}
+                  next={this.fetchMoreData}
+                  hasMore={this.state.contScroll}
+                  loader={<Center w='100%' h='10vh' boxShadow='lg' borderRadius='lg'>Loading...</Center>}
+                  endMessage={
+                    <Center w='100%' h='10vh' boxShadow='lg' borderRadius='lg'>
+                      <b>You have seen it all</b>
+                    </Center>
+                  }
+                >  
                 {this.state.posts.map((post, index) => 
-                <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
+                <Box w="100vh" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
                   <Box p="4" paddingLeft="4">
                     <HStack alignItems="baseline">
                       <Badge borderRadius="full" px="2" colorScheme="teal">
@@ -208,7 +233,9 @@ export default class PostList extends React.Component {
                     </Box>             
                   </Box>
                 </Box>             
-                )} </>: 
+                )} 
+                 </InfiniteScroll>
+                </>: 
                 <Box>
                   No posts in this topic 
                 </Box>
