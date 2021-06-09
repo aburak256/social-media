@@ -36,21 +36,39 @@ export class Message extends Component {
         deleteDateTime: null,
         deleteIndex: null,
         userText: '',
+        contScroll: '',
     }   
 
     async componentDidUpdate(prevProps){
         if(this.props.conversation !== prevProps.conversation){
             const path = '/conversations/' + this.props.conversation
             const data = await API.get(`topicsApi`, path)
-                this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
+            this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
                 () => this.scrollToBottom()
             )
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+              }
+            else{
+                this.setState({contScroll: false})
+              }
                     
             //Update at every 10 seconds
             setInterval(async () => {
                 const path = '/conversations/' + this.props.conversation
                 const data = await API.get(`topicsApi`, path)
-                this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+                //Check the last elements of data. If they are same no new messages
+                }
+                else{
+                    //If there are new messages then change state
+                    this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+                    if( data['cont'] == 'True'){
+                        this.setState({contScroll: true})
+                    }
+                    else{
+                        this.setState({contScroll: false})
+                    }
+                }
                 }, 10000);
         }
     }
@@ -130,6 +148,33 @@ export class Message extends Component {
           }
       }
 
+      fetchMoreData = () => {
+        console.log('scroll')
+        if(this.state.contScroll){
+          setTimeout(async () => {
+            const myInit = {
+              queryStringParameters:{
+                paginator: this.state.messages[0]['dateTime']
+              }
+            }
+            console.log(myInit)
+            const path = '/conversations/' + this.props.conversation
+            const data = await API.get(`topicsApi`, path, myInit)
+            console.log(data)
+            let messages = this.state.messages
+            const result = data['messages'].reverse().concat(messages)
+            this.setState({messages: result})
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+            }
+            else{
+                this.setState({contScroll: false})
+            }
+            this.setState({ loading: false })
+          }, 1500);
+        }
+      };
+
     render() {
         return (
             <VStack w='100%' align='left' boxShadow="lg">
@@ -149,6 +194,7 @@ export class Message extends Component {
                     </HStack> 
                 : <> </>}
                 <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox'>
+                    {this.state.contScroll ? <Center onClick={this.fetchMoreData.bind(this)} boxShadow='xl' p='2' borderRadius='lg' w='100%'>Show more</Center> : <> </>} 
                     {this.state.messages.map((message, index) =>  
                         <Box
                             w='100%'
