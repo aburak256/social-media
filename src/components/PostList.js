@@ -91,7 +91,6 @@ export default class PostList extends React.Component {
         }
     }
     const data = await API.post(`topicsApi`, path, myInit)
-    console.log(data)
     let posts = this.state.posts
     posts[index].bookmark = data["bookmark"]
     this.setState({posts: posts})
@@ -112,7 +111,6 @@ fetchMoreData = () => {
           paginator: this.state.posts[this.state.posts.length - 1]['postId']
         }
       }
-      console.log(myInit)
       if(this.props.topic){
         const path = '/topics/' + (this.props.topic).toUpperCase()
         const data = await API.get(`topicsApi`, path, myInit)
