@@ -78,7 +78,10 @@ def handler(event, context):
                 ScanIndexForward=False,
                 Limit=30
             )
-            cont = 'True'
+            if 'LastEvaluatedKey' in resp:
+                cont = 'True'
+            else:
+                cont = 'False'
         permission = 'Reader'
         user = None
         if 'identity' in event['requestContext']:

@@ -71,7 +71,10 @@ def handler(event, context):
             except ClientError as e:
                 print(e.postLinks['Error']['Message'])
             else:
-                cont = 'True'
+                if 'LastEvaluatedKey' in postLinks:
+                    cont = 'True'
+                else:
+                    cont = 'False'  
         posts = []
         if 'Items' in postLinks and len(postLinks['Items']) >= 1:
             for postLink in postLinks['Items']:
