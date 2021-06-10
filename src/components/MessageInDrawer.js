@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import {API} from "aws-amplify";
-import { Text, VStack, Box, HStack, Flex, Spacer } from '@chakra-ui/layout';
+import { Text, VStack, Box, HStack, Flex, Spacer, Center } from '@chakra-ui/layout';
 import {InfoOutlineIcon, CloseIcon, CheckIcon} from '@chakra-ui/icons'
 import { Image } from '@chakra-ui/image';
 import {Icon, Button, Input} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
 import {RiDeleteBinLine} from 'react-icons/ri'
 import {BiCheckDouble} from 'react-icons/bi'
+import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import {FaQuoteRight} from 'react-icons/fa'
 import {
     Modal,
@@ -37,13 +39,31 @@ export class MessageInDrawer extends Component {
             this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
                 () => this.scrollToBottom()
             )
-            console.log(data)
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+              }
+            else{
+                this.setState({contScroll: false})
+              }
                     
             //Update at every 10 seconds
             setInterval(async () => {
                 const path = '/conversations/' + this.props.conversation
                 const data = await API.get(`topicsApi`, path)
-                this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+                //Check the last elements of data. If they are same no new messages
+                if( _.isEqual(data['messages'].reverse()[data['messages'].length-1]['dateTime'], this.state.messages[this.state.messages.length - 1]['dateTime'])){
+                    //Do nothing
+                }
+                else{
+                    //If there are new messages then change state
+                    this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']})
+                    if( data['cont'] == 'True'){
+                        this.setState({contScroll: true})
+                    }
+                    else{
+                        this.setState({contScroll: false})
+                    }
+                }
                 }, 10000);
         }
     }
@@ -123,6 +143,32 @@ export class MessageInDrawer extends Component {
           }
       }
 
+      fetchMoreData = () => {
+        if(this.state.contScroll){
+          setTimeout(async () => {
+            const myInit = {
+              queryStringParameters:{
+                paginator: this.state.messages[0]['dateTime']
+              }
+            }
+            console.log(myInit)
+            const path = '/conversations/' + this.props.conversation
+            const data = await API.get(`topicsApi`, path, myInit)
+            console.log(data)
+            let messages = this.state.messages
+            const result = data['messages'].reverse().concat(messages)
+            this.setState({messages: result})
+            if( data['cont'] == 'True'){
+                this.setState({contScroll: true})
+            }
+            else{
+                this.setState({contScroll: false})
+            }
+            this.setState({ loading: false })
+          }, 1500);
+        }
+      };
+
     render() {
         return (
             <VStack h='40vh' w='100%' align='left' boxShadow="lg" spacing='0'>
@@ -148,6 +194,14 @@ export class MessageInDrawer extends Component {
                     backgroundColor: `rgba(0, 0, 0, 0.05)`,
                     },
                 }}>
+                    {this.state.contScroll ? <Center  
+                    onClick={this.fetchMoreData.bind(this)} 
+                    boxShadow='xl' p='2' 
+                    borderRadius='lg' w='100%'
+                    _hover={{
+                        bgGradient: "linear(to-r, gray.300, gray.500)",
+                    }}
+                    >Show more</Center> : <> </>}
                     {this.state.messages.map((message, index) =>  
                         <Box
                             w='100%'
