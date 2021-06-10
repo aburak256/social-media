@@ -197,7 +197,16 @@ export class Message extends Component {
                         </Box>
                     </HStack> 
                 : <> </>}
-                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox'>
+                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
+                    '&::-webkit-scrollbar': {
+                    width: '8px',
+                    borderRadius: '8px',
+                    backgroundColor: `rgba(0, 0, 0, 0.05)`,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: `rgba(0, 0, 0, 0.05)`,
+                    },
+                }}>
                     {this.state.contScroll ? <Center onClick={this.fetchMoreData.bind(this)} boxShadow='xl' p='2' borderRadius='lg' w='100%'>Show more</Center> : <> </>} 
                     {this.state.messages.map((message, index) =>  
                         <Box

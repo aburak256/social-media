@@ -28,7 +28,16 @@ export class Conversations extends Component {
 
     render() {
         return (
-            <VStack w='25%' bgGradient="linear(to-b, gray.100, teal.50 )" divider={<StackDivider borderColor="gray.200" />} boxShadow="lg">
+            <VStack w='25%' bgGradient="linear(to-b, gray.100, teal.50 )" divider={<StackDivider borderColor="gray.200" />} overflowY='scroll' boxShadow="lg" sx={{
+                '&::-webkit-scrollbar': {
+                width: '8px',
+                borderRadius: '8px',
+                backgroundColor: `rgba(0, 0, 0, 0.05)`,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                backgroundColor: `rgba(0, 0, 0, 0.05)`,
+                },
+            }}>
                 <Box
                     bgGradient="linear(to-r, teal.200, gray.200)"
                     w='100%'
