@@ -315,7 +315,7 @@ def postHandler(event, context):
                     #Changed bucket policy to give unauth. users to read objects
                     key = urllib.parse.quote(body['image'])
                     url = ("https://{bucket}.s3.us-east-2.amazonaws.com/public/{key}".format(bucket=bucket, key=key))
-                if len(body['text']) == 0 : return Fail
+                if len(body['text']) == 0 or len(body['text']) >= 5000: return Fail
                 #Get username of user
                 try:
                     userResponse = table.get_item(Key={'PK': "USER#" + user , 'sortKey': 'METADATA'})
