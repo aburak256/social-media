@@ -97,7 +97,7 @@ export class Post extends Component {
                     {this.state.post.map(p =>
                     <Box w="75%" boxShadow='lg' borderWidth="1px" borderRadius="lg" overflow="hidden">
                         {p.imageURL ? 
-                            <Image w='100%' maxW='100vh' maxH='80vh' src={p.imageURL} alt={p.text} />
+                            <Image w='100%' maxW='100vh' maxH='300vh' src={p.imageURL} alt={p.text} />
                             :
                             <Box></Box>
                         }
