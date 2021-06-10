@@ -59,11 +59,10 @@ def handler(event, context):
                             KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId) & Key('sortKey').begins_with(dateTimeConvert)
                         )
                         message = mesRes['Items'][0]
-                        print(message)
                         messagesResponse = table.query(
                             KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId),
                             ScanIndexForward=False,
-                            Limit=5,
+                            Limit=10,
                             ExclusiveStartKey={
                                 'PK': 'CONVERSATION#' + conversationId,
                                 'sortKey': message['sortKey']
@@ -78,7 +77,7 @@ def handler(event, context):
                             messagesResponse = table.query(
                                 KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId),
                                 ScanIndexForward = False,
-                                Limit=15
+                                Limit=20
                             )
                         except ClientError as e:
                             print(e.messagesResponse['Error']['Message'])
