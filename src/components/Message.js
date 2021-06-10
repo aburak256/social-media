@@ -153,8 +153,7 @@ export class Message extends Component {
           }
       }
 
-      fetchMoreData = () => {
-        console.log('scroll')
+    fetchMoreData = () => {
         if(this.state.contScroll){
           setTimeout(async () => {
             const myInit = {
