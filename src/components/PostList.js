@@ -8,10 +8,18 @@ import { Popularity } from './Popularity';
 import {SendPost} from './SendPost'
 import InfiniteScroll from "react-infinite-scroll-component"
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
+import { FiSend } from "react-icons/fi"
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,Radio, RadioGroup} from "@chakra-ui/react"
 const Editor = require('react-medium-editor').default;
 require('medium-editor/dist/css/medium-editor.css');
 require('medium-editor/dist/css/themes/default.css');
-
 
 export default class PostList extends React.Component {
   state = {
@@ -22,6 +30,8 @@ export default class PostList extends React.Component {
     message: '',
     paginator: 1,
     contScroll: true,
+    sendPostModal: false,
+    conversations: [],
   }
   
   async componentDidMount() {
@@ -54,6 +64,9 @@ export default class PostList extends React.Component {
         this.setState({ loading: false })
       }
     }
+    const path = '/conversations/'
+    const conversations = await API.get(`topicsApi`, path)
+    this.setState({ conversations: conversations['conversations']})
     
   }
 
@@ -148,6 +161,26 @@ fetchMoreData = () => {
   }
 };
 
+  myChangeHandler = (event) => {
+    this.setState({ sendConversationSelect: event})   
+  }
+
+
+  async sendMessage(){
+    console.log('sent')
+    if(this.state.sendConversationSelect && this.state.postToSend){
+      const path = '/conversations/' + this.state.sendConversationSelect
+      const myInit = {
+          body:{
+              type: 'sendPost',
+              postId: this.state.postToSend, 
+          }
+      }
+      const data = await API.post(`topicsApi`, path, myInit)
+      console.log(data)
+    }
+  }
+  
   render() {
     return (
         <VStack w="100%">
@@ -185,7 +218,24 @@ fetchMoreData = () => {
                   <> 
                   </>
                   }       
-
+                <Modal onClose={() => this.setState({sendPostModal:false})} isOpen={this.state.sendPostModal} isCentered>
+                    <ModalOverlay />
+                    <ModalContent>
+                    <ModalHeader>Send post as message</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                      <RadioGroup onChange={this.myChangeHandler} pb='8'>
+                      <VStack spacing="24px" align='left'>
+                        {this.state.conversations.map((conversation, index) =>                         
+                              <Radio value={conversation.conversationId}>{conversation.userName}</Radio>)}
+                          </VStack>
+                        </RadioGroup>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button bg='teal.500' onClick={this.sendMessage.bind(this)}>Send</Button>
+                    </ModalFooter>
+                    </ModalContent>
+                </Modal>
                 <InfiniteScroll
                   dataLength={this.state.posts.length}
                   next={this.fetchMoreData}
@@ -270,6 +320,15 @@ fetchMoreData = () => {
                         <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
                           <Icon
                             as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
+                            w={6} h={6}
+                            color='teal.500'
+                          />
+                        </button>
+                      </Box>
+                      <Box as="span" fontSize="sm" ml="6">
+                        <button id={post.postId} onClick={() => this.setState({sendPostModal: true, postToSend: postId})}>
+                          <Icon
+                            as={FiSend}
                             w={6} h={6}
                             color='teal.500'
                           />
