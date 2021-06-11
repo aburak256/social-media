@@ -326,7 +326,7 @@ fetchMoreData = () => {
                         </button>
                       </Box>
                       <Box as="span" fontSize="sm" ml="6">
-                        <button id={post.postId} onClick={() => this.setState({sendPostModal: true, postToSend: postId})}>
+                        <button id={post.postId} onClick={() => this.setState({sendPostModal: true, postToSend: post.postId})}>
                           <Icon
                             as={FiSend}
                             w={6} h={6}
