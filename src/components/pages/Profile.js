@@ -15,13 +15,14 @@ import { Box, Center, Grid, GridItem, HStack, VStack,  SkeletonCircle, SkeletonT
     CloseButton, 
     Input,
     InputGroup,
-    InputLeftElement,} from "@chakra-ui/react"
+    InputLeftElement, Radio, RadioGroup} from "@chakra-ui/react"
 import { ChevronUpIcon, ChevronDownIcon , ChatIcon, EditIcon, AttachmentIcon, MessageIcon } from '@chakra-ui/icons'
 import { Popularity } from '../Popularity';
 import {Link} from 'react-router-dom'
 import {API, Auth, Storage} from "aws-amplify";
 import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs"
 import InfiniteScroll from "react-infinite-scroll-component"
+import { FiSend } from "react-icons/fi"
 const Editor = require('react-medium-editor').default;
 require('medium-editor/dist/css/medium-editor.css');
 require('medium-editor/dist/css/themes/default.css');
@@ -43,6 +44,8 @@ export class Profile extends Component {
         userMessage: '',
         paginator: '',
         contScroll: true,
+        sendPostModal: false,
+        conversations: [],
     }
 
     async componentDidMount(){
@@ -76,6 +79,9 @@ export class Profile extends Component {
                 this.setState({contScroll: false})
             }
         }
+        const path = '/conversations/'
+        const conversations = await API.get(`topicsApi`, path)
+        this.setState({ conversations: conversations['conversations']})
     }
 
     async followUser(){
@@ -273,6 +279,28 @@ export class Profile extends Component {
           }, 1500);
         }
       };
+
+    myChangeHandler = (event) => {
+    this.setState({ sendConversationSelect: event})   
+    }
+
+
+    async sendMessage(){
+        console.log('sent')
+        if(this.state.sendConversationSelect && this.state.postToSend){
+          const path = '/conversations/' + this.state.sendConversationSelect
+          const myInit = {
+              body:{
+                  type: 'sendPost',
+                  postId: this.state.postToSend, 
+              }
+          }
+          const data = await API.post(`topicsApi`, path, myInit)
+          if(data['message'] == 'Success'){
+            this.setState({sendPostModal: false})
+          }
+        }
+      }
       
 
     render() {
@@ -482,41 +510,50 @@ export class Profile extends Component {
                                             </Box>
                                         </HStack>
                                         <Box d="flex" mt="4" alignItems="center">
-                                        <button id={post.postId} onClick={() => this.postLike(post.postId, index)}>                
-                                            <ChevronUpIcon w={8} h={8} color={post.Reaction == "Like" ? "teal.300" : "teal.100"}/>
-                                        </button>
-                                        <Box
-                                            as="span"
-                                            color={post.Reaction == "Like" ? "teal.300" : "gray.300"}
-                                            fontSize="sm"
-                                            >
-                                            {post.numberOfLikes}
-                                        </Box>
-                                        <button id={post.postId} onClick={() => this.postDislike(post.postId, index)}>
-                                            <ChevronDownIcon w={8} h={8} ml="4" color={post.Reaction == "Dislike" ? "red.300" : "red.100"}/>
-                                        </button>
-                                        <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
-                                            {post.numberOfDislikes}
-                                        </Box>
-                                        <Popularity likes={post.numberOfLikes} dislikes={post.numberOfDislikes}/>
-                                        <Text
-                                            fontSize='sm'
-                                            ml='7'
-                                        >
-                                            <ChatIcon
-                                            w={4} h={4}
-                                            color='teal.500'
-                                            /> : {post.numberOfComments}
-                                        </Text>
-                                        <Box as="span" fontSize="sm" ml="6">
-                                            <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
-                                            <Icon
-                                                as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
-                                                w={6} h={6}
-                                                color='teal.500'
-                                            />
+                                            <button id={post.postId} onClick={() => this.postLike(post.postId, index)}>                
+                                                <ChevronUpIcon w={8} h={8} color={post.Reaction == "Like" ? "teal.300" : "teal.100"}/>
                                             </button>
-                                        </Box>
+                                            <Box
+                                                as="span"
+                                                color={post.Reaction == "Like" ? "teal.300" : "gray.300"}
+                                                fontSize="sm"
+                                                >
+                                                {post.numberOfLikes}
+                                            </Box>
+                                            <button id={post.postId} onClick={() => this.postDislike(post.postId, index)}>
+                                                <ChevronDownIcon w={8} h={8} ml="4" color={post.Reaction == "Dislike" ? "red.300" : "red.100"}/>
+                                            </button>
+                                            <Box as="span" color={post.Reaction == "Dislike" ? "red.300" : "gray.300"} fontSize="sm">
+                                                {post.numberOfDislikes}
+                                            </Box>
+                                            <Popularity likes={post.numberOfLikes} dislikes={post.numberOfDislikes}/>
+                                            <Text
+                                                fontSize='sm'
+                                                ml='7'
+                                            >
+                                                <ChatIcon
+                                                w={4} h={4}
+                                                color='teal.500'
+                                                /> : {post.numberOfComments}
+                                            </Text>
+                                            <Box as="span" fontSize="sm" ml="6">
+                                                <button id={post.postId} onClick={() => this.postBookmark(post.postId, index)}>
+                                                <Icon
+                                                    as={post.bookmark == "True" ? BsFillBookmarkFill :  BsBookmark}
+                                                    w={6} h={6}
+                                                    color='teal.500'
+                                                />
+                                                </button>
+                                            </Box>
+                                            <Box as="span" fontSize="sm" ml="6">
+                                                <button id={post.postId} onClick={() => this.setState({sendPostModal: true, postToSend: post.postId})}>
+                                                <Icon
+                                                    as={FiSend}
+                                                    w={6} h={6}
+                                                    color='teal.500'
+                                                />
+                                                </button>
+                                            </Box>
                                         </Box>             
                                     </Box>
                                 </Box>             
@@ -524,7 +561,25 @@ export class Profile extends Component {
                                 </InfiniteScroll>
                             </>}
                         </VStack>                            
-                </Center>      
+                </Center>  
+                <Modal onClose={() => this.setState({sendPostModal:false})} isOpen={this.state.sendPostModal} isCentered>
+                    <ModalOverlay />
+                    <ModalContent>
+                    <ModalHeader>Send post as message</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                      <RadioGroup onChange={this.myChangeHandler} pb='8'>
+                      <VStack spacing="24px" align='left'>
+                        {this.state.conversations.map((conversation, index) =>                         
+                              <Radio value={conversation.conversationId}>{conversation.userName}</Radio>)}
+                          </VStack>
+                        </RadioGroup>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button bg='teal.500' onClick={this.sendMessage.bind(this)}>Send</Button>
+                    </ModalFooter>
+                    </ModalContent>
+                </Modal>    
             </div>
         )
     }
