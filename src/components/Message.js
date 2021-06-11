@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import {API} from "aws-amplify";
 import { Text, VStack, Box, StackDivider, HStack, Center, Flex, Spacer } from '@chakra-ui/layout';
 import {InfoOutlineIcon, CloseIcon} from '@chakra-ui/icons'
+import {Link} from 'react-router-dom'
 import { Image } from '@chakra-ui/image';
 import {Icon, Button, Input, Textarea} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
@@ -26,9 +27,11 @@ import {
     PopoverFooter,
     PopoverArrow,
     PopoverCloseButton,
-    Portal
+    Portal,
   } from "@chakra-ui/react"
-
+const Editor = require('react-medium-editor').default;
+require('medium-editor/dist/css/medium-editor.css');
+require('medium-editor/dist/css/themes/default.css');
 export class Message extends Component {
     state = {
         messages:[],
@@ -46,6 +49,7 @@ export class Message extends Component {
         if(this.props.conversation !== prevProps.conversation){
             const path = '/conversations/' + this.props.conversation
             const data = await API.get(`topicsApi`, path)
+            console.log(data)
             this.setState({messages: data['messages'].reverse(), userInfo: data['userInfo']},
                 () => this.scrollToBottom()
             )
@@ -209,7 +213,121 @@ export class Message extends Component {
                 }}>
                     {this.state.contScroll ? <Center onClick={this.fetchMoreData.bind(this)} boxShadow='xl' p='2' borderRadius='lg' w='100%'>Show more</Center> : <> </>} 
                     {this.state.messages.map((message, index) =>  
+                        <> {message.type == 'post' ? <>
                         <Box
+                            w='100%'
+                            align={message.sender == 'user' ? 'right' : 'left'}
+                            px='3'>
+                              <Flex w='60%'>
+                                    {message.sender == 'user' ? 
+                                    <>
+                                        <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
+                                            <ModalOverlay />
+                                            <ModalContent>
+                                            <ModalHeader>Delete Message</ModalHeader>
+                                            <ModalCloseButton />
+                                            <ModalBody>
+                                                Do you want to delete selected message?
+                                                <br/>
+                                                Message: {this.state.deleteSelection}
+                                            </ModalBody>
+                                            <ModalFooter>
+                                                <Button bg='red.500' onClick={this.deleteMessage.bind(this)}>Delete</Button>
+                                            </ModalFooter>
+                                            </ModalContent>
+                                        </Modal>
+                                        <Spacer /> 
+                                        <Box my='auto' mr='1'>
+                                                <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
+                                        </Box>          
+                                    </> :
+                                    <>
+                                    </>
+                                    }
+                                    <VStack
+                                        align={message.sender == 'user' ? 'right' : 'left'}
+                                        spacing='1'
+                                        w='100%'
+                                    >
+                                       <Popover>
+                                            <PopoverTrigger>
+                                                <Text
+                                                    bg='gray.100'
+                                                    maxW='40vh'                                       
+                                                    pl = {message.sender == 'user' ? '2' : '4'}
+                                                    pr = {message.sender == 'user' ? '4' : '2'}
+                                                    borderRadius='lg'
+                                                    fontSize='14'
+                                                    as='cite'
+                                                >
+                                                    <VStack w='100%' align='left' py='2' spacing='2' px='2'>
+                                                        <Text  fontSize='xs' align='left'>
+                                                            {message.username}
+                                                        </Text>
+                                                        <Text w='80%' align='left' noOfLines={[1, 2, 3, 4, 5, 6, 7]}>
+                                                            <Editor text={message.text}  options={{
+                                                                toolbar: {buttons: []},
+                                                                disableEditing: true 
+                                                                }}/>
+                                                        </Text>
+                                                        {message.imageUrl ? <Image borderRadius='xl' pb='4' w='100%' src={message.imageUrl} /> : <> </>}
+                                                    </VStack>
+                                                </Text>
+                                                </PopoverTrigger>
+                                                <Portal>
+                                                    <PopoverContent color="white" bg="black" borderColor="blue.800" w='35vh'>
+                                                        <PopoverArrow />
+                                                        <PopoverCloseButton />
+                                                        <PopoverBody>
+                                                        <HStack>
+                                                            {message.sender =='user' ? 
+                                                            <Box  my='auto'>
+                                                                <Button bg='red.600' onClick={() => this.deleteMessageModalOpen(message, index)}>
+                                                                    Delete
+                                                                </Button>
+                                                            </Box> : <> </> }
+                                                            
+                                                            <Box  my='auto'>
+                                                                <Button bg='cyan.600' onClick={() => this.selectReply(message)}>
+                                                                    Reply
+                                                                </Button> 
+                                                            </Box>
+                                                            <Box ml='2' mx='auto' my='auto'>
+                                                                <Button  bg='green.600'>
+                                                                    <Link to={'/posts/' + message.postId}>
+                                                                        Go to Post
+                                                                    </Link>
+                                                                </Button>
+                                                            </Box>
+                                                        </HStack>
+                                                        </PopoverBody>
+                                                    </PopoverContent>
+                                                </Portal>
+                                            </Popover>
+                                            
+                                        
+                                        <Text fontSize='10' color='gray.500'>
+                                            {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
+                                        </Text>
+                                        <div style={{ float:"left", clear: "both" }}
+                                            ref={(el) => { this.messagesEnd = el; }}>
+                                        </div>
+                                    </VStack>
+                                    {message.sender == 'friend' ?
+                                    <> 
+                                        <Spacer />
+                                        
+                                         
+                                    </>
+                                    :
+                                    <>
+                                    </>
+                                    }
+                                </Flex>  
+                        </Box>
+                        
+                        </> : 
+                            <Box
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='2'
@@ -315,7 +433,9 @@ export class Message extends Component {
                                     </>
                                     }
                                 </Flex>
-                        </Box>   
+                        </Box>
+                        } </>
+                           
                     )}
                 </VStack>
                 <VStack w='50%'>
