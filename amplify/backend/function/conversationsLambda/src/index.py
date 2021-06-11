@@ -411,9 +411,79 @@ def postHandler(event, context):
                             else:
                                 return createConversation(user, otherUser, body['text'])
 
-                                
-            
+
+
         else: return Fail
+                                    
+    elif body['type'] == 'sendPost':
+        #Find conversation that user involved. Else return fail
+        try:
+            conversationUserResponse = table.query(
+                KeyConditionExpression=Key('PK').eq('USER#' + user + '#CONVERSATION'),
+                FilterExpression=Attr('conversationId').eq(conversationId)
+            )
+        except ClientError as e:
+            print(e.conversationUserResponse['Error']['Message'])
+        else:
+            if 'Items' in conversationUserResponse:
+                #Create message object
+                message = {
+                    'PK': 'CONVERSATION#' + conversationId,
+                    'sortKey': datetime.now().isoformat(),
+                    'seen': 'False',
+                    'sender': user,
+                    'text': '',
+                    'postId': body['postId'],
+                }
+
+                #Update the user conversation items to fetch newer data for users.                
+                dateTimeMessage = datetime.strptime(message['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
+                dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
+                oldSortKey = conversationUserResponse['Items'][0]['sortKey']
+                conversationUserResponse['Items'][0]['sortKey'] = dateTime
+
+                #Fetch other user's conversation item to update.
+                otherUser = conversationUserResponse['Items'][0]['otherUser']
+                try:
+                    otherUserResponse = table.query(
+                        KeyConditionExpression=Key('PK').eq('USER#' + otherUser + '#CONVERSATION'),
+                        FilterExpression=Attr('otherUser').eq(user)
+                    )
+                except ClientError as e:
+                    print(e.otherUserResponse['Error']['Message'])
+                    return Fail
+                else:
+                    if 'Items' in otherUserResponse:
+                        table.delete_item(
+                            Key={'PK': otherUserResponse['Items'][0]['PK'] , 'sortKey': otherUserResponse['Items'][0]['sortKey']}
+                        )
+                        otherUserResponse['Items'][0]['sortKey'] = message['sortKey']
+                        table.put_item(Item=otherUserResponse['Items'][0])
+                
+                #Also update our user's conversation data. 
+                table.delete_item(
+                    Key={'PK': conversationUserResponse['Items'][0]['PK'] , 'sortKey':oldSortKey}
+                )
+                conversationUserResponse['Items'][0]['sortKey'] = message['sortKey']
+
+                table.put_item(Item=conversationUserResponse['Items'][0])
+     
+                table.put_item(Item=message)
+                res = {'message': 'Success'}
+                response = {
+                    'statusCode': 200,
+                    'body': json.dumps(res),
+                    'headers': {
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                }
+
+                return response
+
+            else:
+                return Fail
 
 
 def createConversation(user, otherUser, text):
