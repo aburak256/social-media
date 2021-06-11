@@ -177,7 +177,9 @@ fetchMoreData = () => {
           }
       }
       const data = await API.post(`topicsApi`, path, myInit)
-      console.log(data)
+      if(data['message'] == 'Success'){
+        this.setState({sendPostModal: false})
+      }
     }
   }
   
