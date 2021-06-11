@@ -3,6 +3,7 @@ import {API} from "aws-amplify";
 import { Text, VStack, Box, HStack, Flex, Spacer, Center } from '@chakra-ui/layout';
 import {InfoOutlineIcon, CloseIcon, CheckIcon} from '@chakra-ui/icons'
 import { Image } from '@chakra-ui/image';
+import {Link} from 'react-router-dom'
 import {Icon, Button, Input} from '@chakra-ui/react'
 import {BsFillReplyAllFill} from 'react-icons/bs'
 import {RiDeleteBinLine} from 'react-icons/ri'
@@ -203,100 +204,122 @@ export class MessageInDrawer extends Component {
                     }}
                     >Show more</Center> : <> </>}
                     {this.state.messages.map((message, index) =>  
+                    <> {message.type == 'post' ?
+                    <>
                         <Box
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='2'
+                        >
+                            <Text 
+                                bgGradient="linear(to-r,orange.400,orange.50)"
+                                maxW='15vh'
+                                pl = {message.sender == 'user' ? '2' : '4'}
+                                pr = {message.sender == 'user' ? '4' : '2'}
+                                borderRadius='lg'
+                                mb='1'
+                                fontSize='10'>
+                                <Link to={'/posts/' + message.postId}>
+                                    User sent you a post. To see the post Click this message
+                                </Link>
+                            </Text>
+                        </Box> 
+                    </> :
+                        <Box
+                            w='100%'
+                            align={message.sender == 'user' ? 'right' : 'left'}
+                            px='2'
+                        >
+                            {message.reply ? 
+                            <Text
+                                bgGradient="linear(to-r,gray.400,gray.50)"
+                                maxW='15vh'
+                                pl = {message.sender == 'user' ? '2' : '4'}
+                                pr = {message.sender == 'user' ? '4' : '2'}
+                                borderRadius='lg'
+                                mb='1'
+                                fontSize='10'
                             >
-                                {message.reply ? 
-                                <Text
-                                    bgGradient="linear(to-r,gray.400,gray.50)"
-                                    maxW='15vh'
-                                    pl = {message.sender == 'user' ? '2' : '4'}
-                                    pr = {message.sender == 'user' ? '4' : '2'}
-                                    borderRadius='lg'
-                                    mb='1'
-                                    fontSize='10'
-                                >
-                                    Replied to: {message.reply.text}
-                                </Text> : <> </>
+                                Replied to: {message.reply.text}
+                            </Text> : <> </>
+                            }
+                            <Flex w='50%'>
+                                {message.sender == 'user' ? 
+                                <>
+                                    <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
+                                        <ModalOverlay />
+                                        <ModalContent>
+                                        <ModalHeader>Delete Message</ModalHeader>
+                                        <ModalCloseButton />
+                                        <ModalBody>
+                                            Do you want to delete selected message?
+                                            <br/>
+                                            Message: {this.state.deleteSelection}
+                                        </ModalBody>
+                                        <ModalFooter>
+                                            <Button bg='red.500' onClick={this.deleteMessage.bind(this)}>Delete</Button>
+                                        </ModalFooter>
+                                        </ModalContent>
+                                    </Modal>
+                                    <Box mr='2' my='auto'>
+                                        <button onClick={() => this.deleteMessageModalOpen(message, index)}>
+                                            <Icon as={RiDeleteBinLine} color='red'/>
+                                        </button>
+                                    </Box>
+                                    <Box mr='2' my='auto'>
+                                        <button onClick={() => this.selectReply(message)}>
+                                            <Icon as={BsFillReplyAllFill} />
+                                        </button> 
+                                    </Box>
+                                    <Spacer /> 
+                                    <Box my='auto' mr='1'>
+                                            <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
+                                    </Box>                                   
+                                </> :
+                                <>
+                                </>
                                 }
-                                <Flex w='50%'>
-                                    {message.sender == 'user' ? 
-                                    <>
-                                        <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
-                                            <ModalOverlay />
-                                            <ModalContent>
-                                            <ModalHeader>Delete Message</ModalHeader>
-                                            <ModalCloseButton />
-                                            <ModalBody>
-                                                Do you want to delete selected message?
-                                                <br/>
-                                                Message: {this.state.deleteSelection}
-                                            </ModalBody>
-                                            <ModalFooter>
-                                                <Button bg='red.500' onClick={this.deleteMessage.bind(this)}>Delete</Button>
-                                            </ModalFooter>
-                                            </ModalContent>
-                                        </Modal>
-                                        <Box mr='2' my='auto'>
-                                            <button onClick={() => this.deleteMessageModalOpen(message, index)}>
-                                                <Icon as={RiDeleteBinLine} color='red'/>
-                                            </button>
-                                        </Box>
-                                        <Box mr='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message)}>
-                                                <Icon as={BsFillReplyAllFill} />
-                                            </button> 
-                                        </Box>
-                                        <Spacer /> 
-                                        <Box my='auto' mr='1'>
-                                                <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
-                                        </Box>                                   
-                                    </> :
-                                    <>
-                                    </>
-                                    }
-                                    <VStack
-                                        align={message.sender == 'user' ? 'right' : 'left'}
-                                        spacing='0'
-                                    > 
-                                        <Text
-                                            bg={message.sender == 'user' ? 'cyan.400' : 'cyan.500'}
-                                            maxW='35vh'
-                                            color={message.sender == 'user' ? 'white' : 'white'}
-                                            pl = {message.sender == 'user' ? '2' : '4'}
-                                            pr = {message.sender == 'user' ? '4' : '2'}
-                                            borderRadius='lg'
-                                            fontSize='12'
-                                            as='cite'
-                                        >
-                                            {message.text}
-                                        </Text>
-                                            
+                                <VStack
+                                    align={message.sender == 'user' ? 'right' : 'left'}
+                                    spacing='0'
+                                > 
+                                    <Text
+                                        bg={message.sender == 'user' ? 'cyan.400' : 'cyan.500'}
+                                        maxW='35vh'
+                                        color={message.sender == 'user' ? 'white' : 'white'}
+                                        pl = {message.sender == 'user' ? '2' : '4'}
+                                        pr = {message.sender == 'user' ? '4' : '2'}
+                                        borderRadius='lg'
+                                        fontSize='12'
+                                        as='cite'
+                                    >
+                                        {message.text}
+                                    </Text>
                                         
-                                        <Text fontSize='9' color='gray.500'>
-                                            {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
-                                        </Text>
-                                        <div style={{ float:"left", clear: "both" }}
-                                            ref={(el) => { this.messagesEnd = el; }}>
-                                        </div>
-                                    </VStack>
-                                    {message.sender == 'friend' ?
-                                    <> 
-                                        <Box ml='2' my='auto'>
-                                            <button onClick={() => this.selectReply(message)}>
-                                                <Icon as={BsFillReplyAllFill} />
-                                            </button> 
-                                        </Box>
-                                         
-                                    </>
-                                    :
-                                    <>
-                                    </>
-                                    }
-                                </Flex>
-                        </Box>   
+                                    
+                                    <Text fontSize='9' color='gray.500'>
+                                        {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
+                                    </Text>
+                                    <div style={{ float:"left", clear: "both" }}
+                                        ref={(el) => { this.messagesEnd = el; }}>
+                                    </div>
+                                </VStack>
+                                {message.sender == 'friend' ?
+                                <> 
+                                    <Box ml='2' my='auto'>
+                                        <button onClick={() => this.selectReply(message)}>
+                                            <Icon as={BsFillReplyAllFill} />
+                                        </button> 
+                                    </Box>
+                                    
+                                </>
+                                :
+                                <>
+                                </>
+                                }
+                            </Flex>
+                        </Box>}
+                        </>       
                     )}
                     {this.state.replySelection ? 
                     <Flex
