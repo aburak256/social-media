@@ -87,17 +87,39 @@ def handler(event, context):
                             else:
                                 cont = 'False'
                     messages = []
-                    print(messagesResponse)
                     for item in messagesResponse['Items']:
                         if item['sortKey'] != 'METADATA':
                             dateTimeMessage = datetime.strptime(item['sortKey'], '%Y-%m-%dT%H:%M:%S.%f')
                             dateTime = dateTimeMessage.strftime("%m/%d/%Y, %H:%M:%S")
-                            messageObject = {
-                                    'seen' : item['seen'],
-                                    'dateTime': dateTime,
-                                    'text': item['text'],
-                                    'reply': item['reply']
-                                }
+                            if 'postId' in item:
+                                #If user send a post to other user.
+                                #Fetch the post data
+                                try:
+                                    postGetResponse = table.get_item(
+                                        Key={'PK': 'POST#' + item['postId'], 'sortKey': 'METADATA'}
+                                    )
+                                except ClientError as e:
+                                    print(e.postGetResponse['Error']['Message'])
+                                else:
+                                    if 'Item' in postGetResponse:
+                                        messageObject = {
+                                                'type': 'post',
+                                                'seen' : item['seen'],
+                                                'dateTime': dateTime,
+                                                'text': postGetResponse['Item']['text'],
+                                                'postId': postGetResponse['Item']['postId'],
+                                                'username': postGetResponse['Item']['username'],
+                                                'imageUrl': postGetResponse['Item']['imageURL'],
+                                                'reply': ''
+                                            }
+                            else:
+                                messageObject = {
+                                        'type': 'message',
+                                        'seen' : item['seen'],
+                                        'dateTime': dateTime,
+                                        'text': item['text'],
+                                        'reply': item['reply']
+                                    }
                             if item['sender'] == user:
                                 messageObject['sender'] = 'user'
                             else:
@@ -253,7 +275,7 @@ def postHandler(event, context):
                     'seen': 'False',
                     'sender': user,
                     'text': body['text'],
-                    'reply': ''
+                    'reply': '',
                 }
                 if 'reply' in body:
                     #Find replied message. If its not in messages return Fail
@@ -314,7 +336,7 @@ def postHandler(event, context):
                     'dateTime': dateTime,
                     'text': message['text'],
                     'reply': message['reply'],
-                    'sender': 'user'
+                    'sender': 'user',
                 }
 
                 res = {'message': messageReturn}
