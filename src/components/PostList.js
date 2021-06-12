@@ -38,6 +38,7 @@ export default class PostList extends React.Component {
     if(this.props.topic){
       const path = '/topics/' + (this.props.topic).toUpperCase()
       const data = await API.get(`topicsApi`, path)
+      console.log(data)
       this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
       if( data['cont'] == 'True'){
         this.setState({contScroll: true})
@@ -252,7 +253,7 @@ fetchMoreData = () => {
                 {this.state.posts.map((post, index) => 
                 <Box w="100vh" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
                   <Box p="4" paddingLeft="4">
-                    <HStack alignItems="baseline">
+                    <HStack alignItems="baseline" w='100%' mb='2'>
                       <Badge borderRadius="full" px="2" colorScheme="teal">
                         <Link to={'/profile/' + post.userId}>
                           {post.username}
@@ -268,6 +269,20 @@ fetchMoreData = () => {
                           pl='2'
                       >
                           Posted at {post.dateTime}
+                      </Box>
+                      <Box flex='1' align='right'>
+                        <Badge 
+                            color="gray.600"
+                            borderRadius="lg"
+                            colorScheme="orange"
+                            fontWeight="semibold"
+                            letterSpacing="wide"
+                            fontSize="xs"
+                            textTransform="uppercase"
+                            ml="6"
+                            p='1'>
+                          {post.topicId}
+                        </Badge>
                       </Box>
                     </HStack>            
                     <HStack>     

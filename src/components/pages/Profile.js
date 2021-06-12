@@ -472,21 +472,37 @@ export class Profile extends Component {
                                 {this.state.posts ? <>{this.state.posts.map((post, index) => 
                                 <Box w='100vh' borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
                                     <Box p="4" paddingLeft="4">
-                                        <HStack alignItems="baseline">
-                                            <Badge borderRadius="full" px="2" colorScheme="teal">
-                                                {post.username}
-                                            </Badge>
-                                            <Box
-                                                color="gray.400"
+                                    <HStack alignItems="baseline" w='100%' mb='2'>
+                                        <Badge borderRadius="full" px="2" colorScheme="teal">
+                                            <Link to={'/profile/' + post.userId}>
+                                            {post.username}
+                                            </Link>
+                                        </Badge>
+                                        <Box
+                                            color="gray.400"
+                                            fontWeight="semibold"
+                                            letterSpacing="wide"
+                                            fontSize="xs"
+                                            textTransform="uppercase"
+                                            ml="6"
+                                            pl='2'
+                                        >
+                                            Posted at {post.dateTime}
+                                        </Box>
+                                        <Box flex='1' align='right'>
+                                            <Badge 
+                                                color="gray.600"
+                                                borderRadius="lg"
+                                                colorScheme="orange"
                                                 fontWeight="semibold"
                                                 letterSpacing="wide"
                                                 fontSize="xs"
                                                 textTransform="uppercase"
                                                 ml="6"
-                                                pl='2'
-                                            >
-                                                Posted at {post.dateTime}
-                                            </Box>
+                                                p='1'>
+                                            {post.topicId}
+                                            </Badge>
+                                        </Box>
                                         </HStack>            
                                         <HStack>     
                                             <Text
