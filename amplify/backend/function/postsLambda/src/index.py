@@ -339,7 +339,8 @@ def postHandler(event, context):
                             'text': body['text'],
                             'userId': user,
                             'username': username,
-                            'topicId': topic
+                            'topicId': topic,
+                            'post': 'True'
                         }
                     table.put_item(
                         Item=post
