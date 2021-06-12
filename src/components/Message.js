@@ -185,7 +185,7 @@ export class Message extends Component {
 
     render() {
         return (
-            <VStack w='100%' align='left' boxShadow="lg">
+            <VStack w='100%' align='left'>
                 {this.state.userInfo ?
                     <HStack w='50%' h='5vh' bgGradient="linear(to-r,gray.300,teal.200)" align='left' pl='4' py='2.5' borderRadius='md'>
                         {this.state.userInfo.image ? 
@@ -201,7 +201,7 @@ export class Message extends Component {
                         </Box>
                     </HStack> 
                 : <> </>}
-                <VStack w='50%' h='85vh' bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
+                <VStack w='50%' h='85vh'  boxShadow="lg" bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
                     '&::-webkit-scrollbar': {
                     width: '8px',
                     borderRadius: '8px',
@@ -439,7 +439,7 @@ export class Message extends Component {
                            
                     )}
                 </VStack>
-                <VStack w='50%'>
+                <VStack w='50%' borderRadius='lg' boxShadow="lg">
                     {this.state.replySelection ? 
                     <Flex
                         w='100%'
@@ -461,7 +461,7 @@ export class Message extends Component {
                     </Flex>
                     :
                     <> </>}
-                    <HStack w='100%'>
+                    <HStack w='100%' spacing='0'>
                         <Textarea ref='messageArea' w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
                         <Button onClick={this.sendMessage.bind(this)} w='20%' bgGradient="linear(to-r,gray.200,teal.200,green.100)">
                             Send
