@@ -105,6 +105,20 @@
                 ]
             },
             "policyResourceName": "/timeline"
+        },
+        {
+            "name": "/search",
+            "lambdaFunction": "searchLambda",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH"
+                ]
+            },
+            "policyResourceName": "/search"
         }
     ],
     "resourceName": "topicsApi",
@@ -130,10 +144,13 @@
         },
         {
             "lambdaFunction": "timelineLambda"
+        },
+        {
+            "lambdaFunction": "searchLambda"
         }
     ],
     "privacy": {
-        "auth": 7,
+        "auth": 8,
         "unauth": 2,
         "authRoleName": "amplify-socialmedia-dev-131342-authRole",
         "unAuthRoleName": "amplify-socialmedia-dev-131342-unauthRole"
@@ -194,7 +211,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "searchLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
     ],
-    "uuid": "2cbb81ae"
+    "uuid": "6adc8bfd"
 }
