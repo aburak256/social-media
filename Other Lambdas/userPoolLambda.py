@@ -28,6 +28,7 @@ def lambda_handler(event, context):
                 'userName': username,
                 'phone': phone,
                 'imageUrl': '',
+                'user': 'True',
             }
         )
         #Also create user timeline item with metadata. 
