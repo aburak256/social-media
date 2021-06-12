@@ -215,6 +215,7 @@ export class Message extends Component {
                     {this.state.messages.map((message, index) =>  
                         <> {message.type == 'post' ? <>
                         <Box
+                            style={{cursor:'pointer'}}
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='3'>
