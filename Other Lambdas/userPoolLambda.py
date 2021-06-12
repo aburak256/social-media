@@ -38,6 +38,13 @@ def lambda_handler(event, context):
                 'sortKey': "METADATA",
             }
         )
+        #To add user's own posts to user's timeline: user follows themself
+        table.put_item(
+            Item={
+                'PK': 'USER#' + attr['sub'] + '#FOLLOWER',
+                'sortKey': attr['sub'],
+            }
+        )
         return event
     else:
         print("Failed request")
