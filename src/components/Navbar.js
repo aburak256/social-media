@@ -6,10 +6,11 @@ import './Navbar.css';
 import Sidebar from './Sidebar'
 import Logo from './Logo';
 import MessageDrawer from './MessageDrawer'
+import SearchBar from './SearchBar';
 import { Box } from '@chakra-ui/layout';
 
 
-function Navbar() {
+function Navbar(props) {
     const [click, setClick] = useState(false);
     const [button, setButton] = useState(true);
 
@@ -48,6 +49,9 @@ function Navbar() {
                             <Logo />
                         </Box>
                     </Link>
+                    <Box w='70vh' ml='20vh' bg='white' borderRadius='lg'>
+                        <SearchBar onSearch={(event) => props.handleSearch(event)}/>
+                    </Box>
                     <div className='menu-icon' onClick={handleClick}>
                         <i className={click ? 'fas fa-times': 'fas fa-bars'} />
                     </div>
