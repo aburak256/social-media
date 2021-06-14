@@ -183,6 +183,11 @@ fetchMoreData = () => {
       }
     }
   }
+
+  topicArrange(topic){
+    topic = topic.toLowerCase()
+    return '/topics/' +  topic.charAt(0).toUpperCase() + topic.slice(1)
+}
   
   render() {
     return (
@@ -271,18 +276,20 @@ fetchMoreData = () => {
                           Posted at {post.dateTime}
                       </Box>
                       <Box flex='1' align='right'>
-                        <Badge 
-                            color="gray.600"
-                            borderRadius="lg"
-                            colorScheme="orange"
-                            fontWeight="semibold"
-                            letterSpacing="wide"
-                            fontSize="xs"
-                            textTransform="uppercase"
-                            ml="6"
-                            p='1'>
-                          {post.topicId}
-                        </Badge>
+                        <Link to={() => this.topicArrange(post.topicId)}>
+                          <Badge 
+                              color="gray.600"
+                              borderRadius="lg"
+                              colorScheme="orange"
+                              fontWeight="semibold"
+                              letterSpacing="wide"
+                              fontSize="xs"
+                              textTransform="uppercase"
+                              ml="6"
+                              p='1'>
+                            {post.topicId}
+                          </Badge>
+                        </Link>
                       </Box>
                     </HStack>            
                     <HStack>     
