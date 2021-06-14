@@ -30,11 +30,16 @@ export class SendPost extends Component {
       }
     
     imageSelectHandler = event => {
-        if(event.target.files[0].type == "image/png" || event.target.files[0].type == "image/jpeg"){
-            this.setState({ image: event.target.files[0]})
+        if(event.target.files[0].size <= 10000000){
+            if(event.target.files[0].type == "image/png" || event.target.files[0].type == "image/jpeg"){
+                this.setState({ image: event.target.files[0]})
+            }
+            else{
+                this.setState({message: "Uploaded file is not a png or jpeg file"})
+            }
         }
         else{
-            this.setState({message: "Uploaded file is not a png or jpeg file"})
+            this.setState({message: "Uploaded file should be smaller than 10 MB"})
         }
     }
 
