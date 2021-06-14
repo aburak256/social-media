@@ -187,15 +187,17 @@ export class Post extends Component {
                         {this.state.comments.map((comment, index) =>
                             <Box w='70%' boxShadow='md' bg='teal.50' padding='4' borderRadius='md'>
                                 <HStack padding='2'>
-                                    <Text
-                                        color="gray.400"
-                                        fontWeight="semibold"
-                                        letterSpacing="wide"
-                                        fontSize="xs"
-                                        textTransform="uppercase"
-                                        >
-                                        {comment.username}
-                                    </Text>
+                                    <Link to={'/profile/' + comment.userId}>
+                                        <Text
+                                            color="gray.400"
+                                            fontWeight="semibold"
+                                            letterSpacing="wide"
+                                            fontSize="xs"
+                                            textTransform="uppercase"
+                                            >
+                                            {comment.username}
+                                        </Text>
+                                    </Link>
                                     <Text
                                         color="gray.400"
                                         flex="1"
@@ -213,6 +215,7 @@ export class Post extends Component {
                                         color="gray.600"
                                         letterSpacing="wide"
                                         fontSize="sm"
+                                        pl='2'
                                     >
                                         {comment.text}
                                     </Text>
