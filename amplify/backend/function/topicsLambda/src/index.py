@@ -2,7 +2,7 @@ import json
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
 table = dynamodb.Table('SingleTableDesign')
@@ -31,11 +31,15 @@ def handler(event, context):
             # Scanning because in this GSI there are only few elements
             IndexName="topic-index",
         )
+        topics = []
+        for item in resp['Items']:
+            pop = updatePopularity(item['topic'])
+            item['popularity'] = pop
+            topics.append(item)
 
-        print(resp['Items'])
         response = {
             'statusCode': 200,
-            'body': json.dumps(resp['Items']),
+            'body': json.dumps(topics),
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
@@ -46,8 +50,13 @@ def handler(event, context):
         return response
 
     if "/topics" in event['resource']:
+        #Send posts in topic and post information
+        #Update topic's popularity and add user's log to db
         params = event['pathParameters']
         topic = params['proxy'].upper()
+        user = None
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
         if topic == 'BOOKMARKS':
             return bookmarks(event, context)
         if 'INFO/' in topic:
@@ -82,10 +91,16 @@ def handler(event, context):
                 cont = 'True'
             else:
                 cont = 'False'
-        permission = 'Reader'
-        user = None
-        if 'identity' in event['requestContext']:
-            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+            #User opens the selected topic.
+            #Add user log to calculate popularity
+            table.put_item(
+                Item={
+                    'PK': "TOPIC#" + topic + '#POPULARITY',
+                    'sortKey': datetime.now().isoformat(),
+                    'userId': user
+                }
+            )
+        permission = 'Reader'       
         posts = []
         for item in resp['Items']:
             response = table.query(
@@ -440,3 +455,18 @@ def postHandler(event, context):
                     return response
 
 
+def updatePopularity(topic):
+    #Collect the popularity items at last one week?
+    #Add the count of this items to topic and return
+    topicToSearch = topic.upper()
+    dateSearch = (datetime.now() - timedelta(days=7)).isoformat()
+    try:
+        popularityResponse = table.query(
+            KeyConditionExpression=Key('PK').eq('TOPIC#' + topicToSearch + '#POPULARITY') & Key('sortKey').gt(dateSearch)
+        )
+    except ClientError as e:
+        print(e.popularityResponse['Error']['Message'])
+    else:
+        if 'Items' in popularityResponse:
+            return str(len(popularityResponse['Items']))
+        else: return '0'
