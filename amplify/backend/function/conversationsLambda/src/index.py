@@ -358,10 +358,12 @@ def postHandler(event, context):
     #User wants to delete one of his messages. Find given message, check if it belongs to user
     elif body['type'] == 'delete':
         searchDatetime = datetime.strptime(body['dateTime'], "%m/%d/%Y, %H:%M:%S").isoformat()
+        if body['deleteType'] == 'post': search = 'postId'
+        else: search = 'text'
         try:
             messageResponse = table.query(
                 KeyConditionExpression=Key('PK').eq('CONVERSATION#' + conversationId) & Key('sortKey').begins_with(searchDatetime),
-                FilterExpression=Attr('text').eq(body['text']) & Attr('sender').eq(user)
+                FilterExpression=Attr(search).eq(body['text']) & Attr('sender').eq(user)
             )
         except ClientError as e:
             print(e.messageResponse['Error']['Message'])

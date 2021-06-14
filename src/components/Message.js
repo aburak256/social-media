@@ -41,6 +41,7 @@ export class Message extends Component {
         deleteSelection: null,
         deleteDateTime: null,
         deleteIndex: null,
+        deleteType: '',
         userText: '',
         contScroll: '',
     }   
@@ -91,7 +92,12 @@ export class Message extends Component {
     }
 
     deleteMessageModalOpen(message, index){
-        this.setState({ deleteSelection: message.text, deleteDateTime: message.dateTime, deleteIndex: index ,modal:true})
+        if(message.type == 'post'){
+            this.setState({ deleteType:message.type, deleteSelection:message.postId, deleteDateTime: message.dateTime, deleteIndex: index ,modal:true})
+        }
+        else{
+            this.setState({  deleteType: 'message', deleteSelection: message.text, deleteDateTime: message.dateTime, deleteIndex: index ,modal:true})
+        }       
     }
 
     async deleteMessage(){
@@ -101,8 +107,10 @@ export class Message extends Component {
                 type: 'delete',
                 text: this.state.deleteSelection, 
                 dateTime: this.state.deleteDateTime,
+                deleteType: this.state.deleteType
             }
         }
+        console.log(myInit)
         const data = await API.post(`topicsApi`, path, myInit)
         if (data['Success'] == 'True'){
             let messages = this.state.messages
@@ -288,11 +296,6 @@ export class Message extends Component {
                                                                 </Button>
                                                             </Box> : <> </> }
                                                             
-                                                            <Box  my='auto'>
-                                                                <Button bg='cyan.600' onClick={() => this.selectReply(message)}>
-                                                                    Reply
-                                                                </Button> 
-                                                            </Box>
                                                             <Box ml='2' mx='auto' my='auto'>
                                                                 <Button  bg='green.600'>
                                                                     <Link to={'/posts/' + message.postId}>
@@ -310,9 +313,6 @@ export class Message extends Component {
                                         <Text fontSize='10' color='gray.500'>
                                             {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
                                         </Text>
-                                        <div style={{ float:"left", clear: "both" }}
-                                            ref={(el) => { this.messagesEnd = el; }}>
-                                        </div>
                                     </VStack>
                                     {message.sender == 'friend' ?
                                     <> 
