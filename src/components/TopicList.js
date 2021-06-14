@@ -1,7 +1,7 @@
 import React from 'react';
 import { VStack, Box, Badge, Text} from '@chakra-ui/layout';
 import {Link} from 'react-router-dom'
-import { ViewIcon } from '@chakra-ui/icons'
+import { ViewIcon, CheckCircleIcon } from '@chakra-ui/icons'
 import { Image, SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import {API} from "aws-amplify";
 
@@ -53,6 +53,10 @@ export default class PostList extends React.Component {
               <Box d="flex" mt="2" alignItems="center">
                 {/* This will be some kind of a popularity metric*/}                
                 <ViewIcon  color="teal.500"/>
+                <Box as="span" ml="2" color="gray.600" fontSize="md">
+                  {topic.popularity}
+                </Box>
+                <CheckCircleIcon  color="teal.500" ml='5'/>
                 <Box as="span" ml="2" color="gray.600" fontSize="md">
                   {topic.numberOfFollowers}
                 </Box>
