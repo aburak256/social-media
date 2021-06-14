@@ -26,6 +26,7 @@ export class SendComment extends Component {
             }
         }
         const data = await API.post(`topicsApi`, path, myInit)
+        this.setState({comment: ''})
         this.props.onPostComment(data)
     }
 
