@@ -5,6 +5,7 @@ import {  SkeletonCircle, SkeletonText } from "@chakra-ui/react"
 import { VStack, Box, Badge, HStack, Text} from '@chakra-ui/layout';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import {Popularity} from './Popularity';
+import {Link} from 'react-router-dom'
 import SendComment from './SendComment';
 const Editor = require('react-medium-editor').default;
 require('medium-editor/dist/css/medium-editor.css');
@@ -84,6 +85,11 @@ export class Post extends Component {
         this.setState({comments: comments}) 
     }
 
+    topicArrange(topic){
+        topic = topic.toLowerCase()
+        return '/topics/' +  topic.charAt(0).toUpperCase() + topic.slice(1)
+    }
+
     render() {
         return (
             <VStack w="90%">
@@ -102,22 +108,40 @@ export class Post extends Component {
                             <Box></Box>
                         }
                         <Box p='6'>
-                            <Box d="flex" alignItems="baseline">
-                                <Badge borderRadius="full" px="2" colorScheme="teal">
-                                    {/* Add link to username (future work) */}
-                                    {p.username}
-                                </Badge>
-                                <Box
-                                    color="gray.400"
-                                    fontWeight="semibold"
-                                    letterSpacing="wide"
-                                    fontSize="xs"
-                                    textTransform="uppercase"
-                                    ml="2"
-                                >
-                                    Posted at {p.dateTime} &bull; {p.relatedTopic}
-                                </Box>
+                        <HStack alignItems="baseline" w='100%' mb='2'>
+                            <Badge borderRadius="full" px="2" colorScheme="teal">
+                                <Link to={'/profile/' + p.userId}>
+                                {p.username}
+                                </Link>
+                            </Badge>
+                            <Box
+                                color="gray.400"
+                                fontWeight="semibold"
+                                letterSpacing="wide"
+                                fontSize="xs"
+                                textTransform="uppercase"
+                                ml="6"
+                                pl='2'
+                            >
+                                Posted at {p.dateTime}
                             </Box>
+                            <Box flex='1' align='right'>
+                                <Link to={() => this.topicArrange(p.topicId)}>
+                                    <Badge 
+                                        color="gray.600"
+                                        borderRadius="lg"
+                                        colorScheme="orange"
+                                        fontWeight="semibold"
+                                        letterSpacing="wide"
+                                        fontSize="xs"
+                                        textTransform="uppercase"
+                                        ml="6"
+                                        p='1'>
+                                    {p.topicId}
+                                    </Badge>
+                                </Link>
+                            </Box>
+                            </HStack>
                             <Text
                                 my="5"
                                 fontWeight="semibold"
