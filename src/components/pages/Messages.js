@@ -1,4 +1,4 @@
-import { HStack, StackDivider } from '@chakra-ui/layout'
+import { HStack, StackDivider, Box } from '@chakra-ui/layout'
 import React, { Component } from 'react'
 import {Conversations} from '../Conversations'
 import {Message} from '../Message'
@@ -19,12 +19,19 @@ export class Messages extends Component {
                 <HStack
                     divider={<StackDivider borderColor="gray.200" />}
                     spacing={4}
-                    align="stretch"
-                    h='90vh'
-                    ml='35vh'
+                    align="right"
+                    bg='white'
+                    mt='2'
+                    h='93vh'
+                    w='45vw'
+                    ml='15vw'
                 >
-                    <Conversations onSelectConversation={this.showmessages.bind(this)}/>
-                    <Message conversation={this.state.selectedConversationId}/>
+                    <Box w='20vw' h='93vh'>
+                        <Conversations onSelectConversation={this.showmessages.bind(this)}/>
+                    </Box>
+                    <Box w='25vw' h='93vh'>
+                        <Message conversation={this.state.selectedConversationId}/>
+                    </Box>
                 </HStack>
             </div>
         )

@@ -28,7 +28,7 @@ export class Conversations extends Component {
 
     render() {
         return (
-            <VStack w='30%' bgGradient="linear(to-b, gray.100, teal.50 )" divider={<StackDivider borderColor="gray.200" />} overflowY='scroll' boxShadow="lg" sx={{
+            <VStack bg='white' w='100%' px='1' h='100%' divider={<StackDivider borderColor="gray.200" />} overflowY='scroll' boxShadow="lg" sx={{
                 '&::-webkit-scrollbar': {
                 width: '8px',
                 borderRadius: '8px',
@@ -39,10 +39,11 @@ export class Conversations extends Component {
                 },
             }}>
                 <Box
-                    bgGradient="linear(to-r, teal.200, gray.200)"
+                    bg='gray.200'
                     w='100%'
                     h='5vh'
                     pt='1vh'
+                    mt='1'
                     borderRadius='lg'
                     align="center"
                 >
@@ -60,9 +61,8 @@ export class Conversations extends Component {
                         h='8vh'
                         pl='1.5vh'
                         borderRadius='lg'
-                        bgGradient="linear(to-r, teal.200, gray.200)"
                         _hover={{
-                            bgGradient: "linear(to-r, teal.300, gray.300)",
+                            bg: 'gray.100',
                         }} 
                     >   
                         {conversation.Image ? <Image src={conversation.image} h='5vh' maxW='5vh' borderRadius='lg'/> : <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxxnv-Gfi0iwmcUHwRzfBSHutl9CsYoSd0Xg&usqp=CAU" h='5vh' maxW='5vh' borderRadius='lg'/>}

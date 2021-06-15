@@ -193,9 +193,9 @@ export class Message extends Component {
 
     render() {
         return (
-            <VStack w='100%' align='left'>
+            <VStack w='25vw' align='center'>
                 {this.state.userInfo ?
-                    <HStack w='50%' h='5vh' bgGradient="linear(to-r,gray.300,teal.200)" align='left' pl='4' py='2.5' borderRadius='md'>
+                    <HStack w='24.5vw' h='5vh' bg='gray.200' mr='1' align='left' pl='4' py='2.5' borderRadius='md' mt='2'>
                         {this.state.userInfo.image ? 
                             <Image src={this.state.userInfo.image} h={6} maxW={6} />
                         :
@@ -209,7 +209,7 @@ export class Message extends Component {
                         </Box>
                     </HStack> 
                 : <> </>}
-                <VStack w='50%' h='85vh'  boxShadow="lg" bgGradient="linear(to-r,gray.50,teal.50,green.50)" spacing={3} overflowY='scroll' className='messagebox' sx={{
+                <VStack w='25vw' h='77vh'  boxShadow="lg" bg='white' spacing={3} overflowY='scroll' className='messagebox' sx={{
                     '&::-webkit-scrollbar': {
                     width: '8px',
                     borderRadius: '8px',
@@ -227,7 +227,7 @@ export class Message extends Component {
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='3'>
-                              <Flex w='60%'>
+                              <Flex w='55%'>
                                     {message.sender == 'user' ? 
                                     <>
                                         <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
@@ -262,7 +262,7 @@ export class Message extends Component {
                                             <PopoverTrigger>
                                                 <Text
                                                     bg='gray.100'
-                                                    maxW='40vh'                                       
+                                                    w='100%'                                       
                                                     pl = {message.sender == 'user' ? '2' : '4'}
                                                     pr = {message.sender == 'user' ? '4' : '2'}
                                                     borderRadius='lg'
@@ -332,6 +332,7 @@ export class Message extends Component {
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='2'
+                            style={{cursor:'pointer'}}
                             >
                                 {message.reply ? 
                                 <Text
@@ -434,40 +435,43 @@ export class Message extends Component {
                                     </>
                                     }
                                 </Flex>
+                                
                         </Box>
                         } </>
                            
                     )}
+                    
                 </VStack>
-                <VStack w='50%' borderRadius='lg' boxShadow="lg">
-                    {this.state.replySelection ? 
-                    <Flex
-                        w='100%'
-                        align='left'
-                        fontSize='xs'
-                        pl='3'
-                        bgGradient="linear(to-r,gray.400,gray.50)"
-                        borderRadius='md'
-                    >
-                        <Text>
-                            Reply: {this.state.replySelection}
-                        </Text>
-                        <Spacer />
-                        <Box mr='2'>
-                            <button onClick={this.cancelReply.bind(this)}>
-                                <CloseIcon />
-                            </button>
-                        </Box>
-                    </Flex>
-                    :
-                    <> </>}
-                    <HStack w='100%' spacing='0'>
-                        <Textarea ref='messageArea' w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
-                        <Button onClick={this.sendMessage.bind(this)} w='20%' bgGradient="linear(to-r,gray.200,teal.200,green.100)">
-                            Send
-                        </Button>
-                    </HStack>
-                </VStack>
+                {this.state.userInfo ? 
+                    <VStack w='100%' borderRadius='lg' boxShadow="lg">
+                        {this.state.replySelection ? 
+                        <Flex
+                            w='100%'
+                            align='left'
+                            fontSize='xs'
+                            pl='3'
+                            bgGradient="linear(to-r,gray.400,gray.50)"
+                            borderRadius='md'
+                        >
+                            <Text>
+                                Reply: {this.state.replySelection}
+                            </Text>
+                            <Spacer />
+                            <Box mr='2'>
+                                <button onClick={this.cancelReply.bind(this)}>
+                                    <CloseIcon />
+                                </button>
+                            </Box>
+                        </Flex>
+                        :
+                        <> </>}
+                        <HStack w='100%' spacing='0'>
+                            <Textarea ref='messageArea' w='80%' variant="outline" placeholder="Outline" onChange={this.textChange}/>
+                            <Button onClick={this.sendMessage.bind(this)} w='20%' bgGradient="linear(to-r,gray.200,teal.200,green.100)">
+                                Send
+                            </Button>
+                        </HStack>
+                    </VStack> : <> </> }
             </VStack>
         )
     }
