@@ -5,7 +5,7 @@ export class Logo extends Component {
     render() {
         return (
             <div>
-                <Text>
+                <Text color='black'>
                     SOCM
                 </Text>
             </div>
