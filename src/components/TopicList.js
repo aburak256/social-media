@@ -22,23 +22,24 @@ export default class PostList extends React.Component {
 
   render() {
     return (
-        <VStack w="80%">
+        <VStack w="100%">
           {this.state.loading ? 
-            <Box w='100%' padding="6" boxShadow="lg" bg="white">
+            <Box w='80vh' padding="6" boxShadow="lg" bg="white" mt='4'>
               <SkeletonCircle size="100" />
               <SkeletonText mt="4" noOfLines={6} spacing="4" />
             </Box>
           :  
           <>     
           { this.state.topics.map(topic => 
-          <Box w="80%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" mt='4'>  
+          <Box w="80vh" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" mt='4'>  
+            <Link to={'/topics/' + topic.topic }>
             <Image src={topic.imageURL} alt={topic.topic} />       
-            <Box p="6">
+            <Box p="6" bg='white' mb='2'>
               <Box alignItems="baseline">
                 <Badge borderRadius="full" px="2" colorScheme="teal">
-                <Link to={'/topics/' + topic.topic }>
+                <Text >
                   {topic.topic}
-                </Link>
+                </Text>
                 </Badge>
               </Box>     
               <Text
@@ -62,6 +63,7 @@ export default class PostList extends React.Component {
                 </Box>
               </Box>             
             </Box>
+            </Link>
           </Box>             
           )} </>
         }

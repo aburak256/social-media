@@ -8,10 +8,7 @@ function Topics() {
         
         <div>
             <title>Topics</title>
-                <Center spacing="24px" width="80%" pl='15%'>            
-                    <br/>
-                    <TopicList/>
-                </Center>
+            <TopicList/>
         </div>
     )
 }
