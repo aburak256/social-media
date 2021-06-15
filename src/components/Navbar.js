@@ -42,14 +42,14 @@ function Navbar(props) {
     return (
         <>
             <nav className="navbar">
-                <Sidebar />
+                {/* <Sidebar /> */}
                 <div className="navbar-container">
                     <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
                         <Box ml='15vh'>
                             <Logo />
                         </Box>
                     </Link>
-                    <Box w='70vh' ml='20vh' bg='white' borderRadius='lg'>
+                    <Box w='50%' ml='20vh' bg='white' borderRadius='lg'>
                         <SearchBar onSearch={(event) => props.handleSearch(event)}/>
                     </Box>
                     <div className='menu-icon' onClick={handleClick}>
@@ -63,9 +63,9 @@ function Navbar(props) {
                             </Link>
                         </li>
                         <li className='nav-item'>
-                            <div className='nav-links'>
-                                <MessageDrawer />
-                            </div>
+                                <Link to='/messages' className='nav-links' onClick={closeMobileMenu}>
+                                    Messages
+                                </Link>
                         </li>
                         <li className='nav-item'>
                             <Link to='/topics' className='nav-links' onClick={closeMobileMenu}>
@@ -75,6 +75,11 @@ function Navbar(props) {
                         <li className='nav-item'>
                             <Link to='/about' className='nav-links' onClick={closeMobileMenu}>
                                 About
+                            </Link>
+                        </li>
+                        <li className='nav-item'>
+                            <Link to='/profile' className='nav-links' onClick={closeMobileMenu}>
+                                {user}
                             </Link>
                         </li>
                         {!user ? 
@@ -89,10 +94,7 @@ function Navbar(props) {
                                 </Link>
                             </li>}
                     </ul>
-                    {!user && button ? <Button buttonStyle='btn--outline'>SIGN UP</Button> 
-                        :<Link to='/profile' className='nav-links' onClick={closeMobileMenu}>
-                            {user}
-                        </Link>}
+                    
                 </div>
             </nav>
         </>
