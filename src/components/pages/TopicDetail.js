@@ -9,14 +9,13 @@ function TopicDetail() {
     const {topic} = useParams()
     return (        
         <div>
-            <title>Topics</title>
-            <Center w='100%'> 
-                <VStack spacing="24px" width="70%">
+            <title>Topics</title> 
+                <VStack spacing="24px" ml='10%' width="100%">
                     <InfoBar topic={topic} />            
                     <br/>
                     <PostList topic={topic}/>
                 </VStack>
-            </Center>
+
         </div>
     )
 }

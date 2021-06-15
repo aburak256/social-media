@@ -76,8 +76,8 @@ export class SendPost extends Component {
 
     render() {
         return (
-            <VStack pb='4' w='100%'>
-                <Center w='70%'>
+            <VStack pb='4' w='100%' bg='white' boxShadow='lg' p='4' borderRadius='lg'>
+                <Center w='100%'>
                     <Box w='100%' boxShadow='lg' p='4' borderRadius='md' ref='editorBox'>
                         <Editor text={this.state.post} onChange={this.handleChange.bind(this)}  options={{toolbar: {buttons: ['bold', 'italic', 'underline','anchor']},
                         autoLink: true,

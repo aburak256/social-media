@@ -308,9 +308,9 @@ export class Profile extends Component {
             <div>
                 <title>Profile </title>
                 <Center w='100%' mt='10'>
-                    <VStack w='70%'>           
+                    <VStack w='100%' ml='23%'>           
                         {this.state.loading ? 
-                            <Box w='100%' padding="6" boxShadow="lg" bg="white">
+                            <Box w='100vh' padding="6" boxShadow="lg" bg="white">
                                 <SkeletonCircle size="100" />
                                 <SkeletonText mt="4" noOfLines={6} spacing="4" />
                             </Box>
@@ -470,7 +470,7 @@ export class Profile extends Component {
                                     }
                                     >  
                                 {this.state.posts ? <>{this.state.posts.map((post, index) => 
-                                <Box w='100vh' borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
+                                <Box w='100vh' borderWidth="1px" mt='2' bg='white' borderRadius="lg" overflow="hidden" boxShadow="lg" key={post.PK}>         
                                     <Box p="4" paddingLeft="4">
                                     <HStack alignItems="baseline" w='100%' mb='2'>
                                         <Badge borderRadius="full" px="2" colorScheme="teal">
