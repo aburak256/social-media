@@ -19,26 +19,26 @@ import {
 
   function  Sidebar () {
         return (
-            <VStack pl='2' pt='2' h='100vh' maxW='100%' align='left'>
+            <VStack pl='5' pt='2' h='100vh' maxW='100%' align='left'>
                 <Link  to='/topics'>
-                    <Button mt='4'  w='100%'>
+                    <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}} w='75%' borderRadius='lg' align='left'>
                         Topics
-                    </Button>
+                    </Box>
                 </Link>
                 <Link to='/Profile'>
-                    <Button mt='4'  w='100%'>
+                    <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}} w='75%' borderRadius='lg'  align='left'>
                         Profile
-                    </Button>
+                    </Box>
                 </Link>
                 <Link to='/Messages'>
-                    <Button mt='4' w='100%'>
+                    <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}}  w='75%' borderRadius='lg'  align='left'>
                         Messages
-                    </Button>
+                    </Box>
                 </Link>
                 <Link to='/Bookmarks'>
-                    <Button mt='4'  w='100%'>
+                    <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}}  w='75%' borderRadius='lg'  align='left'>
                         Bookmarks
-                    </Button>
+                    </Box>
                 </Link>                
             </VStack>
         )
