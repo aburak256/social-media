@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Box, Textarea, VStack, HStack, Button, Progress, Text, Alert, AlertIcon, } from "@chakra-ui/react"
+import { Box, Textarea, VStack, HStack, Button, Progress, Text, Alert, AlertIcon, Input, InputRightElement, InputGroup   } from "@chakra-ui/react"
 import { Storage, Auth, API } from 'aws-amplify';
 import { AttachmentIcon } from '@chakra-ui/icons'
 
@@ -32,28 +32,22 @@ export class SendComment extends Component {
 
     render() {
         return (        
-               <VStack pb='4' w='100%'>
-                    <Textarea
-                        onChange={this.handleInputChange}
-                        value={this.state.comment}
-                        placeholder="Here is a sample placeholder"
-                        size="lg"
-                        w='70%'
-                        placeholder={'Share anything about this post'}
-                        boxShadow="lg"
-                        borderRadius="lg"
-                    />
-                    <HStack spacing='8'>                                         
-                        <Button bg='teal.200' onClick={this.postComment.bind(this)}>Post</Button>
-                        {this.state.message ? 
-                        <> 
-                        <Alert status="error">
-                            <AlertIcon />
-                            {this.state.message}
-                        </Alert>
-                        </> :
-                        <> </> }
-                    </HStack>                       
+               <VStack pb='4' w='75%'>
+                    <InputGroup w='100%' bg='white' boxShadow="md" borderRadius="lg" > 
+                        <Input
+                            onChange={this.handleInputChange}
+                            value={this.state.comment}
+                            placeholder="Here is a sample placeholder"
+                            size="lg"
+                            w='100%'
+                            placeholder={'Share anything about this post'}
+                            boxShadow="lg"
+                            borderRadius="lg"
+                        />
+                        <InputRightElement width="4.5rem"> 
+                            <Button bg='teal.200' size="md" h="2.5rem" mt='1.5' onClick={this.postComment.bind(this)}>Post</Button>
+                        </InputRightElement>
+                    </InputGroup>                                                               
                 </VStack> 
         )
     }
