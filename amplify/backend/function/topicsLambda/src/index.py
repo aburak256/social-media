@@ -10,10 +10,7 @@ table = dynamodb.Table('SingleTableDesign')
 def handler(event, context):
     print('received event:')
     print(event)
-    if 'resource' in event:
-        path = event['resource']
-    else:
-        return {
+    Fail = {
             'statusCode': 404,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
@@ -23,10 +20,18 @@ def handler(event, context):
             'body': json.dumps("Couldn't find the request")
         }
 
+    if 'resource' in event:
+        path = event['resource']
+    else:
+        return Fail
+
     if event['httpMethod'] == 'POST':
         return postHandler(event, context)
 
     if event['resource'] == "/topics":
+        if 'identity' in event['requestContext']:
+            user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
+        else: return Fail
         resp = table.scan(
             # Scanning because in this GSI there are only few elements
             IndexName="topic-index",
@@ -34,7 +39,9 @@ def handler(event, context):
         topics = []
         for item in resp['Items']:
             pop = updatePopularity(item['topic'])
+            follow = checkFollow(item, user)
             item['popularity'] = pop
+            item['follow'] = follow
             topics.append(item)
 
         response = {
@@ -457,7 +464,6 @@ def postHandler(event, context):
 
 def updatePopularity(topic):
     #Collect the popularity items at last one week?
-    #Add the count of this items to topic and return
     topicToSearch = topic.upper()
     dateSearch = (datetime.now() - timedelta(days=7)).isoformat()
     try:
@@ -470,3 +476,17 @@ def updatePopularity(topic):
         if 'Items' in popularityResponse:
             return str(len(popularityResponse['Items']))
         else: return '0'
+
+def checkFollow(topic, user):
+    #Check if user follows this topic
+    try:
+        followResponse = table.get_item(
+            Key={'PK': 'USER#' + user + '#FOLLOWS', 'sortKey': topic['topic'].upper()}
+        )
+    except ClientError as e:
+        print(e.followResponse['Error']['Message'])
+    else:
+        if 'Item' in followResponse:
+            return 'True'
+        else:
+            return 'False'
