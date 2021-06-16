@@ -44,7 +44,7 @@ function Navbar(props) {
             <nav className="navbar">
                 {/* <Sidebar /> */}
                 <div className="navbar-container">
-                    <Link to="/" className="navbar-logo" onClick={() => props.onCloseSearch()} onClick={closeMobileMenu}>
+                    <Link to="/" className="navbar-logo" onClick={closeMobileMenu} onClick={() => props.onCloseSearch()} >
                         <Box ml='15vh'>
                             <Logo />
                         </Box>

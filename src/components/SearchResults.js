@@ -48,7 +48,7 @@ export class SearchResults extends Component {
             <div>
                 <VStack w='65vw'>
                 {this.state.loading ? 
-                    <Box w='70vw' padding="6" boxShadow="lg" bg="white" mt='15'>
+                    <Box w='60vw' padding="6" boxShadow="lg" bg="white" mt='15'>
                         <SkeletonCircle size="100" />
                         <SkeletonText mt="4" noOfLines={6} spacing="4" />
                     </Box>
