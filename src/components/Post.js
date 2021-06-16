@@ -92,7 +92,7 @@ export class Post extends Component {
 
     render() {
         return (
-            <VStack w="90%">
+            <VStack w="65vw">
             {this.state.loading ? 
                 <Box w='100%' padding="6" boxShadow="lg" bg="white">
                     <SkeletonCircle size="100" />
@@ -101,7 +101,7 @@ export class Post extends Component {
                 :  
                 <>     
                     {this.state.post.map(p =>
-                    <Box w="75%" boxShadow='lg' borderWidth="1px" borderRadius="lg" overflow="hidden">
+                    <Box w="75%" boxShadow='lg' borderWidth="1px" borderRadius="lg" overflow="hidden" bg='white'>
                         {p.imageURL ? 
                             <Image w='100%' maxW='100vh' maxH='300vh' src={p.imageURL} alt={p.text} />
                             :
@@ -111,7 +111,7 @@ export class Post extends Component {
                         <HStack alignItems="baseline" w='100%' mb='2'>
                             <Badge borderRadius="full" px="2" colorScheme="teal">
                                 <Link to={'/profile/' + p.userId}>
-                                {p.username}
+                                    {p.username}
                                 </Link>
                             </Badge>
                             <Box
@@ -182,10 +182,10 @@ export class Post extends Component {
                             </Box>
                         </Box>
                     </Box>)}
-                    <VStack w='100%' p='6' spacing='17px'>
+                    <VStack w='100%' mt='6' spacing='17px'>
                         <SendComment post={this.props.post} onPostComment={this.handlePostComment}/>
                         {this.state.comments.map((comment, index) =>
-                            <Box w='70%' boxShadow='md' bg='teal.50' padding='4' borderRadius='md'>
+                            <Box w='75%' boxShadow='md' bg='cyan.50' padding='4' borderRadius='md'>
                                 <HStack padding='2'>
                                     <Link to={'/profile/' + comment.userId}>
                                         <Text
