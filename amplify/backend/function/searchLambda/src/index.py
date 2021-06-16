@@ -30,8 +30,9 @@ def handler(event, context):
         topics = searchTopics(textForSearch)
         posts = searchPosts(textForSearch)
         usernames = searchUsernames(textForSearch)
+        total = [topics, posts, usernames]
 
-        res = {'topics': topics, 'posts': posts, 'usernames': usernames}
+        res = {'topics': topics, 'posts': posts, 'usernames': usernames, 'total': total}
         response = {
             'statusCode': 200,
             'body': json.dumps(res),

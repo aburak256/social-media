@@ -39,7 +39,7 @@ function App() {
                     <Box w='23%' style={{position: 'fixed', top: '5'}}>
                         <Sidebar />
                     </Box>
-                    {search ? <SearchResults text={searchText} onClose={() => setSearch(false)}/> : 
+                    {search ? <VStack w='50%' pl='43%' minH='100vh'><SearchResults text={searchText} onClose={() => setSearch(false)}/>  </VStack> : 
                     <VStack w='50%' pl='43%' minH='100vh'>
                         <Switch>
                             <Route path='/' exact component={Home} />

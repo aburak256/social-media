@@ -51,7 +51,7 @@
         },
         "searchLambda": {
           "deploymentBucketName": "amplify-socialmedia-dev-131342-deployment",
-          "s3Key": "amplify-builds/searchLambda-5a466e514834346d7576-build.zip"
+          "s3Key": "amplify-builds/searchLambda-507748454a4f58683354-build.zip"
         }
       },
       "auth": {
