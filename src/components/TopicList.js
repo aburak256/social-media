@@ -15,7 +15,6 @@ export default class PostList extends React.Component {
   async componentDidMount() {
     const data = await API.get(`topicsApi`, '/topics')
     const topics = data
-    console.log(topics)
     this.setState({ loading: false})
     this.setState({ topics })
     }
@@ -33,36 +32,35 @@ export default class PostList extends React.Component {
           { this.state.topics.map(topic => 
           <Box w="80vh" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" mt='4'>  
             <Link to={'/topics/' + topic.topic }>
-            <Image src={topic.imageURL} alt={topic.topic} />       
-            <Box p="6" bg='white' mb='2'>
-              <Box alignItems="baseline">
-                <Badge borderRadius="full" px="2" colorScheme="teal">
-                <Text >
-                  {topic.topic}
+              <Image src={topic.imageURL} alt={topic.topic} />       
+              <Box p="6" bg='white' mb='2'>
+                <Box alignItems="baseline">
+                  <Badge borderRadius="full" px="2" colorScheme="teal">
+                  <Text >
+                    {topic.topic}
+                  </Text>
+                  </Badge>
+                </Box>     
+                <Text
+                  mt="2"
+                  fontWeight="semibold"
+                  lineHeight="tight"
+                  noOfLines={[1, 2, 3]}
+                >
+                  { topic.text }
                 </Text>
-                </Badge>
-              </Box>     
-              <Text
-                mt="2"
-                fontWeight="semibold"
-                lineHeight="tight"
-                noOfLines={[1, 2, 3]}
-              >
-                { topic.text }
-              </Text>
-      
-              <Box d="flex" mt="2" alignItems="center">
-                {/* This will be some kind of a popularity metric*/}                
-                <ViewIcon  color="teal.500"/>
-                <Box as="span" ml="2" color="gray.600" fontSize="md">
-                  {topic.popularity}
-                </Box>
-                <CheckCircleIcon  color="teal.500" ml='5'/>
-                <Box as="span" ml="2" color="gray.600" fontSize="md">
-                  {topic.numberOfFollowers}
-                </Box>
-              </Box>             
-            </Box>
+        
+                <Box d="flex" mt="2" alignItems="center">               
+                  <ViewIcon  color="teal.500"/>
+                  <Box as="span" ml="2" color="gray.600" fontSize="md">
+                    {topic.popularity}
+                  </Box>
+                  <CheckCircleIcon  color="teal.500" ml='5'/>
+                  <Box as="span" ml="2" color="gray.600" fontSize="md">
+                    {topic.numberOfFollowers}
+                  </Box>
+                </Box>             
+              </Box>
             </Link>
           </Box>             
           )} </>
