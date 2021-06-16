@@ -38,7 +38,6 @@ export default class PostList extends React.Component {
     if(this.props.topic){
       const path = '/topics/' + (this.props.topic).toUpperCase()
       const data = await API.get(`topicsApi`, path)
-      console.log(data)
       this.setState({ title: this.props.topic , sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
       if( data['cont'] == 'True'){
         this.setState({contScroll: true})
