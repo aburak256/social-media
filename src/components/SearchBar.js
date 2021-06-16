@@ -17,11 +17,17 @@ export class SearchBar extends Component {
         this.props.onSearch(this.state.text)
     }
 
+
     render() {
         return (
             <div>
                 <InputGroup>
-                    <Input onChange={this.handleInputChange.bind(this)}/>
+                    <Input onChange={this.handleInputChange.bind(this)} onKeyPress={(event) =>{ 
+                            var key = event.keyCode || event.which;
+                            if (key === 13) {
+                                this.makeSearch()
+                        }
+                    }}/>
                     <InputRightElement children={<Icon as={BsSearch} onClick={this.makeSearch.bind(this)} color="teal.500" />} />
                 </InputGroup>
             </div>
