@@ -52,9 +52,15 @@ export default class PostList extends React.Component {
       const data = await API.get(`topicsApi`, path)
       if (data['FailMessage']){
         this.setState({ message: data['FailMessage'],loading: false})
+        if(this.props.path == '/timeline'){
+          this.props.takeLength(0)
+        }
       }
       else{
         this.setState({ sizeOfArray: data['posts'].length, posts: data['posts'], permission: data['permission']})
+        if(this.props.path == '/timeline'){  
+          this.props.takeLength(data['posts'].length)         
+        }
         if( data['cont'] == 'True'){
           this.setState({contScroll: true})
         }
