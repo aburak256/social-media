@@ -34,10 +34,10 @@ function App() {
     return (
         <div className = "App">
             <Router>
-                <Navbar handleSearch={handleSearch}/>
+                <Navbar handleSearch={handleSearch} onCloseSearch={() => setSearch(false)}/>
                 <HStack align='top' spacing='1' bg='gray.100' >
                     <Box w='23%' style={{position: 'fixed', top: '5'}}>
-                        <Sidebar />
+                        <Sidebar onCloseSearch={() => setSearch(false)}/>
                     </Box>
                     {search ? <VStack w='50%' pl='43%' minH='100vh'><SearchResults text={searchText} onClose={() => setSearch(false)}/>  </VStack> : 
                     <VStack w='50%' pl='43%' minH='100vh'>

@@ -44,7 +44,7 @@ function Navbar(props) {
             <nav className="navbar">
                 {/* <Sidebar /> */}
                 <div className="navbar-container">
-                    <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
+                    <Link to="/" className="navbar-logo" onClick={() => props.onCloseSearch()} onClick={closeMobileMenu}>
                         <Box ml='15vh'>
                             <Logo />
                         </Box>
@@ -58,38 +58,38 @@ function Navbar(props) {
                     
                     <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                         <li className='nav-item'>
-                            <Link to='/' className='nav-links' onClick={closeMobileMenu}>
+                            <Link to='/' className='nav-links' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                 Home
                             </Link>
                         </li>
                         <li className='nav-item'>
-                                <Link to='/messages' className='nav-links' onClick={closeMobileMenu}>
+                                <Link to='/messages' className='nav-links' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                     Messages
                                 </Link>
                         </li>
                         <li className='nav-item'>
-                            <Link to='/topics' className='nav-links' onClick={closeMobileMenu}>
+                            <Link to='/topics' className='nav-links' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                 Topics
                             </Link>
                         </li>
                         <li className='nav-item'>
-                            <Link to='/about' className='nav-links' onClick={closeMobileMenu}>
+                            <Link to='/about' className='nav-links' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                 About
                             </Link>
                         </li>
                         <li className='nav-item'>
-                            <Link to='/profile' className='nav-links' onClick={closeMobileMenu}>
+                            <Link to='/profile' className='nav-links' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                 {user}
                             </Link>
                         </li>
                         {!user ? 
                             <li>
-                                <Link to='/sign-up' className='nav-links-mobile' onClick={closeMobileMenu}>
+                                <Link to='/sign-up' className='nav-links-mobile' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                     Sign Up
                                 </Link>
                             </li> 
                             :<li>
-                                <Link to='/profile' className='nav-links-mobile' onClick={closeMobileMenu}>
+                                <Link to='/profile' className='nav-links-mobile' onClick={closeMobileMenu} onClick={() => props.onCloseSearch()}>
                                     {user}
                                 </Link>
                             </li>}

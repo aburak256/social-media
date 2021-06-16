@@ -17,25 +17,25 @@ import {
     VStack,
   } from "@chakra-ui/react"
 
-  function  Sidebar () {
+  function  Sidebar (props) {
         return (
             <VStack pl='5' pt='2' h='100vh' maxW='100%' align='left'>
-                <Link  to='/topics'>
+                <Link  to='/topics' onClick={() => props.onCloseSearch()}>
                     <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}} w='75%' borderRadius='lg' align='left'>
                         Topics
                     </Box>
                 </Link>
-                <Link to='/Profile'>
+                <Link to='/Profile' onClick={() => props.onCloseSearch()}>
                     <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}} w='75%' borderRadius='lg'  align='left'>
                         Profile
                     </Box>
                 </Link>
-                <Link to='/Messages'>
+                <Link to='/Messages' onClick={() => props.onCloseSearch()}>
                     <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}}  w='75%' borderRadius='lg'  align='left'>
                         Messages
                     </Box>
                 </Link>
-                <Link to='/Bookmarks'>
+                <Link to='/Bookmarks' onClick={() => props.onCloseSearch()}>
                     <Box p='2' py='3' mt='4' _hover={{bg:'gray.200'}}  w='75%' borderRadius='lg'  align='left'>
                         Bookmarks
                     </Box>
