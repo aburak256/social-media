@@ -106,6 +106,15 @@ def handler(event, context):
                         else:
                             if 'Items' in reactionResponse and len(reactionResponse['Items']) >= 1:
                                 postObject['Reaction'] = reactionResponse['Items'][0]['text']
+                        try:
+                            bookmarkResponse = table.get_item(
+                                Key={'PK': 'USER#' + user + '#BOOKMARK', 'sortKey': postLink['postId'].upper()}
+                            )
+                        except ClientError as e:
+                            print(bookmarkResponse['Error']['Message'])
+                        else:
+                            if 'Item' in bookmarkResponse:
+                                postObject['bookmark'] = "True"
                             posts.append(postObject)
             
             res={'posts': posts, 'cont': cont}
