@@ -34,7 +34,7 @@ export default class Timer extends Component {
             const data = await API.get(`topicsApi`, path)
             this.setState({seconds: parseInt(data['time'])})
             let timeLeftVar = this.secondsToTime(this.state.seconds);
-            this.setState({ time: timeLeftVar, seconds: this.props.seconds});
+            this.setState({ time: timeLeftVar});
             
           
       }
