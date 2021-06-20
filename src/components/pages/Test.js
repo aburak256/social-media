@@ -68,7 +68,7 @@ export default class Test extends React.Component{
         return (
             <div>
                 {this.state.end == 'True' ?
-                <Center>
+                <Center w='100vw'>
                     <Center w='60%' h='500px' bg='gray.100' p='12'>
                         <Text 
                             pb='4'
@@ -82,8 +82,8 @@ export default class Test extends React.Component{
                     </Center>
                 </Center>
                 :
-                <Center> 
-                    <VStack spacing="24px" width="70%" bg='gray.50' pb='8'>
+                <Center w='100vw'> 
+                    <VStack spacing="24px" w="70%" bg='gray.50' pb='8'>
                         <HStack width="100%" mt="4">
                             <Box width="80%"/>
                             <Box width="15%" align='center' py="3" borderRadius="lg" boxShadow="lg" bg='gray.200'>
@@ -107,6 +107,7 @@ export default class Test extends React.Component{
                             <VStack>
                                 <Text
                                     pb='4'
+                                    px='4'
                                     color="gray.500"
                                     fontWeight="semibold"
                                     letterSpacing="wide"
