@@ -71,7 +71,7 @@ export class SendPost extends Component {
         }
         const data = await API.post(`topicsApi`, path, myInit)
         this.props.onPost(data['post'])
-        this.setState({post: ''})
+        this.setState({post: '', image: null, prog: 0})
     }
 
     render() {
