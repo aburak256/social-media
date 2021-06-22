@@ -16,6 +16,7 @@ export class Messages extends Component {
     render(){
         return (
             <div className="messages">
+                <title>Messages</title>
                 <HStack
                     divider={<StackDivider borderColor="gray.200" />}
                     spacing={4}

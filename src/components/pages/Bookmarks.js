@@ -6,14 +6,14 @@ export class Bookmarks extends Component {
     render() {
         return (
             <div>
+                <title>Bookmarks</title>
                 <Center>
                     <VStack w='70%' spacing="24px">
                         <Text
                             mt='4'
                             fontWeight="semibold"
                             lineHeight="tight"
-                            fontSize='xl'
-                            
+                            fontSize='xl'    
                         >
                             Your marked posts
                         </Text>
