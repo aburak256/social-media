@@ -112,6 +112,14 @@ def handler(event, context):
                                                 'imageUrl': postGetResponse['Item']['imageURL'],
                                                 'reply': ''
                                             }
+                                    else:
+                                        #Post deleted. Return object that indicates post is deleted
+                                        messageObject = {
+                                            'type': 'deletedPost',
+                                            'seen' : item['seen'],
+                                            'dateTime': dateTime,
+                                            'reply': ''
+                                        }
                             else:
                                 messageObject = {
                                         'type': 'message',

@@ -193,23 +193,23 @@ export class Message extends Component {
 
     render() {
         return (
-            <VStack w='25vw' align='center'>
+            <VStack w='100%' align='center' overflow="hidden">
                 {this.state.userInfo ?
-                    <HStack w='24.5vw' h='5vh' bg='gray.200' mr='1' align='left' pl='4' py='2.5' borderRadius='md' mt='2'>
+                    <HStack w='98%' h='5vh' bg='gray.200' mr='1' align='left' pl='4' py='2.5' borderRadius='md' mt='2'>
                         {this.state.userInfo.image ? 
                             <Image src={this.state.userInfo.image} h={6} maxW={6} />
                         :
                             <InfoOutlineIcon w={6} h={6} />
                         }
-                        <Text ml='3'>
+                        <Text ml='3' fontSize='sm'>
                             {this.state.userInfo.username}
                         </Text>
-                        <Box w='100%' align='right' pr='2' fontSize='xs'>
+                        <Box w='100%' align='right' pr='2' fontSize='xs' overflow='hidden'>
                             To reply or delete: Click the message
                         </Box>
                     </HStack> 
                 : <> </>}
-                <VStack w='25vw' h='77vh'  boxShadow="lg" bg='white' spacing={3} overflowY='scroll' className='messagebox' sx={{
+                <VStack w='100%' h='77vh'  boxShadow="lg" bg='white' spacing={3} overflowY='scroll' className='messagebox' sx={{
                     '&::-webkit-scrollbar': {
                     width: '8px',
                     borderRadius: '8px',
@@ -327,8 +327,105 @@ export class Message extends Component {
                                 </Flex>  
                         </Box>
                         
-                        </> : 
+                        </> :
+                        <>{message.type == 'deletedPost' ? <>
                             <Box
+                                w='100%'
+                                align={message.sender == 'user' ? 'right' : 'left'}
+                                px='2'
+                                style={{cursor:'pointer'}}
+                            >
+                                <Flex w='55%'>
+                                    {message.sender == 'user' ? 
+                                    <>
+                                        <Modal onClose={() => this.setState({modal:false})} isOpen={this.state.modal} isCentered>
+                                            <ModalOverlay />
+                                            <ModalContent>
+                                            <ModalHeader>Delete Message</ModalHeader>
+                                            <ModalCloseButton />
+                                            <ModalBody>
+                                                Do you want to delete selected message?
+                                                <br/>
+                                                Message: {this.state.deleteSelection}
+                                            </ModalBody>
+                                            <ModalFooter>
+                                                <Button bg='red.500' onClick={this.deleteMessage.bind(this)}>Delete</Button>
+                                            </ModalFooter>
+                                            </ModalContent>
+                                        </Modal>
+                                        <Spacer /> 
+                                        <Box my='auto' mr='1'>
+                                                <Icon color={message.seen == 'True' ? 'blue' : 'gray'} as={BiCheckDouble} /> 
+                                        </Box>          
+                                    </> :
+                                    <>
+                                    </>
+                                    }
+                                    <VStack
+                                        align={message.sender == 'user' ? 'right' : 'left'}
+                                        spacing='0'
+                                    >
+                                       <Popover>
+                                            <PopoverTrigger>
+                                                <Text
+                                                    bg={message.sender == 'user' ? 'yellow.400' : 'yellow.500'}
+                                                    maxW='35vh'
+                                                    color={message.sender == 'user' ? 'white' : 'white'}
+                                                    pl = {message.sender == 'user' ? '2' : '4'}
+                                                    pr = {message.sender == 'user' ? '4' : '2'}
+                                                    borderRadius='lg'
+                                                    fontSize='14'
+                                                    as='cite'
+                                                >
+                                                    This post is deleted
+                                                </Text>
+                                            </PopoverTrigger>
+                                            <Portal>
+                                                <PopoverContent color="white" bg="black" borderColor="blue.800" w='25vh'>
+                                                    <PopoverArrow />
+                                                    <PopoverCloseButton />
+                                                    <PopoverBody>
+                                                    <HStack>
+                                                        {message.sender =='user' ? 
+                                                        <Box mr='2' my='auto'>
+                                                            <Button bg='red.600' onClick={() => this.deleteMessageModalOpen(message, index)}>
+                                                                Delete
+                                                            </Button>
+                                                        </Box> : <> </> }
+                                                        
+                                                        <Box mr='2' my='auto'>
+                                                            <Button bg='cyan.600' onClick={() => this.selectReply(message)}>
+                                                                Reply
+                                                            </Button> 
+                                                        </Box>
+                                                    </HStack>
+                                                    </PopoverBody>
+                                                </PopoverContent>
+                                            </Portal>
+                                        </Popover>
+                                        <Text fontSize='10' color='gray.500'>
+                                            {message.dateTime.substring(0,5) + ' ' + message.dateTime.substring(12,17)}
+                                        </Text>
+                                        <div style={{ float:"left", clear: "both" }}
+                                            ref={(el) => { this.messagesEnd = el; }}>
+                                        </div>
+                                    </VStack>
+                                    {message.sender == 'friend' ?
+                                    <> 
+                                        <Spacer />
+                                        
+                                         
+                                    </>
+                                    :
+                                    <>
+                                    </>
+                                    }
+                                </Flex>
+                                
+                        </Box>
+
+                        </> :
+                        <Box
                             w='100%'
                             align={message.sender == 'user' ? 'right' : 'left'}
                             px='2'
@@ -437,6 +534,8 @@ export class Message extends Component {
                                 </Flex>
                                 
                         </Box>
+                        } 
+                          </>  
                         } </>
                            
                     )}
