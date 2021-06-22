@@ -3,12 +3,10 @@ import React, { Component } from 'react'
 
 export class Logo extends Component {
     render() {
-        return (
-            <div>
-                <Text color='black'>
-                    SOCM
-                </Text>
-            </div>
+        return (         
+            <Text color='black' align='left'>
+                SOCM
+            </Text>
         )
     }
 }

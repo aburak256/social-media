@@ -22,12 +22,10 @@
   .navbar-logo {
     color: #fff;
     justify-self: start;
-    margin-left: 20px;
     cursor: pointer;
     text-decoration: none;
     font-size: 2rem;
-    display: flex;
-    align-items: center;
+    align-items: left;
   }
   
   .fa-typo3 {
@@ -41,13 +39,14 @@
     grid-gap: 10px;
     list-style: none;
     text-align: center;
-    width: 60vw;
+    width: 55vw;
     justify-content: end;
     margin-right: 2rem;
   }
   
   .nav-item {
     height: 50px;
+    margin-left: 2rem;
   }
   
   .nav-links {
@@ -55,7 +54,7 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem;
     height: 100%;
   }
   
