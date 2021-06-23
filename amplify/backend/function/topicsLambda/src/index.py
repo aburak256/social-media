@@ -218,7 +218,7 @@ def bookmarks(event, context):
                 except ClientError as e:
                     print(e.postPull['Error']['Message'])
                 else:
-                    if 'Items' in postPull:
+                    if 'Items' in postPull and len(postPull['Items']) >= 1:
                         postFetched = postPull['Items'][0]
                         dateTimePost = datetime.strptime(postFetched['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
                         postFetched['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S")
@@ -234,6 +234,9 @@ def bookmarks(event, context):
                                 postFetched['Reaction'] = Reaction
                         postFetched['bookmark'] = "True"           
                         posts.append(postFetched)
+                    else:
+                        #Post deleted. Continue
+                        pass
             
             res = {'posts': posts}
             response = {
