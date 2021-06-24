@@ -5,10 +5,15 @@
 ## Introduction
 Social media platform with topics built with **AWS serverless and Reactjs frontend**. Users can only post after passing a quiz about the topic. Designed a **NoSql single table** to store data using **AWS DynamoDB**. Generated personalized timeline for users. Utilized REST to send the API requests. Added like, dislike, bookmark and comment features to posts. To provide private communication between users, added messaging interface with reply, seen and send post features. Utilized **AWS Amplify** framework to build the app in case if I need to implement a mobile application.
 
+All of the data of this project is stored by a single AWS DynamoDB NoSql table. 
+
+Utilized AWS Cognito to handle the authentication. After user is confirmed their e-mail, a [lambda function](https://github.com/aburak256/social-media/blob/main/Other%20Lambdas/userPoolLambda.py) triggered and creates the user information in database.
+
+Utilized [Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) library to handle database and bucket operations with python.
 
 ## [Lambda Files](https://github.com/aburak256/social-media/tree/main/amplify/backend/function "Lambda Files")
 
-There are 10 different lambda function and 8 api path in this project.
+There are 10 different lambda function and 8 api path in this project. Utilized AWS Api Gateway to route the requests.
 
 [commentsLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/commentsLambda "commentsLambda") - Operations about comments in posts. 
 - Like 
