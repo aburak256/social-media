@@ -467,7 +467,7 @@ def postHandler(event, context):
                     lastObject['True'] = 'True'
                 else:
                     lastObject['True'] = 'False'
-                table.put_item(Item=lastObject)
+                
 
             #Check if user finished test.
             countNow = latestAnswer['Items'][-2]['sortKey']
@@ -478,6 +478,17 @@ def postHandler(event, context):
             except ClientError as e:
                 print(e.topicResponse['Error']['Message'])
             else:
+                #Check if time is up
+                #Subtract now - startTest and compare this with requiredTimeTest attribute of topic metadata
+                dateTimePrev = datetime.strptime(topicResponse['Item']['requiredTimeTest'], '%Y-%m-%dT%H:%M:%S.%f')
+                now = datetime.now()
+                result = now - dateTimePrev
+                if result.total_seconds() >= 0:
+                    pass
+                else:
+                    #Time is up do not count this answer and evaluate
+                    return evaluate(user, topic)
+                table.put_item(Item=lastObject)
                 if int(countNow) >= int(topicResponse['Item']['numberOfTestQuestions']):
                     #User answered required number of questions. Evaluate
                     return evaluate(user, topic)
