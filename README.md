@@ -3,7 +3,9 @@
 [Live link of the project](https://main.d2xe8y05ho8c70.amplifyapp.com/ "Live link of the project")
 
 ## Introduction
-Social media platform with topics built with **AWS serverless and Reactjs frontend**. Users can only post after passing a quiz about the topic. Designed a **NoSql single table** to store data using **AWS DynamoDB**. Generated personalized timeline for users. Utilized REST to send the API requests. Added like, dislike, bookmark and comment features to posts. To provide private communication between users, added messaging interface with reply, seen and send post features. Utilized **AWS Amplify** framework to build the app in case if I need to implement a mobile application.
+Social media platform with topics built with **AWS serverless and Reactjs frontend**. Users can only post after passing a quiz about the topic. 
+
+Generated personalized timeline for users. Utilized REST to send the API requests. Added like, dislike, bookmark and comment features to posts. To provide private communication between users, added messaging interface with reply, seen and send post features. Utilized **AWS Amplify** framework to build the app in case if I need to implement a mobile application.
 
 All of the data of this project is stored by a single AWS DynamoDB NoSql table. 
 
