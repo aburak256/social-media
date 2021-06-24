@@ -29,13 +29,14 @@ def handler(event, context):
             'body': json.dumps("Couldn't find the request")
         }
 
+    #Return given posts details
+    #Return comments of the post
     if "/posts" in event['resource']:
         params = event['pathParameters']
         postId = params['proxy']
         user = None
         if 'identity' in event['requestContext']:
             user = event['requestContext']['identity']['cognitoAuthenticationProvider'][-36:]
-        print(user)
         try:
             response = table.get_item(Key={'PK': "POST#" + postId, 'sortKey': "METADATA"})
         except ClientError as e:
@@ -43,6 +44,8 @@ def handler(event, context):
         else:
             post = []
             post.append(response['Item'])
+
+            #Check user's reactions
             if user != None:
                 try:
                     likeResponse = table.query(
@@ -54,6 +57,7 @@ def handler(event, context):
                     if len(likeResponse['Items']) != 0:
                         Reaction = likeResponse['Items'][0]['text']      
                         post[0]['Reaction'] = Reaction
+            #Collect comment links inside of post
             comments = []
             try :
                 commentsResponse = table.query(
@@ -64,11 +68,13 @@ def handler(event, context):
                 print(e.commentsResponse['Error']['Message'])
             else:
                 for comment in commentsResponse['Items']:
+                    #Collect comment itself
                     try :
                         comment = table.get_item(Key={'PK': "COMMENT#" + comment['commentId'], 'sortKey': "METADATA"})
                     except ClientError as e:
                         print(e.comment['Error']['Message'])
                     else:
+                        #Convert dateTime value of comment to a readable version
                         dateTimeComment = datetime.strptime(comment['Item']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
                         comment['Item']['dateTime'] = dateTimeComment.strftime("%m/%d/%Y, %H:%M:%S")
                         comments.append(comment['Item'])
@@ -83,9 +89,10 @@ def handler(event, context):
                                 if len(commentsLikeResponse['Items']) != 0:
                                     Reaction = commentsLikeResponse['Items'][0]['text']      
                                     comments[-1]['Reaction'] = Reaction
+                                    
+        #Convert dateTime value of post to a readable version
         dateTimePost = datetime.strptime(post[0]['dateTime'], '%Y-%m-%dT%H:%M:%S.%f')
         post[0]['dateTime'] = dateTimePost.strftime("%m/%d/%Y, %H:%M:%S") 
-        print(post, comments)
         res = {'post': post, 'comments':comments}
         response = {
             'statusCode': 200,
