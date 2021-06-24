@@ -1,70 +1,76 @@
-# Getting Started with Create React App
+# Social Media Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[Live link of the project](https://main.d2xe8y05ho8c70.amplifyapp.com/ "Live link of the project")
 
-## Available Scripts
+## Introduction
+Social media platform with topics built with **AWS serverless and Reactjs frontend**. Users can only post after passing a quiz about the topic. Designed a **NoSql single table** to store data using **AWS DynamoDB**. Generated personalized timeline for users. Utilized REST to send the API requests. Added like, dislike, bookmark and comment features to posts. To provide private communication between users, added messaging interface with reply, seen and send post features. Utilized **AWS Amplify** framework to build the app in case if I need to implement a mobile application.
 
-In the project directory, you can run:
 
-### `yarn start`
+## [Lambda Files](https://github.com/aburak256/social-media/tree/main/amplify/backend/function "Lambda Files")
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+There are 10 different lambda function and 8 api path in this project.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+[commentsLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/commentsLambda "commentsLambda") - Operations about comments in posts. 
+- Like 
+- Dislike 
+- Post comment 
 
-### `yarn test`
+[conversationsLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/conversationsLambda "conversationsLambda") - Operations about messaging feature. 
+- Send post as a message 
+- Reply message 
+- Delete message 
+- Post message 
+- Seen information
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+[postsLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/postsLambda "postsLambda") - Operations about posts
+- Post details with comments
+- Post a post
+- Like
+- Dislike
+- Bookmark
 
-### `yarn build`
+[profileLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/profileLambda "profileLambda") - Operations at user profiles
+- Collect user details with user's posts
+- Follow - Unfollow
+**For user's own profile**:
+- Bio change
+- Photo change
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+[searchLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/searchLambda "searchLambda") - Search operations
+- Search posts
+- Search usernames
+- Search topics
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+[timelineLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/timelineLambda "timelineLambda") - Operations about generating timeline
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+[topicTestLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/topicTestsLambda "topicTestLambda") - Operations about quizzes
+- Start quiz
+- Hold logs
+- Continue session if user accidentally left
+- Give random question about topic
+- Evaluate the results
 
-### `yarn eject`
+[topicsLambda](https://github.com/aburak256/social-media/tree/main/amplify/backend/function/topicsLambda "topicsLambda") - Operations about topics
+- Popularity feature
+- List all topics
+- Topic details with posts
+- List bookmarks
+- Follow / Unfollow topics
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## [Imported Components (Reactjs) ](https://github.com/aburak256/social-media/tree/main/src "Imported Components (Reactjs) ")
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+[aws-amplify](https://docs.amplify.aws/ "aws-amplify")
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+[Chakra - UI](https://chakra-ui.com/ "Chakra - UI")
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+[Infinite Scroll](https://github.com/ankeetmaini/react-infinite-scroll-component#readme "Infinite Scroll")
 
-## Learn More
+[React medium editor](https://github.com/wangzuo/react-medium-editor "React medium editor")
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+[lodash](https://github.com/lodash/lodash "lodash")
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+[react-icons](https://react-icons.github.io/react-icons/ "react-icons")
 
-### Code Splitting
+Example look from topic page:
+![image](https://user-images.githubusercontent.com/34773124/123256708-ee9ace00-d4f9-11eb-9023-e5526a70be40.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
